@@ -4,14 +4,21 @@ using UnrealBuildTool;
 
 public class Parcheesi : ModuleRules
 {
-	public Parcheesi(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Niagara" });
+    public Parcheesi(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+        PublicDependencyModuleNames.AddRange(new string[] {
+            "Core",
+            "CoreUObject",
+            "Engine",
+            "InputCore",
+            "Niagara",
+            "UMG"
+        });
 
-        PublicIncludePaths.AddRange(new string[] { "" });
+        PrivateDependencyModuleNames.AddRange(new string[] { });
+
+        PublicIncludePaths.AddRange(new string[] { });
     }
 }

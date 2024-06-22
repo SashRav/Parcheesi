@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "CC_SelectItem.generated.h"
+#include "CCSelectItem.generated.h"
 
 class UNiagaraSystem;
 class UNiagaraComponent;
@@ -14,12 +14,12 @@ class UMaterial;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PARCHEESI_API UCC_CSelectItem : public UActorComponent
+class PARCHEESI_API UCCCSelectItem : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UCC_CSelectItem();
+	UCCCSelectItem();
 
 protected:
 	virtual void BeginPlay() override;
