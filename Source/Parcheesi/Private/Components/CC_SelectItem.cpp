@@ -1,7 +1,7 @@
 // Copyright Cats and Cubes, Inc. All Rights Reserved.
 
 
-#include "ACSelectItem.h"
+#include "Components/CC_SelectItem.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/SceneComponent.h"
@@ -9,25 +9,25 @@
 #include "Materials/Material.h"
 
 
-UACSelectItem::UACSelectItem()
+UCC_CSelectItem::UCC_CSelectItem()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
 
-void UACSelectItem::BeginPlay()
+void UCC_CSelectItem::BeginPlay()
 {
 	Super::BeginPlay();
 
 }
 
-void UACSelectItem::SelectThisItem(UNiagaraSystem* NiagaraSystem, USceneComponent* ComponentToAdd, UMeshComponent* MeshToUpdate, UMaterial* OverlayMaterialToAdd)
+void UCC_CSelectItem::SelectThisItem(UNiagaraSystem* NiagaraSystem, USceneComponent* ComponentToAdd, UMeshComponent* MeshToUpdate, UMaterial* OverlayMaterialToAdd)
 {
 	CurrentNiagaraSystem = UNiagaraFunctionLibrary::SpawnSystemAttached(NiagaraSystem,ComponentToAdd, "None", FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true);
 	MeshToUpdate->SetOverlayMaterial(OverlayMaterialToAdd);
 }
 
-void UACSelectItem::DeselectThisItem(UMeshComponent* MeshToUpdate)
+void UCC_CSelectItem::DeselectThisItem(UMeshComponent* MeshToUpdate)
 {
 	if (CurrentNiagaraSystem) {
 		CurrentNiagaraSystem->DestroyComponent();

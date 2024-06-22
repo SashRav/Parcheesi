@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Cats and Cubes. All Rights Reserved.
 
 #include "Parcheesi.h"
 #include "Modules/ModuleManager.h"

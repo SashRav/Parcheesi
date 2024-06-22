@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Cats and Cubes. All Rights Reserved.
 
 using UnrealBuildTool;
 
@@ -12,6 +12,6 @@ public class Parcheesi : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-        PublicIncludePaths.AddRange(new string[] { "Parcheesi/Components" });
+        PublicIncludePaths.AddRange(new string[] { "" });
     }
 }
