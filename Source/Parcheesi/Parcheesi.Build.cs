@@ -14,7 +14,9 @@ public class Parcheesi : ModuleRules
             "Engine",
             "InputCore",
             "Niagara",
-            "UMG"
+            "UMG",
+            "OnlineSubsystem",
+            "OnlineSubsystemUtils"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

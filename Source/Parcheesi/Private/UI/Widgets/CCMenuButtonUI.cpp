@@ -1,16 +1,14 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
-
 #include "UI/Widgets/CCMenuButtonUI.h"
 #include "Components/Button.h"
 
-bool UCCMenuButtonUI::Initialize()
+void UCCMenuButtonUI::NativeConstruct()
 {
-    Super::Initialize();
     Button->OnClicked.AddDynamic(this, &UCCMenuButtonUI::ButtonClicked);
-    return true;
 }
 
-void UCCMenuButtonUI::ButtonClicked() {
+void UCCMenuButtonUI::ButtonClicked()
+{
     OnButtonPressedEvent.Broadcast();
 }

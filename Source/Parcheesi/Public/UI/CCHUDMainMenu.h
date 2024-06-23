@@ -16,6 +16,8 @@ public:
     void ShowMultiplayerWidget();
     void ShowSettingsWidget();
     void ShowMainMenuWidget();
+    void ShowCreateGameWidget();
+    void ShowJoinGameWidget();
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
@@ -30,9 +32,17 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> SettingsWidgetClass;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> CreateGameWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> SearchGameWidgetClass;
+
     virtual void BeginPlay() override;
 
 private:
+    void HideAllWidgets();
+
     UPROPERTY()
     UUserWidget* MainMenuWidget = nullptr;
 
@@ -44,4 +54,10 @@ private:
 
     UPROPERTY()
     UUserWidget* SettingsWidget = nullptr;
+
+    UPROPERTY()
+    UUserWidget* CreateGameWidget = nullptr;
+
+    UPROPERTY()
+    UUserWidget* SearchGameWidget = nullptr;
 };

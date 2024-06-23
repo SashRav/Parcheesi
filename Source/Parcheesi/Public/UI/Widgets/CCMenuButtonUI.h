@@ -20,7 +20,7 @@ public:
     FOnButtonPressed OnButtonPressedEvent;
 
 protected:
-    virtual bool Initialize();
+    virtual void NativeConstruct() override;
 
     UPROPERTY(meta = (BindWidget))
     class UButton* Button;

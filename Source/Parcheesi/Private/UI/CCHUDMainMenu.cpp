@@ -3,44 +3,67 @@
 #include "UI/CCHUDMainMenu.h"
 #include "Blueprint/UserWidget.h"
 
+
 void ACCHUDMainMenu::BeginPlay()
 {
     check(MainMenuWidgetClass);
     check(SingleplayerWidgetClass);
     check(MultiplayerWidgetClass);
     check(SettingsWidgetClass);
+    check(CreateGameWidgetClass);
+    check(SearchGameWidgetClass);
 
     MainMenuWidget = CreateWidget<UUserWidget>(GetWorld(), MainMenuWidgetClass);
     SingleplayerWidget = CreateWidget<UUserWidget>(GetWorld(), SingleplayerWidgetClass);
     MultiplayerWidget = CreateWidget<UUserWidget>(GetWorld(), MultiplayerWidgetClass);
     SettingsWidget = CreateWidget<UUserWidget>(GetWorld(), SettingsWidgetClass);
+    CreateGameWidget = CreateWidget<UUserWidget>(GetWorld(), CreateGameWidgetClass);
+    SearchGameWidget = CreateWidget<UUserWidget>(GetWorld(), SearchGameWidgetClass);
     ShowMainMenuWidget();
 }
 
-void ACCHUDMainMenu::ShowMainMenuWidget() {
+void ACCHUDMainMenu::HideAllWidgets()
+{
+    MainMenuWidget->RemoveFromViewport();
+    SingleplayerWidget->RemoveFromViewport();
+    MultiplayerWidget->RemoveFromViewport();
+    SettingsWidget->RemoveFromViewport();
+    CreateGameWidget->RemoveFromViewport();
+    SearchGameWidget->RemoveFromViewport();
+}
+
+void ACCHUDMainMenu::ShowMainMenuWidget()
+{
+    HideAllWidgets();
     MainMenuWidget->AddToViewport();
-    SingleplayerWidget->RemoveFromViewport();
-    MultiplayerWidget->RemoveFromViewport();
-    SettingsWidget->RemoveFromViewport();
 }
 
-void ACCHUDMainMenu::ShowSingleplayerWidget() {
-    MainMenuWidget->RemoveFromViewport();
+void ACCHUDMainMenu::ShowSingleplayerWidget()
+{
+    HideAllWidgets();
     SingleplayerWidget->AddToViewport();
-    MultiplayerWidget->RemoveFromViewport();
-    SettingsWidget->RemoveFromViewport();
 }
 
-void ACCHUDMainMenu::ShowMultiplayerWidget() {
-    MainMenuWidget->RemoveFromViewport();
-    SingleplayerWidget->RemoveFromViewport();
+void ACCHUDMainMenu::ShowMultiplayerWidget()
+{
+    HideAllWidgets();
     MultiplayerWidget->AddToViewport();
-    SettingsWidget->RemoveFromViewport();
 }
 
-void ACCHUDMainMenu::ShowSettingsWidget() {
-    MainMenuWidget->RemoveFromViewport();
-    SingleplayerWidget->RemoveFromViewport();
-    MultiplayerWidget->RemoveFromViewport();
+void ACCHUDMainMenu::ShowSettingsWidget()
+{
+    HideAllWidgets();
     SettingsWidget->AddToViewport();
+}
+
+void ACCHUDMainMenu::ShowCreateGameWidget()
+{
+    HideAllWidgets();
+    CreateGameWidget->AddToViewport();
+}
+
+void ACCHUDMainMenu::ShowJoinGameWidget()
+{
+    HideAllWidgets();
+    SearchGameWidget->AddToViewport();
 }

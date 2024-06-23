@@ -16,7 +16,7 @@ class PARCHEESI_API UCCMainMenuUI : public UUserWidget
     GENERATED_BODY()
 
 protected:
-    virtual bool Initialize();
+    virtual void NativeConstruct() override;
 
     UPROPERTY(meta = (BindWidget))
     class UCCMenuButtonUI* SingleplayerButton;
