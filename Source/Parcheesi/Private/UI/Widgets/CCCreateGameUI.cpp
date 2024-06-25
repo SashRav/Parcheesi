@@ -8,19 +8,25 @@
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
 
+void UCCCreateGameUI::NativeConstruct()
+{
+    const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (PlayerController)
+        MainMenuHUD = Cast<ACCHUDMainMenu>(PlayerController->GetHUD());
 
-void UCCCreateGameUI::NativeConstruct() {
-     const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-     if (PlayerController)
-         MainMenuHUD = Cast<ACCHUDMainMenu>(PlayerController->GetHUD());
+    CreateSessionButton->OnButtonPressedEvent.AddDynamic(this, &UCCCreateGameUI::CreateSessionButtonClicked);
+    BackToMenuButton->OnButtonPressedEvent.AddDynamic(this, &UCCCreateGameUI::BackToMenuButtonlicked);
 
-     CreateSessionButton->OnButtonPressedEvent.AddDynamic(this, &UCCCreateGameUI::CreateSessionButtonClicked);
-     BackToMenuButton->OnButtonPressedEvent.AddDynamic(this, &UCCCreateGameUI::BackToMenuButtonlicked);
- }
+    SessionInterface = Online::GetSessionInterface(GetWorld());
+    if (SessionInterface.IsValid())
+    {
+        SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UCCCreateGameUI::OnCreateSessionComplete);
+    }
+}
 
 void UCCCreateGameUI::CreateSessionButtonClicked()
 {
-    CreateSession(4, false);
+    CreateSession(5, true);
 }
 
 void UCCCreateGameUI::BackToMenuButtonlicked()
@@ -30,16 +36,16 @@ void UCCCreateGameUI::BackToMenuButtonlicked()
 
 void UCCCreateGameUI::CreateSession(int32 NumPublicConnections, bool IsLANMatch)
 {
-    SessionInterface = Online::GetSessionInterface(GetWorld());
+    FOnlineSessionSettings SessionSettings;
+    SessionSettings.bAllowJoinInProgress = true;
+    SessionSettings.bShouldAdvertise = true;
+    SessionSettings.bIsDedicated = false;
+    SessionSettings.bUsesPresence = false;
+    SessionSettings.NumPublicConnections = NumPublicConnections;
+    SessionSettings.bIsLANMatch = IsLANMatch;
+
     if (SessionInterface.IsValid())
     {
-        SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UCCCreateGameUI::OnCreateSessionComplete);
-
-        FOnlineSessionSettings SessionSettings;
-        SessionSettings.NumPrivateConnections = 0;
-        SessionSettings.NumPublicConnections = NumPublicConnections;
-        SessionSettings.bIsLANMatch = IsLANMatch;
-
         SessionInterface->CreateSession(0, FName("My session"), SessionSettings);
     }
 }
@@ -47,5 +53,5 @@ void UCCCreateGameUI::CreateSession(int32 NumPublicConnections, bool IsLANMatch)
 void UCCCreateGameUI::OnCreateSessionComplete(FName ServerName, bool Succeeded)
 {
     if (Succeeded)
-        UGameplayStatics::OpenLevel(GetWorld(), FName("GameMap?listen"));
+        GetWorld()->ServerTravel("/Game/_Main/Maps/GameMap?listen"); // UGameplayStatics::OpenLevel(GetWorld(), FName("GameMap?listen"));
 }

@@ -19,51 +19,58 @@ void ACCHUDMainMenu::BeginPlay()
     SettingsWidget = CreateWidget<UUserWidget>(GetWorld(), SettingsWidgetClass);
     CreateGameWidget = CreateWidget<UUserWidget>(GetWorld(), CreateGameWidgetClass);
     SearchGameWidget = CreateWidget<UUserWidget>(GetWorld(), SearchGameWidgetClass);
+    MainMenuWidget->AddToViewport();
+    SingleplayerWidget->AddToViewport();
+    MultiplayerWidget->AddToViewport();
+    SettingsWidget->AddToViewport();
+    CreateGameWidget->AddToViewport();
+    SearchGameWidget->AddToViewport();
+
     ShowMainMenuWidget();
 }
 
 void ACCHUDMainMenu::HideAllWidgets()
 {
-    MainMenuWidget->RemoveFromViewport();
-    SingleplayerWidget->RemoveFromViewport();
-    MultiplayerWidget->RemoveFromViewport();
-    SettingsWidget->RemoveFromViewport();
-    CreateGameWidget->RemoveFromViewport();
-    SearchGameWidget->RemoveFromViewport();
+    MainMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+    SingleplayerWidget->SetVisibility(ESlateVisibility::Hidden);
+    MultiplayerWidget->SetVisibility(ESlateVisibility::Hidden);
+    SettingsWidget->SetVisibility(ESlateVisibility::Hidden);
+    CreateGameWidget->SetVisibility(ESlateVisibility::Hidden);
+    SearchGameWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ACCHUDMainMenu::ShowMainMenuWidget()
 {
     HideAllWidgets();
-    MainMenuWidget->AddToViewport();
+    MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ACCHUDMainMenu::ShowSingleplayerWidget()
 {
     HideAllWidgets();
-    SingleplayerWidget->AddToViewport();
+    SingleplayerWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ACCHUDMainMenu::ShowMultiplayerWidget()
 {
     HideAllWidgets();
-    MultiplayerWidget->AddToViewport();
+    MultiplayerWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ACCHUDMainMenu::ShowSettingsWidget()
 {
     HideAllWidgets();
-    SettingsWidget->AddToViewport();
+    SettingsWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ACCHUDMainMenu::ShowCreateGameWidget()
 {
     HideAllWidgets();
-    CreateGameWidget->AddToViewport();
+    CreateGameWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ACCHUDMainMenu::ShowJoinGameWidget()
 {
     HideAllWidgets();
-    SearchGameWidget->AddToViewport();
+    SearchGameWidget->SetVisibility(ESlateVisibility::Visible);
 }
