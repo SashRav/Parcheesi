@@ -4,9 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "OnlineSessionSettings.h"
 #include "CCSessionItemUI.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSessionItemPressed, FOnlineSessionSearchResult);
+
 class UTextBlock;
+class UBorder;
 
 UCLASS()
 class PARCHEESI_API UCCSessionItemUI : public UUserWidget
@@ -14,9 +18,22 @@ class PARCHEESI_API UCCSessionItemUI : public UUserWidget
     GENERATED_BODY()
 
 public:
-    void SetSessionWidgetData(FText ServerName, int Players, int Ping);
+    
+
+    virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+   
+    //UPROPERTY(BlueprintAssignable)
+    FOnSessionItemPressed OnSessionItemPressedEvent;
+
+    void SetSessionWidgetData(FString ServerName, int Players, int Ping);
+    void SetSessionData(FOnlineSessionSearchResult SessionData);
 
 protected:
+    FOnlineSessionSearchResult LocalSessionData;
+
+    UPROPERTY(meta = (BindWidget))
+    class UBorder* SelectingBorder;
+
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* ServerNameText;
 

@@ -21,6 +21,7 @@ void UCCCreateGameUI::NativeConstruct()
     if (SessionInterface.IsValid())
     {
         SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UCCCreateGameUI::OnCreateSessionComplete);
+        
     }
 }
 

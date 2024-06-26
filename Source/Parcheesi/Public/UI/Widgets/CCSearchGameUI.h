@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "OnlineSessionSettings.h"
 #include "CCSearchGameUI.generated.h"
 
 class UCCMenuButtonUI;
@@ -21,6 +22,8 @@ class PARCHEESI_API UCCSearchGameUI : public UUserWidget
 protected:
     virtual void NativeConstruct() override;
     virtual void OnFindSessionsComplete(bool Succeeded);
+    virtual void SetSelectedSession(FOnlineSessionSearchResult Result);
+    virtual void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UCCSessionItemUI> SessionResultWidgetClass;
@@ -58,6 +61,10 @@ private:
 
     IOnlineSessionPtr SessionInterface;
 
-    void AddServerLine(FString ServerName, int Players, int Ping);
     TSharedPtr<FOnlineSessionSearch> SessionSearch;
+    
+    FOnlineSessionSearchResult SelectedSessionResult;
+
+
+    void AddServerLine(FOnlineSessionSearchResult Result);
 };

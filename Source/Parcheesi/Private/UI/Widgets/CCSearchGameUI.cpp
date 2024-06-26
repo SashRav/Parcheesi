@@ -29,6 +29,7 @@ void UCCSearchGameUI::NativeConstruct()
     if (SessionInterface.IsValid())
     {
         SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UCCSearchGameUI::OnFindSessionsComplete);
+        SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UCCSearchGameUI::OnJoinSessionComplete);
     }
 }
 
@@ -49,17 +50,29 @@ void UCCSearchGameUI::RefreshButtonClicked()
     }
 }
 
-void UCCSearchGameUI::JoinGameButtonClicked() {}
+void UCCSearchGameUI::JoinGameButtonClicked()
+{
+    if (SelectedSessionResult.IsValid())
+    {
+        StatusTextBox->SetText(FText::FromString("Connecting to the session"));
+        SessionInterface->JoinSession(0, "", SelectedSessionResult);
+    }
+    else
+        StatusTextBox->SetText(FText::FromString("No Session Selected"));
+}
 
 void UCCSearchGameUI::BackToMenuButtonlicked()
 {
+    FOnlineSessionSearchResult NewSelectedSessionResult;
+    SelectedSessionResult = NewSelectedSessionResult;
     MainMenuHUD->ShowMainMenuWidget();
 }
 
-void UCCSearchGameUI::AddServerLine(FString ServerName, int Players, int Ping)
+void UCCSearchGameUI::AddServerLine(FOnlineSessionSearchResult Result)
 {
     SessionWidget = CreateWidget<UCCSessionItemUI>(GetWorld(), SessionResultWidgetClass);
-    SessionWidget->SetSessionWidgetData(FText::FromString(ServerName), Players, Ping);
+    SessionWidget->SetSessionData(Result);
+    SessionWidget->OnSessionItemPressedEvent.AddUObject(this, &UCCSearchGameUI::SetSelectedSession);
     ServerScrollBox->AddChild(SessionWidget);
 }
 
@@ -67,19 +80,37 @@ void UCCSearchGameUI::OnFindSessionsComplete(bool Succeeded)
 {
     if (Succeeded)
     {
-        TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
+        TArray<FOnlineSessionSearchResult> LocalSearchResults = SessionSearch->SearchResults;
 
-        if (SearchResults.Num() != 0)
+        if (LocalSearchResults.Num() != 0)
         {
             StatusTextBox->SetText(FText::FromString("Sessions available:"));
-            for (FOnlineSessionSearchResult Result : SearchResults)
+
+            for (FOnlineSessionSearchResult Result : LocalSearchResults)
             {
-                AddServerLine("Test Server", 1, Result.PingInMs);
+                AddServerLine(Result);
             }
         }
         else
         {
             StatusTextBox->SetText(FText::FromString("No Servers Available"));
         }
+    }
+}
+
+void UCCSearchGameUI::SetSelectedSession(FOnlineSessionSearchResult Result)
+{
+    SelectedSessionResult = Result;
+}
+
+void UCCSearchGameUI::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (PlayerController)
+    {
+        FString JoinAddress;
+        SessionInterface->GetResolvedConnectString(SessionName, JoinAddress);
+        if (JoinAddress != "")
+            PlayerController->ClientTravel(JoinAddress, ETravelType::TRAVEL_Absolute);
     }
 }
