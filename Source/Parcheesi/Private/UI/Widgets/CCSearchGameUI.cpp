@@ -73,6 +73,7 @@ void UCCSearchGameUI::AddServerLine(FOnlineSessionSearchResult Result)
     SessionWidget = CreateWidget<UCCSessionItemUI>(GetWorld(), SessionResultWidgetClass);
     SessionWidget->SetSessionData(Result);
     SessionWidget->OnSessionItemPressedEvent.AddUObject(this, &UCCSearchGameUI::SetSelectedSession);
+
     ServerScrollBox->AddChild(SessionWidget);
 }
 

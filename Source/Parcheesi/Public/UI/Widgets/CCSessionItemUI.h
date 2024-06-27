@@ -27,6 +27,7 @@ public:
 
     void SetSessionWidgetData(FString ServerName, int Players, int Ping);
     void SetSessionData(FOnlineSessionSearchResult SessionData);
+    void CleanSelection();
 
 protected:
     FOnlineSessionSearchResult LocalSessionData;
@@ -42,4 +43,9 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* PingText;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCCSessionItemUI> SessionWidget;
+
+
 };
