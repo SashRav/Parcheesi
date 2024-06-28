@@ -5,6 +5,6 @@
 
 void ACCControllerMainMenu::BeginPlay() {
 
-	this->SetInputMode(FInputModeUIOnly());
-    this->bShowMouseCursor = true;
+	SetInputMode(FInputModeUIOnly());
+    bShowMouseCursor = true;
 }
