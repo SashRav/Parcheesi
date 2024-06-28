@@ -14,12 +14,12 @@ class UMaterial;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PARCHEESI_API UCCCSelectItem : public UActorComponent
+class PARCHEESI_API UCCSelectItem : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UCCCSelectItem();
+	UCCSelectItem();
 
 protected:
 	virtual void BeginPlay() override;

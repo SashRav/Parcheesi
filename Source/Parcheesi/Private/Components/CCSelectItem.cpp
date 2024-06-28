@@ -9,25 +9,25 @@
 #include "Materials/Material.h"
 
 
-UCCCSelectItem::UCCCSelectItem()
+UCCSelectItem::UCCSelectItem()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
 
-void UCCCSelectItem::BeginPlay()
+void UCCSelectItem::BeginPlay()
 {
 	Super::BeginPlay();
 
 }
 
-void UCCCSelectItem::SelectThisItem(UNiagaraSystem* NiagaraSystem, USceneComponent* ComponentToAdd, UMeshComponent* MeshToUpdate, UMaterial* OverlayMaterialToAdd)
+void UCCSelectItem::SelectThisItem(UNiagaraSystem* NiagaraSystem, USceneComponent* ComponentToAdd, UMeshComponent* MeshToUpdate, UMaterial* OverlayMaterialToAdd)
 {
 	CurrentNiagaraSystem = UNiagaraFunctionLibrary::SpawnSystemAttached(NiagaraSystem,ComponentToAdd, "None", FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true);
 	MeshToUpdate->SetOverlayMaterial(OverlayMaterialToAdd);
 }
 
-void UCCCSelectItem::DeselectThisItem(UMeshComponent* MeshToUpdate)
+void UCCSelectItem::DeselectThisItem(UMeshComponent* MeshToUpdate)
 {
 	if (CurrentNiagaraSystem) {
 		CurrentNiagaraSystem->DestroyComponent();
