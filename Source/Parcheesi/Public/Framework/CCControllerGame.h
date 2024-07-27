@@ -7,11 +7,13 @@
 #include "CCControllerGame.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class PARCHEESI_API ACCControllerGame : public APlayerController
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
+protected:
+    virtual void BeginPlay() override;
 };
