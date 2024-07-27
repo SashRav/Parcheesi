@@ -1,34 +1,65 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
-
 #include "Framework/CCPlayerPawnGame.h"
+#include "Framework/CCGameModeBaseGame.h"
+#include "Framework/CCControllerGame.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerState.h"
+// #include "Online/CoreOnlinePackage.h"
 
-// Sets default values
-ACCPlayerPawnGame::ACCPlayerPawnGame()
-{
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+ACCPlayerPawnGame::ACCPlayerPawnGame() {}
 
-}
-
-// Called when the game starts or when spawned
 void ACCPlayerPawnGame::BeginPlay()
 {
-	Super::BeginPlay();
-	
+    Super::BeginPlay();
 }
+    // Client_GetPlayerId_Implementation();
+    //Server_AddPlayerToList_Implementation();
+   // const FName PlayerDefaultTag = "Lobby";
+    // const FUniqueNetIdRepl PlayerNetId = GetPlayerState()->GetUniqueId();
+    // FString UserIdSerialized = PlayerNetId.GetUniqueNetId()->ToString();
+    // APlayerState* State = UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerNetId);
+    //  if (State)
+    //      UE_LOG(LogTemp, Display, TEXT("Player state found"));
+    //if (GetPlayerState())
+    //{
 
-// Called every frame
-void ACCPlayerPawnGame::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+    //    FUniqueNetIdRepl PlayerNetId = GetPlayerState()->GetUniqueId();
+    //    if (PlayerNetId.IsValid())
+    //        if (GetWorld())
+    //        {
+    //            ACCGameModeBaseGame* GameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
+    //            if (GameMode)
+    //                GameMode->AddPlayerToAllPlayersData(PlayerNetId, PlayerDefaultTag);
+    //        }
+    //}
 
-}
-
-// Called to bind functionality to input
-void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
+//
+//void ACCPlayerPawnGame::Client_GetPlayerId_Implementation()
+//{
+//    //PlayerNetId /* = GetPlayerState()->GetUniqueId();
+//     /*if (PlayerNetId.IsValid())
+//         FString UserIdSerialized = PlayerNetId.GetUniqueNetId()->ToString();*/
+//}
+//
+//void ACCPlayerPawnGame::Server_AddPlayerToList_Implementation()
+//{
+//    const FName PlayerDefaultTag = "Lobby";
+//    // const FUniqueNetIdRepl PlayerNetId = GetPlayerState()->GetUniqueId();
+//    // FString UserIdSerialized = PlayerNetId.GetUniqueNetId()->ToString();
+//    // APlayerState* State = UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerNetId);
+//    //  if (State)
+//    //      UE_LOG(LogTemp, Display, TEXT("Player state found"));
+//    if (GetPlayerState())
+//    {
+//
+//        FUniqueNetIdRepl PlayerNetId = GetPlayerState()->GetUniqueId();
+//        if (PlayerNetId.IsValid())
+//            if (GetWorld())
+//            {
+//                ACCGameModeBaseGame* GameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
+//                if (GameMode)
+//                    GameMode->AddPlayerToAllPlayersData(PlayerNetId, PlayerDefaultTag);
+//            }
+//    }
+//}

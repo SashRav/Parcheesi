@@ -7,6 +7,7 @@
 #include "CCHUDGame.generated.h"
 
 class UCCGameLobbyUI;
+class ACCGameModeBaseGame;
 
 UCLASS()
 class PARCHEESI_API ACCHUDGame : public AHUD
@@ -16,10 +17,17 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> LobbyWidgetClass;
 
+    UPROPERTY()
+    ACCGameModeBaseGame* ServerGameMode = nullptr;
+
     UFUNCTION()
     void StartGameFromLobby();
 
     virtual void BeginPlay() override;
+
+public:
+    UFUNCTION()
+    void RemoveLobbyWidget();
 
 private:
     UPROPERTY()

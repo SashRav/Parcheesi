@@ -6,24 +6,32 @@
 #include "GameFramework/Pawn.h"
 #include "CCPlayerPawnGame.generated.h"
 
+//class ACCGameModeBaseGame;
+class ACCControllerGame;
+
 UCLASS()
 class PARCHEESI_API ACCPlayerPawnGame : public APawn
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
-	ACCPlayerPawnGame();
+    ACCPlayerPawnGame();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+   /* UPROPERTY()
+    ACCGameModeBaseGame* GameMode;*/
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    UPROPERTY()
+    ACCControllerGame* PlayerController;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    //UPROPERTY()
+    //FUniqueNetIdRepl PlayerNetId;
 
+    virtual void BeginPlay() override;
+
+    //UFUNCTION(Server, Reliable)
+    //void Server_AddPlayerToList();
+
+    //UFUNCTION(NetMulticast, Reliable)
+    //void Client_GetPlayerId();
 };
