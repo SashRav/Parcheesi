@@ -13,12 +13,6 @@ class PARCHEESI_API ACCControllerGame : public APlayerController
 {
     GENERATED_BODY()
 
-public:
-    FUniqueNetIdRepl GetNetId();
-
 protected:
-    UPROPERTY()
-    ACCPlayerStateGame* PlayerStateLocal;
-
     virtual void BeginPlay() override;
 };

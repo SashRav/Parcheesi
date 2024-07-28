@@ -6,9 +6,6 @@
 #include "GameFramework/PlayerState.h"
 #include "CCPlayerStateGame.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PARCHEESI_API ACCPlayerStateGame : public APlayerState
 {
