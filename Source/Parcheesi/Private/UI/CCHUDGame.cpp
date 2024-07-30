@@ -3,8 +3,7 @@
 
 #include "UI/CCHUDGame.h"
 #include "UI/Widgets/CCGameLobbyUI.h"
-#include "Framework/CCGameModeBaseGame.h"
-#include "Kismet/GameplayStatics.h"
+#include "Framework/CCPlayerPawnGame.h"
 
 void ACCHUDGame::BeginPlay()
 {
@@ -13,13 +12,9 @@ void ACCHUDGame::BeginPlay()
     LobbyWidget = CreateWidget<UCCGameLobbyUI>(GetWorld(), LobbyWidgetClass);
     LobbyWidget->AddToViewport();
     LobbyWidget->OnStartGameButtonPressedEvent.AddDynamic(this, &ACCHUDGame::StartGameFromLobby);
+    LobbyWidget->OnColorButtonPressed.AddDynamic(this, &ACCHUDGame::SelectColorInLobby);
 
-    ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
-
-    //if (ServerGameMode)
-    //{
-    //    ServerGameMode->OnGameStartedEvent.AddDynamic(this, &ACCHUDGame::RemoveLobbyWidget);
-    //}
+    OwningPlayerPawn = Cast<ACCPlayerPawnGame>(GetOwningPawn());
 }
 
 void ACCHUDGame::RemoveLobbyWidget() {
@@ -33,10 +28,12 @@ void ACCHUDGame::RemoveLobbyWidget() {
 }
 
 void ACCHUDGame::StartGameFromLobby() {
-    if (ServerGameMode)
-    {
-        ServerGameMode->StartNewGame();
-    }
+    
+}
+
+void ACCHUDGame::SelectColorInLobby(FName ColorTag)
+{
+    OwningPlayerPawn->Server_UpdateSelectedColor(ColorTag);
 }
 
 

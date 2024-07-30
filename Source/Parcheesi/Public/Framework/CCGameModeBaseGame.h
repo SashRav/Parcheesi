@@ -18,6 +18,8 @@ public:
 
     void StartNewGame();
 
+    void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
+
 protected:
     UPROPERTY()
     TArray<APlayerController*> Controllers;

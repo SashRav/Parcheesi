@@ -23,6 +23,12 @@ void ACCGameModeBaseGame::StartNewGame()
     UE_LOG(LogTemp, Display, TEXT("Start game in Game Mode"));
 }
 
+void ACCGameModeBaseGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
+{
+    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    GameStateGame->ChangePlayerTag(PlayerNetId, PlayerTag);
+}
+
 void ACCGameModeBaseGame::AddPlayerToAllPlayersData(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
 {
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());

@@ -13,8 +13,11 @@ class PARCHEESI_API ACCGameStateGame : public AGameStateBase
 
 public:
     void AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
+    void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
 
 protected:
     UPROPERTY()
     TMap<FUniqueNetIdRepl, FName> AllPlayersData;
+
+    void DisplayPlayersData();
 };
