@@ -15,6 +15,8 @@ public:
     void AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
 
+    TMap<FUniqueNetIdRepl, FName> GetAllPlayersData() { return AllPlayersData; };
+
 protected:
     UPROPERTY()
     TMap<FUniqueNetIdRepl, FName> AllPlayersData;

@@ -2,6 +2,7 @@
 
 #include "UI/Widgets/CCGameLobbyUI.h"
 #include "Components/Button.h"
+#include "GameFramework/PlayerController.h"
 
 void UCCGameLobbyUI::NativeConstruct()
 {
@@ -10,6 +11,9 @@ void UCCGameLobbyUI::NativeConstruct()
     SelectYellowButton->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectYellowButtonClicked);
     SelectGreenButton->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectGreenButtonClicked);
     SelectBlueButton->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectBlueButtonClicked);
+
+    if (!GetOwningPlayer()->HasAuthority())
+        StartGameButton->SetIsEnabled(false);
 }
 
 void UCCGameLobbyUI::StartGameButtonClicked()

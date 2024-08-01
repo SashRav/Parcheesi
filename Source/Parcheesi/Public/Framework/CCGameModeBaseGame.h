@@ -17,13 +17,10 @@ public:
     ACCGameModeBaseGame();
 
     void StartNewGame();
-
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
 
-protected:
-    UPROPERTY()
-    TArray<APlayerController*> Controllers;
 
+protected:
     void AddPlayerToAllPlayersData(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
 
     virtual void PostLogin(APlayerController* NewPlayer) override;

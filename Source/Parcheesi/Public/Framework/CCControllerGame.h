@@ -6,13 +6,20 @@
 #include "GameFramework/PlayerController.h"
 #include "CCControllerGame.generated.h"
 
-class ACCPlayerStateGame;
+class ACCHUDGame;
 
 UCLASS()
 class PARCHEESI_API ACCControllerGame : public APlayerController
 {
     GENERATED_BODY()
 
+public:
+    UFUNCTION(Client,Reliable)
+    void Client_StartGameFromController();
+
 protected:
+    UPROPERTY()
+    ACCHUDGame* OwningHUD;
+
     virtual void BeginPlay() override;
 };
