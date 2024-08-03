@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "CCCoreTypes.h"
 #include "CCGameModeBaseGame.generated.h"
 
 class ACCGameStateGame;
@@ -19,10 +20,15 @@ public:
     void StartNewGame();
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
 
-
 protected:
-    void AddPlayerToAllPlayersData(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
+    UPROPERTY()
+    TArray<FPlayersTurnData> PlayersTurnData;
 
     virtual void PostLogin(APlayerController* NewPlayer) override;
     virtual void BeginPlay() override;
+
+    void AddPlayerToAllPlayersData(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
+
+    void UpdatePlayersTurnData();
+    void UpdatePlayersTurnWidgets();
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "CCCoreTypes.h"
 #include "CCControllerGame.generated.h"
 
 class ACCHUDGame;
@@ -16,6 +17,9 @@ class PARCHEESI_API ACCControllerGame : public APlayerController
 public:
     UFUNCTION(Client,Reliable)
     void Client_StartGameFromController();
+
+    UFUNCTION(Client, Reliable)
+    void Client_UpdateTurnWidgets(const TArray<FPlayersTurnData>& PlayersTurnData);
 
 protected:
     UPROPERTY()

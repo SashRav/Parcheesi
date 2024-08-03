@@ -5,14 +5,17 @@
 #include "CCCoreTypes.generated.h"
 
 USTRUCT(BlueprintType)
-struct FPlayersData : public FTableRowBase
+struct FPlayersTurnData : public FTableRowBase
 {
     GENERATED_USTRUCT_BODY()
 
-    UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Players")
-    FUniqueNetIdRepl PlayerNetId;
+    UPROPERTY()
+    FString PlayerName;
 
-    // Time between enemy attacks
-    UPROPERTY(EditDefaultsOnly, Category = "Players")
-    FName PlayerTag;
+    UPROPERTY()
+    FLinearColor PlayerColor;
+
+
+    UPROPERTY()
+    bool TurnSatus;
 };
