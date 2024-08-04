@@ -31,4 +31,7 @@ protected:
 
     void UpdatePlayersTurnData();
     void UpdatePlayersTurnWidgets();
+
+    void SetPlayerTurn();
+    void SetNextTurnColor();
 };

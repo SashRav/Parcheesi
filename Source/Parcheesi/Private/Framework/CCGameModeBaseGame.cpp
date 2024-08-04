@@ -38,7 +38,8 @@ void ACCGameModeBaseGame::StartNewGame()
             Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), NetId)->GetOwningController());
         GameController->Client_StartGameFromController();
     }
-    UpdatePlayersTurnWidgets();
+
+    SetPlayerTurn();
 }
 
 void ACCGameModeBaseGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
@@ -56,28 +57,44 @@ void ACCGameModeBaseGame::AddPlayerToAllPlayersData(FUniqueNetIdRepl PlayerNetId
 void ACCGameModeBaseGame::UpdatePlayersTurnData()
 {
     PlayersTurnData.Empty();
-    TArray<FUniqueNetIdRepl> PlayersNetId;
+    TArray<ETurnColors> PlayersColors;
 
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     TMap<FUniqueNetIdRepl, FName> AllPlayersData = GameStateGame->GetAllPlayersData();
-    AllPlayersData.GetKeys(PlayersNetId);
+    TMap<ETurnColors, FUniqueNetIdRepl> AllPlayersTurnData = GameStateGame->GetPlayersTurnData();
+    ETurnColors CurrentTurnColor = GameStateGame->GetCurrentTurnColor();
+    AllPlayersTurnData.GetKeys(PlayersColors);
 
-    for (FUniqueNetIdRepl NetId : PlayersNetId)
+    for (ETurnColors Color : PlayersColors)
     {
         FPlayersTurnData PlayerData;
-        PlayerData.PlayerName = NetId->ToString();
-        PlayerData.TurnSatus = true; /// Change after adding turn data
-        PlayerData.PlayerColor = FColor::White;
-        /// Rework after implementing turn system
-        FName* PlayerTag = AllPlayersData.Find(NetId);
-        if (PlayerTag->ToString() == "Red")
+        
+        // Set Player name
+        FUniqueNetIdRepl PlayerNetId = *AllPlayersTurnData.Find(Color);
+        PlayerData.PlayerName = PlayerNetId->ToString();
+        
+        // Set player turn status
+        if (CurrentTurnColor == Color)
+            PlayerData.TurnSatus = true;
+        else
+            PlayerData.TurnSatus = false;
+        
+        //Set player color
+        switch (Color)
+        {
+        case ETurnColors::Red:
             PlayerData.PlayerColor = FColor::Red;
-        if (PlayerTag->ToString() == "Blue")
+            break;
+        case ETurnColors::Blue:
             PlayerData.PlayerColor = FColor::Blue;
-        if (PlayerTag->ToString() == "Yellow")
+            break;
+        case ETurnColors::Yellow:
             PlayerData.PlayerColor = FColor::Yellow;
-        if (PlayerTag->ToString() == "Green")
+            break;
+        case ETurnColors::Green:
             PlayerData.PlayerColor = FColor::Green;
+            break;
+        }
 
         PlayersTurnData.Add(PlayerData);
     }
@@ -97,5 +114,52 @@ void ACCGameModeBaseGame::UpdatePlayersTurnWidgets()
             Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), NetId)->GetOwningController());
         if (PlayersTurnData.Num() > 0)
             GameController->Client_UpdateTurnWidgets(PlayersTurnData);
+    }
+}
+
+void ACCGameModeBaseGame::SetPlayerTurn()
+{
+    SetNextTurnColor();
+    UpdatePlayersTurnWidgets();
+}
+
+void ACCGameModeBaseGame::SetNextTurnColor()
+{
+    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    ETurnColors CurrentTurnColor = GameStateGame->GetCurrentTurnColor();
+
+    uint8 TurnNumber = static_cast<uint8>(CurrentTurnColor);
+    UE_LOG(LogTemp, Display, TEXT("Current color number: %d"), TurnNumber);
+
+    UEnum* EnumPtr = StaticEnum<ETurnColors>();
+    if (EnumPtr)
+    {
+
+        int64 MaxEnumValue = EnumPtr->GetMaxEnumValue() - 2; // Returns +1 then existing, and removing None element from count
+        bool NextColorNotFound = true;
+        int32 TryIterator = 0;
+        do
+        {
+            if (TurnNumber >= MaxEnumValue)
+                TurnNumber = 0;
+            else
+                TurnNumber++;
+
+            CurrentTurnColor = static_cast<ETurnColors>(TurnNumber);
+            if (GameStateGame->GetPlayersTurnData().Contains(CurrentTurnColor))
+                NextColorNotFound = false;
+            if (TryIterator + 1 > MaxEnumValue)
+            {
+                NextColorNotFound = false;
+                UE_LOG(LogTemp, Fatal, TEXT("Error in setting Next Turn Color. Do While ended with no result"));
+            }
+
+            TryIterator++;
+
+        } while (NextColorNotFound);
+
+        GameStateGame->SetCurrentTurnColor(CurrentTurnColor);
+        uint8 NextTurn = static_cast<uint8>(CurrentTurnColor);
+        UE_LOG(LogTemp, Display, TEXT("Next turn color number: %d"), NextTurn);
     }
 }

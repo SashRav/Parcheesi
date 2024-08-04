@@ -15,7 +15,16 @@ struct FPlayersTurnData : public FTableRowBase
     UPROPERTY()
     FLinearColor PlayerColor;
 
-
     UPROPERTY()
     bool TurnSatus;
+};
+
+UENUM(BlueprintType)
+enum class ETurnColors : uint8
+{
+    Red,
+    Yellow,
+    Green,
+    Blue,
+    None
 };
