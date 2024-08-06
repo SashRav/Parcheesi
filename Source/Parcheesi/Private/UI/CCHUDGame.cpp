@@ -3,6 +3,7 @@
 #include "UI/CCHUDGame.h"
 #include "UI/Widgets/CCGameLobbyUI.h"
 #include "UI/Widgets/CCPlayersTurnContainer.h"
+#include "UI/Widgets/CCGameTurnButtons.h"
 #include "Framework/CCPlayerPawnGame.h"
 #include "Framework/CCControllerGame.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,6 +15,7 @@ void ACCHUDGame::BeginPlay()
 {
     check(LobbyWidgetClass);
     check(TurnInfoContainerWidgetClass);
+    check(GameTurnButtonsWidgetClass);
 
     LobbyWidget = CreateWidget<UCCGameLobbyUI>(GetWorld(), LobbyWidgetClass);
     LobbyWidget->AddToViewport();
@@ -22,6 +24,12 @@ void ACCHUDGame::BeginPlay()
 
     TurnInfoContainerWidget = CreateWidget<UCCPlayersTurnContainer>(GetWorld(), TurnInfoContainerWidgetClass);
     TurnInfoContainerWidget->AddToViewport();
+
+    GameTurnButtonsWidget = CreateWidget<UCCGameTurnButtons>(GetWorld(), GameTurnButtonsWidgetClass);
+    GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Hidden);
+    GameTurnButtonsWidget->AddToViewport();
+    GameTurnButtonsWidget->OnEndTurnPressedEvent.AddDynamic(this, &ACCHUDGame::EndPlayerTurn);
+    GameTurnButtonsWidget->OnDebugEndTurnPressedEvent.AddDynamic(this, &ACCHUDGame::DebugEndPlayerTurn);
 
     OwningPlayerPawn = Cast<ACCPlayerPawnGame>(GetOwningPawn());
 }
@@ -37,7 +45,8 @@ void ACCHUDGame::RemoveLobbyWidget()
         UE_LOG(LogTemp, Display, TEXT("Lobby widget already removed"));
 }
 
-void ACCHUDGame::UpdateTurnWidgets(const TArray<FPlayersTurnData>& PlayersTurnData) {
+void ACCHUDGame::UpdateTurnWidgets(const TArray<FPlayersTurnData>& PlayersTurnData)
+{
     TurnInfoContainerWidget->UpdatePlayersTurnData(PlayersTurnData);
 }
 
@@ -50,4 +59,24 @@ void ACCHUDGame::StartGameFromLobby()
 void ACCHUDGame::SelectColorInLobby(FName ColorTag)
 {
     OwningPlayerPawn->Server_UpdateSelectedColor(ColorTag);
+}
+
+void ACCHUDGame::EndPlayerTurn()
+{
+    OwningPlayerPawn->Server_EndPlayerTurn();
+}
+
+void ACCHUDGame::DebugEndPlayerTurn()
+{
+    OwningPlayerPawn->Server_DebugEndPlayerTurn();
+}
+
+void ACCHUDGame::ShowTurnButtons()
+{
+    GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ACCHUDGame::HideTurnButtons()
+{
+    GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Hidden);
 }

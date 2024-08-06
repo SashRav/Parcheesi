@@ -19,6 +19,12 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_UpdateSelectedColor(const FName& ColorTag);
 
+    UFUNCTION(Server, Reliable)
+    void Server_EndPlayerTurn();
+
+    UFUNCTION(Server, Reliable)
+    void Server_DebugEndPlayerTurn();
+
 protected:
     virtual void BeginPlay() override;
 

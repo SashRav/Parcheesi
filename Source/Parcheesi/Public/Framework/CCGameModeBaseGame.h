@@ -18,6 +18,8 @@ public:
     ACCGameModeBaseGame();
 
     void StartNewGame();
+    void StartNextTurn();
+
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
 
 protected:
@@ -32,6 +34,6 @@ protected:
     void UpdatePlayersTurnData();
     void UpdatePlayersTurnWidgets();
 
-    void SetPlayerTurn();
+    void StartNextTurnForPlayer(FUniqueNetIdRepl PlayerNetId);
     void SetNextTurnColor();
 };

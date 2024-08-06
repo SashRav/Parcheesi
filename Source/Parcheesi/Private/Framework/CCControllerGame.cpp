@@ -10,7 +10,8 @@ void ACCControllerGame::Client_StartGameFromController_Implementation()
         OwningHUD->RemoveLobbyWidget();
 }
 
-void ACCControllerGame::Client_UpdateTurnWidgets_Implementation(const TArray<FPlayersTurnData>& PlayersTurnData) {
+void ACCControllerGame::Client_UpdateTurnWidgets_Implementation(const TArray<FPlayersTurnData>& PlayersTurnData)
+{
     if (OwningHUD)
         OwningHUD->UpdateTurnWidgets(PlayersTurnData);
 }
@@ -21,4 +22,16 @@ void ACCControllerGame::BeginPlay()
     bShowMouseCursor = true;
 
     OwningHUD = Cast<ACCHUDGame>(GetHUD());
+}
+
+void ACCControllerGame::Client_ShowTurnButtonsWidget_Implementation()
+{
+    if (OwningHUD)
+        OwningHUD->ShowTurnButtons();
+}
+
+void ACCControllerGame::Client_HideTurnButtonsWidget_Implementation()
+{
+    if (OwningHUD)
+        OwningHUD->HideTurnButtons();
 }

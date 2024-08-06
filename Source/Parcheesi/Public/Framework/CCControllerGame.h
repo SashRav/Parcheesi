@@ -21,6 +21,12 @@ public:
     UFUNCTION(Client, Reliable)
     void Client_UpdateTurnWidgets(const TArray<FPlayersTurnData>& PlayersTurnData);
 
+    UFUNCTION(Client, Reliable)
+    void Client_ShowTurnButtonsWidget();
+
+    UFUNCTION(Client, Reliable)
+    void Client_HideTurnButtonsWidget();
+
 protected:
     UPROPERTY()
     ACCHUDGame* OwningHUD;

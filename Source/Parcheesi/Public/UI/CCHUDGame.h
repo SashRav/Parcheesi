@@ -10,6 +10,7 @@
 class UCCGameLobbyUI;
 class ACCPlayerPawnGame;
 class UCCPlayersTurnContainer;
+class UCCGameTurnButtons;
 
 UCLASS()
 class PARCHEESI_API ACCHUDGame : public AHUD
@@ -22,20 +23,29 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UCCPlayersTurnContainer> TurnInfoContainerWidgetClass;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCCGameTurnButtons> GameTurnButtonsWidgetClass;
+
     UFUNCTION()
     void StartGameFromLobby();
 
     UFUNCTION()
     void SelectColorInLobby(FName ColorTag);
 
+    UFUNCTION()
+    void EndPlayerTurn();
+
+    UFUNCTION()
+    void DebugEndPlayerTurn();
+
     virtual void BeginPlay() override;
 
 public:
-    UFUNCTION()
     void RemoveLobbyWidget();
-
-    UFUNCTION()
     void UpdateTurnWidgets(const TArray<FPlayersTurnData>& PlayersTurnData);
+
+    void ShowTurnButtons();
+    void HideTurnButtons();
 
 private:
     UPROPERTY()
@@ -43,6 +53,9 @@ private:
 
     UPROPERTY()
     UCCPlayersTurnContainer* TurnInfoContainerWidget = nullptr;
+
+    UPROPERTY()
+    UCCGameTurnButtons* GameTurnButtonsWidget = nullptr;
 
     UPROPERTY()
     ACCPlayerPawnGame* OwningPlayerPawn;

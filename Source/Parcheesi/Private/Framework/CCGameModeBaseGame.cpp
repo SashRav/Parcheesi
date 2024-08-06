@@ -39,7 +39,7 @@ void ACCGameModeBaseGame::StartNewGame()
         GameController->Client_StartGameFromController();
     }
 
-    SetPlayerTurn();
+    StartNextTurn();
 }
 
 void ACCGameModeBaseGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
@@ -75,7 +75,10 @@ void ACCGameModeBaseGame::UpdatePlayersTurnData()
         
         // Set player turn status
         if (CurrentTurnColor == Color)
+        {
+            StartNextTurnForPlayer(PlayerNetId); // Start New turn for the player
             PlayerData.TurnSatus = true;
+        }
         else
             PlayerData.TurnSatus = false;
         
@@ -117,7 +120,7 @@ void ACCGameModeBaseGame::UpdatePlayersTurnWidgets()
     }
 }
 
-void ACCGameModeBaseGame::SetPlayerTurn()
+void ACCGameModeBaseGame::StartNextTurn()
 {
     SetNextTurnColor();
     UpdatePlayersTurnWidgets();
@@ -162,4 +165,11 @@ void ACCGameModeBaseGame::SetNextTurnColor()
         uint8 NextTurn = static_cast<uint8>(CurrentTurnColor);
         UE_LOG(LogTemp, Display, TEXT("Next turn color number: %d"), NextTurn);
     }
+}
+
+void ACCGameModeBaseGame::StartNextTurnForPlayer(FUniqueNetIdRepl PlayerNetId) {
+    ACCControllerGame* GameController =
+        Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerNetId)->GetOwningController());
+    
+    GameController->Client_ShowTurnButtonsWidget();
 }
