@@ -11,6 +11,7 @@ class UCCGameLobbyUI;
 class ACCPlayerPawnGame;
 class UCCPlayersTurnContainer;
 class UCCGameTurnButtons;
+class UCCQuickMenuWidget;
 
 UCLASS()
 class PARCHEESI_API ACCHUDGame : public AHUD
@@ -26,6 +27,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UCCGameTurnButtons> GameTurnButtonsWidgetClass;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCCQuickMenuWidget> QuickMenuWidgetClass;
+
     UFUNCTION()
     void StartGameFromLobby();
 
@@ -40,12 +44,16 @@ protected:
 
     virtual void BeginPlay() override;
 
+    void AddQuickMenuWidget();
+
 public:
     void RemoveLobbyWidget();
     void UpdateTurnWidgets(const TArray<FPlayersTurnData>& PlayersTurnData);
 
     void ShowTurnButtons();
     void HideTurnButtons();
+
+    void SwitchQuickMenuVisibility();
 
 private:
     UPROPERTY()
@@ -56,6 +64,9 @@ private:
 
     UPROPERTY()
     UCCGameTurnButtons* GameTurnButtonsWidget = nullptr;
+
+    UPROPERTY()
+    UCCQuickMenuWidget* QuickMenuWidget = nullptr;
 
     UPROPERTY()
     ACCPlayerPawnGame* OwningPlayerPawn;

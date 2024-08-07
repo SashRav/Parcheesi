@@ -8,6 +8,8 @@
 #include "CCControllerGame.generated.h"
 
 class ACCHUDGame;
+class UInputMappingContext;
+class UInputAction;
 
 UCLASS()
 class PARCHEESI_API ACCControllerGame : public APlayerController
@@ -15,7 +17,7 @@ class PARCHEESI_API ACCControllerGame : public APlayerController
     GENERATED_BODY()
 
 public:
-    UFUNCTION(Client,Reliable)
+    UFUNCTION(Client, Reliable)
     void Client_StartGameFromController();
 
     UFUNCTION(Client, Reliable)
@@ -27,9 +29,20 @@ public:
     UFUNCTION(Client, Reliable)
     void Client_HideTurnButtonsWidget();
 
+    UFUNCTION(Client, Reliable)
+    void Client_SwitchQuickMenuVisibility();
+
 protected:
     UPROPERTY()
     ACCHUDGame* OwningHUD;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputMappingContext* GameMappingContext;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* QuickMenuAction;
+
     virtual void BeginPlay() override;
+
+    virtual void SetupInputComponent() override;
 };

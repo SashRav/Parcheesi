@@ -4,6 +4,7 @@
 #include "UI/Widgets/CCGameLobbyUI.h"
 #include "UI/Widgets/CCPlayersTurnContainer.h"
 #include "UI/Widgets/CCGameTurnButtons.h"
+#include "UI/Widgets/CCQuickMenuWidget.h"
 #include "Framework/CCPlayerPawnGame.h"
 #include "Framework/CCControllerGame.h"
 #include "Kismet/GameplayStatics.h"
@@ -16,6 +17,7 @@ void ACCHUDGame::BeginPlay()
     check(LobbyWidgetClass);
     check(TurnInfoContainerWidgetClass);
     check(GameTurnButtonsWidgetClass);
+    check(QuickMenuWidgetClass);
 
     LobbyWidget = CreateWidget<UCCGameLobbyUI>(GetWorld(), LobbyWidgetClass);
     LobbyWidget->AddToViewport();
@@ -31,7 +33,14 @@ void ACCHUDGame::BeginPlay()
     GameTurnButtonsWidget->OnEndTurnPressedEvent.AddDynamic(this, &ACCHUDGame::EndPlayerTurn);
     GameTurnButtonsWidget->OnDebugEndTurnPressedEvent.AddDynamic(this, &ACCHUDGame::DebugEndPlayerTurn);
 
+    QuickMenuWidget = CreateWidget<UCCQuickMenuWidget>(GetWorld(), QuickMenuWidgetClass);
+
     OwningPlayerPawn = Cast<ACCPlayerPawnGame>(GetOwningPawn());
+}
+
+void ACCHUDGame::AddQuickMenuWidget()
+{
+    QuickMenuWidget->AddToViewport();
 }
 
 void ACCHUDGame::RemoveLobbyWidget()
@@ -43,6 +52,7 @@ void ACCHUDGame::RemoveLobbyWidget()
     }
     else
         UE_LOG(LogTemp, Display, TEXT("Lobby widget already removed"));
+    AddQuickMenuWidget();
 }
 
 void ACCHUDGame::UpdateTurnWidgets(const TArray<FPlayersTurnData>& PlayersTurnData)
@@ -79,4 +89,11 @@ void ACCHUDGame::ShowTurnButtons()
 void ACCHUDGame::HideTurnButtons()
 {
     GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ACCHUDGame::SwitchQuickMenuVisibility() {
+    if (QuickMenuWidget->IsInViewport())
+    {
+        QuickMenuWidget->SwitchQuickMenuVisibility();
+    }
 }

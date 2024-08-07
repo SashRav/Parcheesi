@@ -15,6 +15,7 @@ public class Parcheesi : ModuleRules
             "InputCore",
             "Niagara",
             "UMG",
+            "EnhancedInput" ,
             "OnlineSubsystem",
             "OnlineSubsystemUtils"
         });
