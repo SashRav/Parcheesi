@@ -20,8 +20,10 @@ class PARCHEESI_API UCCGameTurnButtons : public UUserWidget
     GENERATED_BODY()
 
 public:
+    void EnableRollButton();
+
     UPROPERTY(BlueprintAssignable)
-    FOnMovePawnPressed FOnMovePawnPressedEvent;
+    FOnMovePawnPressed OnMovePawnPressedEvent;
 
     UPROPERTY(BlueprintAssignable)
     FOnRollDicePressed OnRollDicePressedEvent;

@@ -12,12 +12,14 @@ void UCCGameTurnButtons::NativeConstruct() {
     B_DebugEndTurn->OnClicked.AddDynamic(this, &UCCGameTurnButtons::DebugEndTurnClicked);
 }
 
-void UCCGameTurnButtons::RollDiceButtonClicked() {
+void UCCGameTurnButtons::RollDiceButtonClicked()
+{
     OnRollDicePressedEvent.Broadcast();
+    B_RollDice->SetIsEnabled(false);
 }
 
 void UCCGameTurnButtons::MovePawnButtonClicked() {
-    FOnMovePawnPressedEvent.Broadcast();
+    OnMovePawnPressedEvent.Broadcast();
 }
 
 void UCCGameTurnButtons::EndTurnClicked() {
@@ -30,3 +32,6 @@ void UCCGameTurnButtons::DebugEndTurnClicked() {
     this->SetVisibility(ESlateVisibility::Hidden);
 }
 
+void UCCGameTurnButtons::EnableRollButton() {
+    B_RollDice->SetIsEnabled(true);
+}

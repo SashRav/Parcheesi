@@ -42,6 +42,12 @@ protected:
     UFUNCTION()
     void DebugEndPlayerTurn();
 
+    UFUNCTION()
+    void RollDice();
+
+    UFUNCTION()
+    void MovePawn();
+
     virtual void BeginPlay() override;
 
     void AddQuickMenuWidget();

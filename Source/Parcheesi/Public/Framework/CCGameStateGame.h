@@ -7,6 +7,8 @@
 #include "CCCoreTypes.h"
 #include "CCGameStateGame.generated.h"
 
+class ACCDice;
+
 UCLASS()
 class PARCHEESI_API ACCGameStateGame : public AGameStateBase
 {
@@ -22,6 +24,12 @@ public:
     void SetCurrentTurnColor(ETurnColors Color) { CurrentTurnColor = Color; };
     ETurnColors GetCurrentTurnColor() { return CurrentTurnColor; }
 
+    void AddSpawnedDice(ACCDice* Dice) { SpawnedDices.Add(Dice); }
+    void RemoveDice(ACCDice* Dice) { SpawnedDices.Remove(Dice); }
+    TArray<ACCDice*> GetSpawnedDices() { return SpawnedDices; }
+    void CleanSpawnedDicesArray() { SpawnedDices.Empty(); }
+
+
 protected:
     UPROPERTY()
     TMap<FUniqueNetIdRepl, FName> AllPlayersData;
@@ -31,6 +39,9 @@ protected:
 
     UPROPERTY()
     ETurnColors CurrentTurnColor = ETurnColors::Blue;
+
+    UPROPERTY()
+    TArray<ACCDice*> SpawnedDices;
 
     void DisplayPlayersData();
     void SetPlayerTurnData();

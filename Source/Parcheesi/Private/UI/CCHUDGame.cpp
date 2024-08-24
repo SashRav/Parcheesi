@@ -32,6 +32,9 @@ void ACCHUDGame::BeginPlay()
     GameTurnButtonsWidget->AddToViewport();
     GameTurnButtonsWidget->OnEndTurnPressedEvent.AddDynamic(this, &ACCHUDGame::EndPlayerTurn);
     GameTurnButtonsWidget->OnDebugEndTurnPressedEvent.AddDynamic(this, &ACCHUDGame::DebugEndPlayerTurn);
+    GameTurnButtonsWidget->OnRollDicePressedEvent.AddDynamic(this, &ACCHUDGame::RollDice);
+    GameTurnButtonsWidget->OnMovePawnPressedEvent.AddDynamic(this, &ACCHUDGame::MovePawn);
+
 
     QuickMenuWidget = CreateWidget<UCCQuickMenuWidget>(GetWorld(), QuickMenuWidgetClass);
 
@@ -81,9 +84,19 @@ void ACCHUDGame::DebugEndPlayerTurn()
     OwningPlayerPawn->Server_DebugEndPlayerTurn();
 }
 
+void ACCHUDGame::RollDice()
+{
+    OwningPlayerPawn->Server_SpawnDice();
+}
+
+void ACCHUDGame::MovePawn() {
+    OwningPlayerPawn->Server_MoveSelectedPawn();
+}
+
 void ACCHUDGame::ShowTurnButtons()
 {
     GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Visible);
+    GameTurnButtonsWidget->EnableRollButton();
 }
 
 void ACCHUDGame::HideTurnButtons()
@@ -91,7 +104,8 @@ void ACCHUDGame::HideTurnButtons()
     GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void ACCHUDGame::SwitchQuickMenuVisibility() {
+void ACCHUDGame::SwitchQuickMenuVisibility()
+{
     if (QuickMenuWidget->IsInViewport())
     {
         QuickMenuWidget->SwitchQuickMenuVisibility();
