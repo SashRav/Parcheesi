@@ -56,4 +56,13 @@ protected:
 
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACCDice> DiceClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float DiceMoveDelay = 5.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FName DicePlaceTag = "DicePlace"; 
+
+    UPROPERTY()
+    TArray<FVector> DicePlacesLocation;
 };

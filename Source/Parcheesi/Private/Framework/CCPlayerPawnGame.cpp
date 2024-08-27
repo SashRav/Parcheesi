@@ -15,6 +15,14 @@ void ACCPlayerPawnGame::BeginPlay()
     check(DiceClass);
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
+
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsWithTag(GetWorld(), DicePlaceTag, FoundActors);
+
+    for (AActor* PlaceActor : FoundActors)
+    {
+        DicePlacesLocation.Add(PlaceActor->GetActorLocation());
+    }
 }
 
 void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& ColorTag)
@@ -45,11 +53,15 @@ void ACCPlayerPawnGame::Server_SpawnDice_Implementation()
     SpawnDiceActor(SpawnOffset);
     SpawnOffset.Y = -200.0f;
     SpawnDiceActor(SpawnOffset);
+
+    FTimerHandle TimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ACCPlayerPawnGame::MoveDicesToBoard, DiceMoveDelay, false);
 }
 
 void ACCPlayerPawnGame::Server_SelectDiceSide_Implementation() {}
 
-void ACCPlayerPawnGame::Server_CleanAllDices_Implementation() {
+void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
+{
     for (ACCDice* Dice : ServerGameState->GetSpawnedDices())
     {
         ServerGameState->RemoveDice(Dice);
@@ -61,14 +73,16 @@ void ACCPlayerPawnGame::Server_CleanAllDices_Implementation() {
 
 void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation() {}
 
-void ACCPlayerPawnGame::SpawnDiceActor(FVector SpawnOffest) {
+void ACCPlayerPawnGame::SpawnDiceActor(FVector SpawnOffest)
+{
     FRotator Rotation(-45.0f, 30.0f, -30.0f);
     ACCDice* SpawnedDice = GetWorld()->SpawnActor<ACCDice>(DiceClass, SpawnOffest, Rotation);
     ServerGameState->AddSpawnedDice(SpawnedDice);
     SetDiceVelocity(SpawnedDice);
 }
 
-void ACCPlayerPawnGame::SetDiceVelocity(ACCDice* Dice) {
+void ACCPlayerPawnGame::SetDiceVelocity(ACCDice* Dice)
+{
     FVector DiceVelocity(0.0f, 0.0f, 0.0f);
     // Hardcoded for now
     DiceVelocity.X = FMath::RandRange(-1750.0, -1250.0);
@@ -77,6 +91,21 @@ void ACCPlayerPawnGame::SetDiceVelocity(ACCDice* Dice) {
     Dice->GetStaticMeshComponent()->SetPhysicsLinearVelocity(DiceVelocity);
 }
 
-void ACCPlayerPawnGame::MoveDicesToBoard() {}
+void ACCPlayerPawnGame::MoveDicesToBoard() {
+    TArray<ACCDice*> SpawnedDices =  ServerGameState->GetSpawnedDices();
+
+    if (SpawnedDices.Num() == 0)
+        return;
+
+    for (int Index = 0; Index < SpawnedDices.Num(); Index++)
+    {
+        if (DicePlacesLocation.IsValidIndex(Index))
+        {
+            FRotator DiceRotation;
+            SpawnedDices[Index]->SetActorLocationAndRotation(DicePlacesLocation[Index], DiceRotation);
+        }
+    }
+
+}
 
 void ACCPlayerPawnGame::TryDoubleDices() {}

@@ -1,5 +1,39 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
-
 #include "BoardItems/CCDice.h"
+#include "Components/BoxComponent.h"
 
+ACCDice::ACCDice()
+{
+
+    BoxSideFirst = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+    BoxSideFirst->SetupAttachment(RootComponent);
+    BoxSideFirst->InitBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+
+    BoxSideSecond = CreateDefaultSubobject<UBoxComponent>(TEXT("Side2"));
+    BoxSideSecond->SetupAttachment(RootComponent);
+    BoxSideSecond->InitBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+
+    BoxSideThird = CreateDefaultSubobject<UBoxComponent>(TEXT("Side3"));
+    BoxSideThird->SetupAttachment(RootComponent);
+    BoxSideThird->InitBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+
+    BoxSideFourth = CreateDefaultSubobject<UBoxComponent>(TEXT("Side4"));
+    BoxSideFourth->SetupAttachment(RootComponent);
+    BoxSideFourth->InitBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+
+    BoxSideFifth = CreateDefaultSubobject<UBoxComponent>(TEXT("Side5"));
+    BoxSideFifth->SetupAttachment(RootComponent);
+    BoxSideFifth->InitBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+
+    BoxSideFSixth = CreateDefaultSubobject<UBoxComponent>(TEXT("Side6"));
+    BoxSideFSixth->SetupAttachment(RootComponent);
+    BoxSideFSixth->InitBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+}
+
+int32 ACCDice::GetDiceSide()
+{
+    return DiceSide;
+}
+
+void ACCDice::GetHighestComponent() {}
