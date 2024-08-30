@@ -9,6 +9,7 @@
 class ACCGameModeBaseGame;
 class ACCGameStateGame;
 class ACCDice;
+class UInputAction;
 
 UCLASS()
 class PARCHEESI_API ACCPlayerPawnGame : public APawn
@@ -42,6 +43,10 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    virtual void SetupPlayerInputComponent(UInputComponent* NewInputComponent) override;
+
+    void ClickOnBoard();
+
     // Funcitons related to Dice Functionality
     void SpawnDiceActor(FVector SpawnOffest);
     void SetDiceVelocity(ACCDice* Dice);
@@ -65,4 +70,8 @@ protected:
 
     UPROPERTY()
     TArray<FVector> DicePlacesLocation;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* ClickOnBoardAction;
 };

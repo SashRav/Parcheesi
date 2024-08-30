@@ -40,6 +40,9 @@ protected:
     UInputMappingContext* GameMappingContext;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputMappingContext* LevelInputContext;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* QuickMenuAction;
 
     virtual void BeginPlay() override;

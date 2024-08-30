@@ -5,14 +5,20 @@
 #include "Framework/CCGameStateGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/PlayerController.h"
 #include "BoardItems/CCDice.h"
+#include "EnhancedInputComponent.h"
+#include "InputActionValue.h"
 
 ACCPlayerPawnGame::ACCPlayerPawnGame() {}
 
 void ACCPlayerPawnGame::BeginPlay()
 {
     Super::BeginPlay();
+
     check(DiceClass);
+    check(ClickOnBoardAction);
+
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
 
@@ -24,6 +30,33 @@ void ACCPlayerPawnGame::BeginPlay()
         DicePlacesLocation.Add(PlaceActor->GetActorLocation());
     }
 }
+
+void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputComponent)
+{
+    Super::SetupPlayerInputComponent(InputComponent);
+    if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+    {
+        EnhancedInputComponent->BindAction(ClickOnBoardAction, ETriggerEvent::Started, this, &ACCPlayerPawnGame::ClickOnBoard);
+    }
+}
+
+void ACCPlayerPawnGame::ClickOnBoard() {
+    UE_LOG(LogTemp, Log, TEXT("Click action hit"));
+    APlayerController* PlayerController = Cast<APlayerController>(GetController());
+    if (PlayerController)
+    {
+        FHitResult HitResult;
+        if (PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+        {
+            if (ACCDice* HitDice = Cast<ACCDice>(HitResult.GetActor()))
+            {
+                UE_LOG(LogTemp, Log, TEXT("Hit Actor: %d"), HitDice->GetDiceSide());
+            }
+        }
+    }
+}
+
+
 
 void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& ColorTag)
 {
@@ -58,7 +91,9 @@ void ACCPlayerPawnGame::Server_SpawnDice_Implementation()
     GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ACCPlayerPawnGame::MoveDicesToBoard, DiceMoveDelay, false);
 }
 
-void ACCPlayerPawnGame::Server_SelectDiceSide_Implementation() {}
+void ACCPlayerPawnGame::Server_SelectDiceSide_Implementation() {
+    
+}
 
 void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
 {
@@ -109,3 +144,4 @@ void ACCPlayerPawnGame::MoveDicesToBoard() {
 }
 
 void ACCPlayerPawnGame::TryDoubleDices() {}
+

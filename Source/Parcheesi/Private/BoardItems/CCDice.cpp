@@ -33,6 +33,38 @@ ACCDice::ACCDice()
 
 int32 ACCDice::GetDiceSide()
 {
+    int32 DiceSide = 0;
+    double TopComponentHeight = -100000.0;
+    UBoxComponent* TopComponent = nullptr;
+
+    TArray<UBoxComponent*> BoxComponents;
+    GetComponents(BoxComponents);
+
+    for (UBoxComponent* Component : BoxComponents)
+    {
+        if (TopComponentHeight < Component->GetComponentTransform().GetLocation().Z)
+        {
+            TopComponentHeight = Component->GetComponentTransform().GetLocation().Z;
+            TopComponent = Component;
+        }
+    }
+    if (TopComponent)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Top Component Exists"));
+        if (TopComponent == BoxSideFirst)
+            DiceSide = 1;
+        else if (TopComponent == BoxSideSecond)
+            DiceSide = 2;
+        else if (TopComponent == BoxSideThird)
+            DiceSide = 3;
+        else if (TopComponent == BoxSideFourth)
+            DiceSide = 4;
+        else if (TopComponent == BoxSideFifth)
+            DiceSide = 5;
+        else if (TopComponent == BoxSideFSixth)
+            DiceSide = 6;
+    }
+
     return DiceSide;
 }
 

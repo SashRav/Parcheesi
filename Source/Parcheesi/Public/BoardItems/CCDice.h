@@ -38,7 +38,4 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UBoxComponent* BoxSideFSixth;
-
-    UPROPERTY()
-    int DiceSide = 0;
 };

@@ -12,16 +12,21 @@ void ACCControllerGame::BeginPlay()
     Super::BeginPlay();
 
     check(GameMappingContext);
+    check(LevelInputContext);
     check(QuickMenuAction);
 
-    SetInputMode(FInputModeGameAndUI());
+    FInputModeGameAndUI InputModeData;
+    InputModeData.SetHideCursorDuringCapture(false);
+    SetInputMode(InputModeData);
+    
     bShowMouseCursor = true;
 
     OwningHUD = Cast<ACCHUDGame>(GetHUD());
 
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
-        Subsystem->AddMappingContext(GameMappingContext, 0);
+        Subsystem->AddMappingContext(LevelInputContext, 0);
+        Subsystem->AddMappingContext(GameMappingContext, 1);
     }
 }
 
