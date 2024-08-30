@@ -29,7 +29,7 @@ public:
     void Server_DebugEndPlayerTurn();
 
     UFUNCTION(Server, Reliable)
-    void Server_SpawnDice();
+    void Server_SpawnDice(bool SpawnOnBoard, bool SimulatePhysics, int32 DicesToSpawn);
 
     UFUNCTION(Server, Reliable)
     void Server_CleanAllDices();
@@ -40,6 +40,9 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_MoveSelectedPawn();
 
+    UFUNCTION(Server, Reliable)
+    void Server_TryDoubleDices();
+
 protected:
     virtual void BeginPlay() override;
 
@@ -48,10 +51,11 @@ protected:
     void ClickOnBoard();
 
     // Funcitons related to Dice Functionality
-    void SpawnDiceActor(FVector SpawnOffest);
+    void SpawnDiceActor(FVector SpawnOffest, bool UseVelocity, bool SimulatePhysics);
     void SetDiceVelocity(ACCDice* Dice);
-    void MoveDicesToBoard();
-    void TryDoubleDices();
+
+    UFUNCTION()
+    void MoveDicesToBoard(TArray<FVector> TargetLocations);
 
     UPROPERTY()
     ACCGameModeBaseGame* ServerGameMode;
@@ -66,11 +70,19 @@ protected:
     float DiceMoveDelay = 5.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FName DicePlaceTag = "DicePlace"; 
+    FName DicePlaceTag = "DicePlace";
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FName DoubledDicePlaceTag = "DicePlaceDoubled";
 
     UPROPERTY()
     TArray<FVector> DicePlacesLocation;
 
+    UPROPERTY()
+    TArray<FVector> DoubledDicePlacesLocation;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    TMap<int32, FRotator> DiceSidesRotation;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* ClickOnBoardAction;

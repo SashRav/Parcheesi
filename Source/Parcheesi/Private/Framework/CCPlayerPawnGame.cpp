@@ -22,12 +22,21 @@ void ACCPlayerPawnGame::BeginPlay()
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
 
-    TArray<AActor*> FoundActors;
-    UGameplayStatics::GetAllActorsWithTag(GetWorld(), DicePlaceTag, FoundActors);
+    TArray<AActor*> FoundDicePlaces;
+    UGameplayStatics::GetAllActorsWithTag(GetWorld(), DicePlaceTag, FoundDicePlaces);
 
-    for (AActor* PlaceActor : FoundActors)
+    for (AActor* PlaceActor : FoundDicePlaces)
     {
         DicePlacesLocation.Add(PlaceActor->GetActorLocation());
+    }
+
+    TArray<AActor*> FoundDoubledDicePlaces;
+    UGameplayStatics::GetAllActorsWithTag(GetWorld(), DoubledDicePlaceTag, FoundDoubledDicePlaces);
+
+    for (AActor* PlaceActor : FoundDoubledDicePlaces)
+    {
+        DoubledDicePlacesLocation.Add(PlaceActor->GetActorLocation());
+        UE_LOG(LogTemp, Display, TEXT("Doubled dice place added"));
     }
 }
 
@@ -40,7 +49,8 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
     }
 }
 
-void ACCPlayerPawnGame::ClickOnBoard() {
+void ACCPlayerPawnGame::ClickOnBoard()
+{
     UE_LOG(LogTemp, Log, TEXT("Click action hit"));
     APlayerController* PlayerController = Cast<APlayerController>(GetController());
     if (PlayerController)
@@ -55,8 +65,6 @@ void ACCPlayerPawnGame::ClickOnBoard() {
         }
     }
 }
-
-
 
 void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& ColorTag)
 {
@@ -78,22 +86,40 @@ void ACCPlayerPawnGame::Server_DebugEndPlayerTurn_Implementation()
     Server_EndPlayerTurn();
 }
 
-void ACCPlayerPawnGame::Server_SpawnDice_Implementation()
+void ACCPlayerPawnGame::Server_SpawnDice_Implementation(bool SpawnOnBoard, bool SimulatePhysics, int32 DicesToSpawn)
 {
-    FVector SpawnOffset(500.0f, 0.0f, 600.0f);
-    // Hardcoded for now
-    SpawnOffset.Y = 200.0f;
-    SpawnDiceActor(SpawnOffset);
-    SpawnOffset.Y = -200.0f;
-    SpawnDiceActor(SpawnOffset);
+
+    /// Update logic
+    if (SpawnOnBoard)
+    {
+        FVector SpawnOffset(500.0f, 0.0f, 600.0f);
+        for (int i = 0; i < DicesToSpawn; i++)
+        {
+            SpawnOffset.Y = -100.0f * i;
+            SpawnDiceActor(SpawnOffset, SpawnOnBoard, SimulatePhysics);
+        }
+    }
+    else
+    {
+        FVector SpawnOffset(0.0f, 0.0f, -4000.0f);
+        for (int i = 0; i < DicesToSpawn; i++)
+        {
+            SpawnOffset.Y = -300.0f * i;
+            SpawnDiceActor(SpawnOffset, SpawnOnBoard, SimulatePhysics);
+        }
+    }
 
     FTimerHandle TimerHandle;
-    GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ACCPlayerPawnGame::MoveDicesToBoard, DiceMoveDelay, false);
+    FTimerDelegate TimerDelegate;
+
+    TimerDelegate.BindUFunction(this, FName("MoveDicesToBoard"), DicePlacesLocation);
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DiceMoveDelay, false);
+
+    FTimerHandle DoubleTimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(DoubleTimerHandle, this, &ACCPlayerPawnGame::Server_TryDoubleDices, DiceMoveDelay + 1.0f, false);
 }
 
-void ACCPlayerPawnGame::Server_SelectDiceSide_Implementation() {
-    
-}
+void ACCPlayerPawnGame::Server_SelectDiceSide_Implementation() {}
 
 void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
 {
@@ -108,12 +134,37 @@ void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
 
 void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation() {}
 
-void ACCPlayerPawnGame::SpawnDiceActor(FVector SpawnOffest)
+void ACCPlayerPawnGame::Server_TryDoubleDices_Implementation()
+{
+    TArray<ACCDice*> SpawnedDices = ServerGameState->GetSpawnedDices();
+    UE_LOG(LogTemp, Log, TEXT("Trying to double dices. Dices number: %d"), SpawnedDices.Num());
+
+    if (SpawnedDices.Num() != 2)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Dices count is not 2"));
+        return;
+    }
+
+    if (SpawnedDices[0]->GetDiceSide() == SpawnedDices[1]->GetDiceSide())
+    {
+        UE_LOG(LogTemp, Log, TEXT("Doubling dices!!!!"));
+        FVector SpawnOffset(0.0f, 0.0f, -1000.0f);
+
+        Server_SpawnDice(false, false, 2);
+        MoveDicesToBoard(DoubledDicePlacesLocation);
+    }
+    else
+        UE_LOG(LogTemp, Log, TEXT("Dices are not equal"));
+}
+
+void ACCPlayerPawnGame::SpawnDiceActor(FVector SpawnOffest, bool UseVelocity, bool SimulatePhysics)
 {
     FRotator Rotation(-45.0f, 30.0f, -30.0f);
     ACCDice* SpawnedDice = GetWorld()->SpawnActor<ACCDice>(DiceClass, SpawnOffest, Rotation);
     ServerGameState->AddSpawnedDice(SpawnedDice);
-    SetDiceVelocity(SpawnedDice);
+    SpawnedDice->GetStaticMeshComponent()->SetSimulatePhysics(SimulatePhysics);
+    if (UseVelocity)
+        SetDiceVelocity(SpawnedDice);
 }
 
 void ACCPlayerPawnGame::SetDiceVelocity(ACCDice* Dice)
@@ -126,22 +177,20 @@ void ACCPlayerPawnGame::SetDiceVelocity(ACCDice* Dice)
     Dice->GetStaticMeshComponent()->SetPhysicsLinearVelocity(DiceVelocity);
 }
 
-void ACCPlayerPawnGame::MoveDicesToBoard() {
-    TArray<ACCDice*> SpawnedDices =  ServerGameState->GetSpawnedDices();
+void ACCPlayerPawnGame::MoveDicesToBoard(TArray<FVector> TargetLocations)
+{
+    TArray<ACCDice*> SpawnedDices = ServerGameState->GetSpawnedDices();
 
     if (SpawnedDices.Num() == 0)
         return;
 
     for (int Index = 0; Index < SpawnedDices.Num(); Index++)
     {
-        if (DicePlacesLocation.IsValidIndex(Index))
+        if (TargetLocations.IsValidIndex(Index))
         {
-            FRotator DiceRotation;
-            SpawnedDices[Index]->SetActorLocationAndRotation(DicePlacesLocation[Index], DiceRotation);
+            FRotator DiceRotation = *DiceSidesRotation.Find(SpawnedDices[Index]->GetDiceSide());
+            SpawnedDices[Index]->SetActorLocationAndRotation(TargetLocations[Index], DiceRotation);
+            SpawnedDices[Index]->GetStaticMeshComponent()->SetSimulatePhysics(false);
         }
     }
-
 }
-
-void ACCPlayerPawnGame::TryDoubleDices() {}
-

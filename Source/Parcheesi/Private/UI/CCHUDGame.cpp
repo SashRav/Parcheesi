@@ -86,7 +86,7 @@ void ACCHUDGame::DebugEndPlayerTurn()
 
 void ACCHUDGame::RollDice()
 {
-    OwningPlayerPawn->Server_SpawnDice();
+    OwningPlayerPawn->Server_SpawnDice(true, true ,2);
 }
 
 void ACCHUDGame::MovePawn() {

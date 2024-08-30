@@ -50,7 +50,6 @@ int32 ACCDice::GetDiceSide()
     }
     if (TopComponent)
     {
-        UE_LOG(LogTemp, Log, TEXT("Top Component Exists"));
         if (TopComponent == BoxSideFirst)
             DiceSide = 1;
         else if (TopComponent == BoxSideSecond)
