@@ -3,6 +3,7 @@
 
 #include "UI/Widgets/CCGameTurnButtons.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 
 
 void UCCGameTurnButtons::NativeConstruct() {
@@ -34,4 +35,13 @@ void UCCGameTurnButtons::DebugEndTurnClicked() {
 
 void UCCGameTurnButtons::EnableRollButton() {
     B_RollDice->SetIsEnabled(true);
+}
+
+void UCCGameTurnButtons::SetIsEnabledEndTurnButton(bool State)
+{
+    B_EndTurn->SetIsEnabled(State);
+}
+
+void UCCGameTurnButtons::SetDiceSideOnUI(int32 Side) {
+    T_DiceSide->SetText(FText::FromString(FString::FromInt(Side)));
 }

@@ -59,7 +59,10 @@ public:
     void ShowTurnButtons();
     void HideTurnButtons();
 
+    void EnableEndTurnButton();
     void SwitchQuickMenuVisibility();
+    void SetSeclectedDiceSideOnUI(int32 Side);
+
 
 private:
     UPROPERTY()

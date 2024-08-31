@@ -68,3 +68,13 @@ void ACCControllerGame::Client_HideTurnButtonsWidget_Implementation()
     if (OwningHUD)
         OwningHUD->HideTurnButtons();
 }
+
+void ACCControllerGame::Client_EnableEndTurnButton_Implementation() {
+    if (OwningHUD)
+        OwningHUD->EnableEndTurnButton();
+}
+
+void ACCControllerGame::Client_SetDiceSideOnUI_Implementation(int32 Side) {
+    if (OwningHUD)
+        OwningHUD->SetSeclectedDiceSideOnUI(Side);
+}

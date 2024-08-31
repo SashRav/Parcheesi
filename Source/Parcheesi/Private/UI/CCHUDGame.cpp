@@ -35,7 +35,6 @@ void ACCHUDGame::BeginPlay()
     GameTurnButtonsWidget->OnRollDicePressedEvent.AddDynamic(this, &ACCHUDGame::RollDice);
     GameTurnButtonsWidget->OnMovePawnPressedEvent.AddDynamic(this, &ACCHUDGame::MovePawn);
 
-
     QuickMenuWidget = CreateWidget<UCCQuickMenuWidget>(GetWorld(), QuickMenuWidgetClass);
 
     OwningPlayerPawn = Cast<ACCPlayerPawnGame>(GetOwningPawn());
@@ -86,10 +85,11 @@ void ACCHUDGame::DebugEndPlayerTurn()
 
 void ACCHUDGame::RollDice()
 {
-    OwningPlayerPawn->Server_SpawnDice(true, true ,2);
+    OwningPlayerPawn->Server_RollDices();
 }
 
-void ACCHUDGame::MovePawn() {
+void ACCHUDGame::MovePawn()
+{
     OwningPlayerPawn->Server_MoveSelectedPawn();
 }
 
@@ -97,11 +97,22 @@ void ACCHUDGame::ShowTurnButtons()
 {
     GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Visible);
     GameTurnButtonsWidget->EnableRollButton();
+    GameTurnButtonsWidget->SetIsEnabledEndTurnButton(false);
 }
 
 void ACCHUDGame::HideTurnButtons()
 {
     GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ACCHUDGame::EnableEndTurnButton()
+{
+    GameTurnButtonsWidget->SetIsEnabledEndTurnButton(true);
+}
+
+void ACCHUDGame::SetSeclectedDiceSideOnUI(int32 Side)
+{
+    GameTurnButtonsWidget->SetDiceSideOnUI(Side);
 }
 
 void ACCHUDGame::SwitchQuickMenuVisibility()

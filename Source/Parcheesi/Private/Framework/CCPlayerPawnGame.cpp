@@ -3,6 +3,7 @@
 #include "Framework/CCPlayerPawnGame.h"
 #include "Framework/CCGameModeBaseGame.h"
 #include "Framework/CCGameStateGame.h"
+#include "Framework/CCControllerGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/PlayerController.h"
@@ -21,6 +22,7 @@ void ACCPlayerPawnGame::BeginPlay()
 
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
+    OwningPlayerController = Cast<ACCControllerGame>(GetController());
 
     TArray<AActor*> FoundDicePlaces;
     UGameplayStatics::GetAllActorsWithTag(GetWorld(), DicePlaceTag, FoundDicePlaces);
@@ -52,18 +54,56 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
 void ACCPlayerPawnGame::ClickOnBoard()
 {
     UE_LOG(LogTemp, Log, TEXT("Click action hit"));
-    APlayerController* PlayerController = Cast<APlayerController>(GetController());
-    if (PlayerController)
+    if (OwningPlayerController)
     {
         FHitResult HitResult;
-        if (PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+        if (OwningPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
         {
             if (ACCDice* HitDice = Cast<ACCDice>(HitResult.GetActor()))
             {
+                SelectedDiceActor = HitDice;
+                UpdateSelectedDiceOnUI();
                 UE_LOG(LogTemp, Log, TEXT("Hit Actor: %d"), HitDice->GetDiceSide());
             }
         }
     }
+}
+
+void ACCPlayerPawnGame::UpdateSelectedDiceOnUI()
+{
+    if (OwningPlayerController && SelectedDiceActor)
+    {
+        OwningPlayerController->Client_SetDiceSideOnUI(SelectedDiceActor->GetDiceSide());
+    }
+}
+
+void ACCPlayerPawnGame::Server_RollDices_Implementation()
+{
+
+    FTimerHandle TimerHandle;
+    FTimerDelegate TimerDelegate;
+
+    FRotator Rotation;
+    FVector SpawnLocation(500.0f, -100.0f, 600.0f);
+    
+    Rotation.Pitch = FMath::RandRange(-180.0, 180.0);
+    Rotation.Yaw = FMath::RandRange(-180.0, 180.0);
+    Rotation.Roll = FMath::RandRange(-180.0, 180.0);
+
+    Server_SpawnDice(SpawnLocation, Rotation, true, true);
+
+    Rotation.Pitch = FMath::RandRange(-180.0, 180.0);
+    Rotation.Yaw = FMath::RandRange(-180.0, 180.0);
+    Rotation.Roll = FMath::RandRange(-180.0, 180.0);
+    SpawnLocation.Y = 100.0f;
+
+    Server_SpawnDice(SpawnLocation, Rotation, true, true);
+
+    TimerDelegate.BindUFunction(this, FName("MoveDicesToBoard"), DicePlacesLocation);
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DiceMoveDelay, false);
+
+    FTimerHandle DoubleTimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(DoubleTimerHandle, this, &ACCPlayerPawnGame::Server_TryDoubleDices, DiceMoveDelay + 1.0f, false);
 }
 
 void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& ColorTag)
@@ -86,43 +126,21 @@ void ACCPlayerPawnGame::Server_DebugEndPlayerTurn_Implementation()
     Server_EndPlayerTurn();
 }
 
-void ACCPlayerPawnGame::Server_SpawnDice_Implementation(bool SpawnOnBoard, bool SimulatePhysics, int32 DicesToSpawn)
+void ACCPlayerPawnGame::Server_SpawnDice_Implementation(FVector SpawnOffset, FRotator Rotation, bool SpawnOnBoard, bool SimulatePhysics)
 {
-
-    /// Update logic
-    if (SpawnOnBoard)
-    {
-        FVector SpawnOffset(500.0f, 0.0f, 600.0f);
-        for (int i = 0; i < DicesToSpawn; i++)
-        {
-            SpawnOffset.Y = -100.0f * i;
-            SpawnDiceActor(SpawnOffset, SpawnOnBoard, SimulatePhysics);
-        }
-    }
-    else
-    {
-        FVector SpawnOffset(0.0f, 0.0f, -4000.0f);
-        for (int i = 0; i < DicesToSpawn; i++)
-        {
-            SpawnOffset.Y = -300.0f * i;
-            SpawnDiceActor(SpawnOffset, SpawnOnBoard, SimulatePhysics);
-        }
-    }
-
-    FTimerHandle TimerHandle;
-    FTimerDelegate TimerDelegate;
-
-    TimerDelegate.BindUFunction(this, FName("MoveDicesToBoard"), DicePlacesLocation);
-    GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DiceMoveDelay, false);
-
-    FTimerHandle DoubleTimerHandle;
-    GetWorld()->GetTimerManager().SetTimer(DoubleTimerHandle, this, &ACCPlayerPawnGame::Server_TryDoubleDices, DiceMoveDelay + 1.0f, false);
+    ACCDice* SpawnedDice = GetWorld()->SpawnActor<ACCDice>(DiceClass, SpawnOffset, Rotation);
+    ServerGameState->AddSpawnedDice(SpawnedDice);
+    SpawnedDice->GetStaticMeshComponent()->SetSimulatePhysics(SimulatePhysics);
+    if (SimulatePhysics)
+        SetDiceVelocity(SpawnedDice);
+    //SpawnDiceActor(SpawnOffset, Rotation, SpawnOnBoard, SimulatePhysics);
 }
 
 void ACCPlayerPawnGame::Server_SelectDiceSide_Implementation() {}
 
 void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
 {
+    SelectedDiceActor = nullptr;
     for (ACCDice* Dice : ServerGameState->GetSpawnedDices())
     {
         ServerGameState->RemoveDice(Dice);
@@ -142,24 +160,35 @@ void ACCPlayerPawnGame::Server_TryDoubleDices_Implementation()
     if (SpawnedDices.Num() != 2)
     {
         UE_LOG(LogTemp, Log, TEXT("Dices count is not 2"));
+        Client_EnableTurnButton();
         return;
     }
 
     if (SpawnedDices[0]->GetDiceSide() == SpawnedDices[1]->GetDiceSide())
     {
         UE_LOG(LogTemp, Log, TEXT("Doubling dices!!!!"));
-        FVector SpawnOffset(0.0f, 0.0f, -1000.0f);
 
-        Server_SpawnDice(false, false, 2);
+        FVector SpawnOffset(0.0f, 0.0f, -1000.0f);
+        FRotator Rotation = *DiceSidesRotation.Find(SpawnedDices[0]->GetDiceSide());
+
+        Server_SpawnDice(SpawnOffset, Rotation, false, false);
+        SpawnOffset.X = 300.0f;
+        Server_SpawnDice(SpawnOffset, Rotation, false, false);
+
         MoveDicesToBoard(DoubledDicePlacesLocation);
     }
     else
         UE_LOG(LogTemp, Log, TEXT("Dices are not equal"));
+    Client_EnableTurnButton();
 }
 
-void ACCPlayerPawnGame::SpawnDiceActor(FVector SpawnOffest, bool UseVelocity, bool SimulatePhysics)
+void ACCPlayerPawnGame::Client_EnableTurnButton_Implementation()
 {
-    FRotator Rotation(-45.0f, 30.0f, -30.0f);
+    OwningPlayerController->Client_EnableEndTurnButton();
+}
+
+void ACCPlayerPawnGame::SpawnDiceActor(FVector SpawnOffest, FRotator Rotation, bool UseVelocity, bool SimulatePhysics)
+{
     ACCDice* SpawnedDice = GetWorld()->SpawnActor<ACCDice>(DiceClass, SpawnOffest, Rotation);
     ServerGameState->AddSpawnedDice(SpawnedDice);
     SpawnedDice->GetStaticMeshComponent()->SetSimulatePhysics(SimulatePhysics);

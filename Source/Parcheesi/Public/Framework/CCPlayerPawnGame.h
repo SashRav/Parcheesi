@@ -8,6 +8,7 @@
 
 class ACCGameModeBaseGame;
 class ACCGameStateGame;
+class ACCControllerGame;
 class ACCDice;
 class UInputAction;
 
@@ -29,7 +30,7 @@ public:
     void Server_DebugEndPlayerTurn();
 
     UFUNCTION(Server, Reliable)
-    void Server_SpawnDice(bool SpawnOnBoard, bool SimulatePhysics, int32 DicesToSpawn);
+    void Server_SpawnDice(FVector SpawnOffset, FRotator Rotation, bool SpawnOnBoard, bool SimulatePhysics);
 
     UFUNCTION(Server, Reliable)
     void Server_CleanAllDices();
@@ -43,15 +44,22 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_TryDoubleDices();
 
+    UFUNCTION(Server, Reliable)
+    void Server_RollDices();
+
+    UFUNCTION(Client, Reliable)
+    void Client_EnableTurnButton();
+
 protected:
     virtual void BeginPlay() override;
 
     virtual void SetupPlayerInputComponent(UInputComponent* NewInputComponent) override;
 
     void ClickOnBoard();
+    void UpdateSelectedDiceOnUI();
 
     // Funcitons related to Dice Functionality
-    void SpawnDiceActor(FVector SpawnOffest, bool UseVelocity, bool SimulatePhysics);
+    void SpawnDiceActor(FVector SpawnOffest, FRotator Rotation, bool UseVelocity, bool SimulatePhysics);
     void SetDiceVelocity(ACCDice* Dice);
 
     UFUNCTION()
@@ -62,6 +70,9 @@ protected:
 
     UPROPERTY()
     ACCGameStateGame* ServerGameState;
+
+    UPROPERTY()
+    ACCControllerGame* OwningPlayerController;
 
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACCDice> DiceClass;
@@ -86,4 +97,7 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* ClickOnBoardAction;
+
+    UPROPERTY()
+    ACCDice* SelectedDiceActor;
 };

@@ -21,6 +21,8 @@ class PARCHEESI_API UCCGameTurnButtons : public UUserWidget
 
 public:
     void EnableRollButton();
+    void SetIsEnabledEndTurnButton(bool State);
+    void SetDiceSideOnUI(int32 Side);
 
     UPROPERTY(BlueprintAssignable)
     FOnMovePawnPressed OnMovePawnPressedEvent;

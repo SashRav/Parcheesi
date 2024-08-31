@@ -32,6 +32,13 @@ public:
     UFUNCTION(Client, Reliable)
     void Client_SwitchQuickMenuVisibility();
 
+    UFUNCTION(Client, Reliable)
+    void Client_EnableEndTurnButton();
+
+    UFUNCTION(Client, Reliable)
+    void Client_SetDiceSideOnUI(int32 Side);
+
+
 protected:
     UPROPERTY()
     ACCHUDGame* OwningHUD;
