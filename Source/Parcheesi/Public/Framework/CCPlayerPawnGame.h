@@ -9,9 +9,10 @@
 class ACCGameModeBaseGame;
 class ACCGameStateGame;
 class ACCControllerGame;
-class ACCDice;
 class UInputAction;
 class UCCDiceComponent;
+class ACCPawn;
+class ACCDice;
 
 UCLASS()
 class PARCHEESI_API ACCPlayerPawnGame : public APawn
@@ -39,9 +40,6 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_RollDices();
 
-    UFUNCTION(Client, Reliable)
-    void Client_EnableTurnButton();
-
 protected:
     virtual void BeginPlay() override;
 
@@ -49,6 +47,9 @@ protected:
 
     void ClickOnBoard();
     void UpdateSelectedDiceOnUI();
+
+    UFUNCTION(Client, Reliable)
+    void Client_EnableTurnButton();
 
     UPROPERTY()
     ACCGameModeBaseGame* ServerGameMode;

@@ -4,23 +4,37 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CCCoreTypes.h"
 #include "CCPawn.generated.h"
+
+class UStaticMeshComponent;
 
 UCLASS()
 class PARCHEESI_API ACCPawn : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	ACCPawn();
+    GENERATED_BODY()
+
+public:
+    ACCPawn();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_SetupPawnData(ETurnColors PawnColor);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    UPROPERTY(EditDefaultsOnly)
+    UStaticMeshComponent* PawnMeshComponent;
 
+    UPROPERTY(EditDefaultsOnly)
+    UMaterialInstance* RedMaterial;
+
+    UPROPERTY(EditDefaultsOnly)
+    UMaterialInstance* GreenMaterial;
+
+    UPROPERTY(EditDefaultsOnly)
+    UMaterialInstance* YellowMaterial;
+
+    UPROPERTY(EditDefaultsOnly)
+    UMaterialInstance* BlueMaterial;
 };

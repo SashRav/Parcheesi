@@ -4,6 +4,7 @@
 #include "Framework/CCGameStateGame.h"
 #include "Framework/CCControllerGame.h"
 #include "GameFramework/PlayerState.h"
+#include "BoardItems/CCPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "CCCoreTypes.h"
 
@@ -22,6 +23,8 @@ void ACCGameModeBaseGame::PostLogin(APlayerController* NewPlayer)
 void ACCGameModeBaseGame::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(PawnClass);
 }
 
 void ACCGameModeBaseGame::StartNewGame()
@@ -39,6 +42,9 @@ void ACCGameModeBaseGame::StartNewGame()
         GameController->Client_StartGameFromController();
     }
 
+    UpdatePlayersTurnData();
+
+    SpawnPawnsOnBoard();
     StartNextTurn();
 }
 
@@ -113,10 +119,10 @@ void ACCGameModeBaseGame::UpdatePlayersTurnWidgets()
 
     for (FUniqueNetIdRepl NetId : PlayersNetId)
     {
-        ACCControllerGame* GameController =
+        ACCControllerGame* PlayerController =
             Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), NetId)->GetOwningController());
         if (PlayersTurnData.Num() > 0)
-            GameController->Client_UpdateTurnWidgets(PlayersTurnData);
+            PlayerController->Client_UpdateTurnWidgets(PlayersTurnData);
     }
 }
 
@@ -168,8 +174,32 @@ void ACCGameModeBaseGame::SetNextTurnColor()
 }
 
 void ACCGameModeBaseGame::StartNextTurnForPlayer(FUniqueNetIdRepl PlayerNetId) {
-    ACCControllerGame* GameController =
+    ACCControllerGame* PlayerController =
         Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerNetId)->GetOwningController());
     
-    GameController->Client_ShowTurnButtonsWidget();
+    PlayerController->Client_ShowTurnButtonsWidget();
+}
+
+void ACCGameModeBaseGame::SpawnPawnsOnBoard()
+{
+    TArray<ETurnColors> PlayersColors;
+    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    GameStateGame->GetPlayersTurnData().GetKeys(PlayersColors);
+
+
+    for (ETurnColors Color : PlayersColors)
+    {
+        TArray<AActor*> FoundSpawnCells;
+        FName SpawnCellTag = UEnum::GetValueAsName(Color);
+
+        UGameplayStatics::GetAllActorsWithTag(GetWorld(), SpawnCellTag, FoundSpawnCells);
+
+        for (AActor* PlaceActor : FoundSpawnCells)
+        {
+            UE_LOG(LogTemp, Display, TEXT("Spawn Dices for %s Player. Cell Name: %s"), *SpawnCellTag.ToString(), *PlaceActor->GetName());
+            FRotator Rotation;
+            ACCPawn* SpawnedPawn = GetWorld()->SpawnActor<ACCPawn>(PawnClass, PlaceActor->GetActorLocation(), Rotation);
+            SpawnedPawn->Multicast_SetupPawnData(Color);
+        }
+    }
 }

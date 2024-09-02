@@ -39,32 +39,6 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
     }
 }
 
-void ACCPlayerPawnGame::ClickOnBoard()
-{
-    UE_LOG(LogTemp, Log, TEXT("Click action hit"));
-    if (OwningPlayerController)
-    {
-        FHitResult HitResult;
-        if (OwningPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
-        {
-            if (ACCDice* HitDice = Cast<ACCDice>(HitResult.GetActor()))
-            {
-                SelectedDiceActor = HitDice;
-                UpdateSelectedDiceOnUI();
-                UE_LOG(LogTemp, Log, TEXT("Hit Actor: %d"), HitDice->GetDiceSide());
-            }
-        }
-    }
-}
-
-void ACCPlayerPawnGame::UpdateSelectedDiceOnUI()
-{
-    if (OwningPlayerController && SelectedDiceActor)
-    {
-        OwningPlayerController->Client_SetDiceSideOnUI(SelectedDiceActor->GetDiceSide());
-    }
-}
-
 void ACCPlayerPawnGame::Server_RollDices_Implementation()
 {
     DiceComponent->RollDices();
@@ -105,6 +79,32 @@ void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
 void ACCPlayerPawnGame::Client_EnableTurnButton_Implementation()
 {
     OwningPlayerController->Client_EnableEndTurnButton();
+}
+
+void ACCPlayerPawnGame::UpdateSelectedDiceOnUI()
+{
+    if (OwningPlayerController && SelectedDiceActor)
+    {
+        OwningPlayerController->Client_SetDiceSideOnUI(SelectedDiceActor->GetDiceSide());
+    }
+}
+
+void ACCPlayerPawnGame::ClickOnBoard()
+{
+    UE_LOG(LogTemp, Log, TEXT("Click action hit"));
+    if (OwningPlayerController)
+    {
+        FHitResult HitResult;
+        if (OwningPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+        {
+            if (ACCDice* HitDice = Cast<ACCDice>(HitResult.GetActor()))
+            {
+                SelectedDiceActor = HitDice;
+                UpdateSelectedDiceOnUI();
+                UE_LOG(LogTemp, Log, TEXT("Hit Actor: %d"), HitDice->GetDiceSide());
+            }
+        }
+    }
 }
 
 void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation() {}

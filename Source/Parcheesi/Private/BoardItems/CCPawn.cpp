@@ -1,27 +1,42 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
-
 #include "BoardItems/CCPawn.h"
+#include "Components/StaticMeshComponent.h"
 
-// Sets default values
 ACCPawn::ACCPawn()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
 
+    PawnMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pawn Mesh"));
+    PawnMeshComponent->SetupAttachment(RootComponent);
 }
 
-// Called when the game starts or when spawned
 void ACCPawn::BeginPlay()
 {
-	Super::BeginPlay();
-	
+    Super::BeginPlay();
+
+    check(RedMaterial);
+    check(GreenMaterial);
+    check(YellowMaterial);
+    check(BlueMaterial);
 }
 
-// Called every frame
-void ACCPawn::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor) {
+    Tags.Add(UEnum::GetValueAsName(PawnColor));
 
+    switch (PawnColor)
+    {
+    case ETurnColors::Red:
+        PawnMeshComponent->SetMaterial(0, RedMaterial);
+        break;
+    case ETurnColors::Blue:
+        PawnMeshComponent->SetMaterial(0, BlueMaterial);
+        break;
+    case ETurnColors::Green:
+        PawnMeshComponent->SetMaterial(0, GreenMaterial);
+        break;
+    case ETurnColors::Yellow:
+        PawnMeshComponent->SetMaterial(0, YellowMaterial);
+        break;
+    }
 }
-
