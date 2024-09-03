@@ -8,31 +8,33 @@
 
 class UNiagaraSystem;
 class UNiagaraComponent;
-class USceneComponent;
 class UMeshComponent;
-class UMaterial;
+class UMaterialInstance;
 
-
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PARCHEESI_API UCCSelectItem : public UActorComponent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-public:	
-	UCCSelectItem();
+public:
+    UCCSelectItem();
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-public:	
-	UFUNCTION(BlueprintCallable, Category = "Select")
-	void SelectThisItem(UNiagaraSystem* NiagaraSystem, USceneComponent* ComponentToAdd, UMeshComponent* MeshToUpdate, UMaterial* OverlayMaterialToAdd);
-	
-	UFUNCTION(BlueprintCallable, Category="Select")
-	void DeselectThisItem(UMeshComponent* MeshToUpdate);
+    UPROPERTY(EditDefaultsOnly)
+    UMaterialInstance* OverlayMaterial;
+
+    UPROPERTY(EditDefaultsOnly)
+    UNiagaraSystem* OverlayNiagaraSystem;
+
+public:
+    UFUNCTION(BlueprintCallable, Category = "Select")
+    void SelectThisItem(UMeshComponent* MeshToUpdate);
+
+    UFUNCTION(BlueprintCallable, Category = "Select")
+    void DeselectThisItem(UMeshComponent* MeshToUpdate);
 
 private:
-	UNiagaraComponent* CurrentNiagaraSystem;
-
+    UNiagaraComponent* CurrentNiagaraSystem;
 };
-

@@ -1,6 +1,7 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
 #include "Framework/CCControllerGame.h"
+#include "Framework/CCPlayerPawnGame.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
@@ -61,6 +62,10 @@ void ACCControllerGame::Client_ShowTurnButtonsWidget_Implementation()
 {
     if (OwningHUD)
         OwningHUD->ShowTurnButtons();
+
+    ACCPlayerPawnGame* PlayerPawn = Cast<ACCPlayerPawnGame>(GetPawn());
+    if (PlayerPawn)
+        PlayerPawn->Multicast_SetCurrentTurn(true);
 }
 
 void ACCControllerGame::Client_HideTurnButtonsWidget_Implementation()

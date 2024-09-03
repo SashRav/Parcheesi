@@ -11,6 +11,7 @@ class ACCGameStateGame;
 class ACCControllerGame;
 class UInputAction;
 class UCCDiceComponent;
+class UCCSelectItem;
 class ACCPawn;
 class ACCDice;
 
@@ -40,6 +41,12 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_RollDices();
 
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_SetCurrentTurn(bool Turn);
+
+        UFUNCTION(NetMulticast, Reliable)
+    void Multicast_CleanTurnData();
+
 protected:
     virtual void BeginPlay() override;
 
@@ -48,8 +55,14 @@ protected:
     void ClickOnBoard();
     void UpdateSelectedDiceOnUI();
 
+    void SelectDiceActor(ACCDice* HitDice);
+    void SelectPawnActor(ACCPawn* HitPawn);
+
     UFUNCTION(Client, Reliable)
     void Client_EnableTurnButton();
+
+    UPROPERTY()
+    bool bCurrentTurn = false;
 
     UPROPERTY()
     ACCGameModeBaseGame* ServerGameMode;
@@ -63,9 +76,18 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UCCDiceComponent* DiceComponent;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UCCSelectItem* SelectItemDiceComponent;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UCCSelectItem* SelectItemPawnComponent;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* ClickOnBoardAction;
 
     UPROPERTY()
     ACCDice* SelectedDiceActor;
+
+    UPROPERTY()
+    ACCPawn* SelectedPawnActor;
 };

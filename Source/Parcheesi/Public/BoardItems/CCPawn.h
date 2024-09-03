@@ -20,11 +20,11 @@ public:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_SetupPawnData(ETurnColors PawnColor);
 
-protected:
-    virtual void BeginPlay() override;
-
     UPROPERTY(EditDefaultsOnly)
     UStaticMeshComponent* PawnMeshComponent;
+
+protected:
+    virtual void BeginPlay() override;
 
     UPROPERTY(EditDefaultsOnly)
     UMaterialInstance* RedMaterial;
