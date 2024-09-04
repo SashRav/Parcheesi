@@ -19,7 +19,6 @@ class PARCHEESI_API UCCDiceComponent : public UActorComponent
 public:
     void SpawnDice(FVector SpawnLocation, FRotator Rotation, bool UseVelocity, bool SimulatePhysics);
     void RollDices();
-    void CleanAllDices();
 
     UPROPERTY(BlueprintAssignable)
     FOnDiceRollingEnd OnDiceRollingEnd;

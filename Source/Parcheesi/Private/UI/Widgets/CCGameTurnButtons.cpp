@@ -21,6 +21,7 @@ void UCCGameTurnButtons::RollDiceButtonClicked()
 
 void UCCGameTurnButtons::MovePawnButtonClicked() {
     OnMovePawnPressedEvent.Broadcast();
+    B_MovePawn->SetIsEnabled(false);
 }
 
 void UCCGameTurnButtons::EndTurnClicked() {
@@ -40,6 +41,10 @@ void UCCGameTurnButtons::EnableRollButton() {
 void UCCGameTurnButtons::SetIsEnabledEndTurnButton(bool State)
 {
     B_EndTurn->SetIsEnabled(State);
+}
+
+void UCCGameTurnButtons::SetIsEnabledMovePawnButton(bool State) {
+    B_MovePawn->SetIsEnabled(State);
 }
 
 void UCCGameTurnButtons::SetDiceSideOnUI(int32 Side) {

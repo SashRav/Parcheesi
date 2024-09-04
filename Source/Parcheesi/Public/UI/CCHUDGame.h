@@ -60,7 +60,9 @@ public:
     void HideTurnButtons();
 
     void EnableEndTurnButton();
+
     void SwitchQuickMenuVisibility();
+    void SwitchMovePawnButtonIsEnabled(bool State);
     void SetSeclectedDiceSideOnUI(int32 Side);
 
 

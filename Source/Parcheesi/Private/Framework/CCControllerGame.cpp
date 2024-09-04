@@ -83,3 +83,8 @@ void ACCControllerGame::Client_SetDiceSideOnUI_Implementation(int32 Side) {
     if (OwningHUD)
         OwningHUD->SetSeclectedDiceSideOnUI(Side);
 }
+
+void ACCControllerGame::Client_SwitchMovePawnButtonIsEnabled_Implementation(bool State) {
+    if (OwningHUD)
+        OwningHUD->SwitchMovePawnButtonIsEnabled(State);
+}

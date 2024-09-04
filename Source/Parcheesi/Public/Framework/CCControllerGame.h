@@ -36,8 +36,10 @@ public:
     void Client_EnableEndTurnButton();
 
     UFUNCTION(Client, Reliable)
-    void Client_SetDiceSideOnUI(int32 Side);
+    void Client_SwitchMovePawnButtonIsEnabled(bool State);
 
+    UFUNCTION(Client, Reliable)
+    void Client_SetDiceSideOnUI(int32 Side);
 
 protected:
     UPROPERTY()

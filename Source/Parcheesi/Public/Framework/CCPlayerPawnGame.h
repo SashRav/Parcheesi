@@ -57,6 +57,9 @@ protected:
 
     void ClickOnBoard();
     void UpdateSelectedDiceOnUI();
+    
+    UFUNCTION(Server, Reliable)
+    void Server_SwitchMovePawnButtonIsEnabled(bool State);
 
     UFUNCTION(Server, Reliable)
     void Server_SelectDiceActor(ACCDice* HitDice);

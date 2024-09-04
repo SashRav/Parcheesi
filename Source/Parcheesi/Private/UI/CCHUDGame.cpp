@@ -98,6 +98,7 @@ void ACCHUDGame::ShowTurnButtons()
     GameTurnButtonsWidget->SetVisibility(ESlateVisibility::Visible);
     GameTurnButtonsWidget->EnableRollButton();
     GameTurnButtonsWidget->SetIsEnabledEndTurnButton(false);
+    GameTurnButtonsWidget->SetIsEnabledMovePawnButton(false);
 }
 
 void ACCHUDGame::HideTurnButtons()
@@ -121,4 +122,9 @@ void ACCHUDGame::SwitchQuickMenuVisibility()
     {
         QuickMenuWidget->SwitchQuickMenuVisibility();
     }
+}
+
+void ACCHUDGame::SwitchMovePawnButtonIsEnabled(bool State)
+{
+    GameTurnButtonsWidget->SetIsEnabledMovePawnButton(State);
 }
