@@ -8,6 +8,7 @@
 #include "CCGameStateGame.generated.h"
 
 class ACCDice;
+class ACCPawn;
 
 UCLASS()
 class PARCHEESI_API ACCGameStateGame : public AGameStateBase
@@ -17,6 +18,7 @@ class PARCHEESI_API ACCGameStateGame : public AGameStateBase
 public:
     void AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
+    void ChangeCellsDataItem(int32 Index, ACCPawn* Pawn);
 
     TMap<FUniqueNetIdRepl, FName> GetAllPlayersData() { return AllPlayersData; };
     TMap<ETurnColors, FUniqueNetIdRepl> GetPlayersTurnData() { return PlayersTurnData; }
@@ -29,8 +31,15 @@ public:
     TArray<ACCDice*> GetSpawnedDices() { return SpawnedDices; }
     void CleanSpawnedDicesArray() { SpawnedDices.Empty(); }
 
-
 protected:
+    virtual void BeginPlay() override;
+
+    void DisplayPlayersData();
+    void SetPlayerTurnData();
+    ETurnColors GetEnumColorFromTag(FString PlayerTag);
+
+    void SetCellsData();
+
     UPROPERTY()
     TMap<FUniqueNetIdRepl, FName> AllPlayersData;
 
@@ -38,13 +47,11 @@ protected:
     TMap<ETurnColors, FUniqueNetIdRepl> PlayersTurnData;
 
     UPROPERTY()
+    TMap<int32, ACCPawn*> CellsData;
+
+    UPROPERTY()
     ETurnColors CurrentTurnColor = ETurnColors::Blue;
 
     UPROPERTY()
     TArray<ACCDice*> SpawnedDices;
-
-
-    void DisplayPlayersData();
-    void SetPlayerTurnData();
-    ETurnColors GetEnumColorFromTag(FString PlayerTag);
 };

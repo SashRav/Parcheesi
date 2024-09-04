@@ -1,6 +1,9 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
 #include "Framework/CCGameStateGame.h"
+#include "BoardItems/CCPawn.h"
+#include "BoardItems/CCCell.h"
+#include "Kismet/GameplayStatics.h"
 #include "CCCoreTypes.h"
 
 void ACCGameStateGame::AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
@@ -22,6 +25,13 @@ void ACCGameStateGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName Playe
     AllPlayersData.Emplace(PlayerNetId, PlayerTag);
     SetPlayerTurnData();
     DisplayPlayersData();
+}
+
+void ACCGameStateGame::ChangeCellsDataItem(int32 Index, ACCPawn* Pawn) {
+    if (CellsData.Find(Index))
+    {
+        CellsData.Add(Index, Pawn);
+    }
 }
 
 void ACCGameStateGame::DisplayPlayersData()
@@ -63,4 +73,19 @@ ETurnColors ACCGameStateGame::GetEnumColorFromTag(FString PlayerTag)
         return ETurnColors::Green;
 
     return ETurnColors::None;
+}
+
+void ACCGameStateGame::SetCellsData() {
+    TArray<AActor*> FoundCellsActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACCCell::StaticClass(), FoundCellsActors);
+
+    for (AActor* CellActor : FoundCellsActors)
+    {
+        ACCCell* Cell = Cast<ACCCell>(CellActor);
+        CellsData.Add(Cell->GetCellIndex(), nullptr);
+    }
+}
+
+void ACCGameStateGame::BeginPlay() {
+    SetCellsData();
 }

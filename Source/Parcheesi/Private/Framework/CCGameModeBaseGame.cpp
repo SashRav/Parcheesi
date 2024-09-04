@@ -6,6 +6,7 @@
 #include "Framework/CCPlayerPawnGame.h"
 #include "GameFramework/PlayerState.h"
 #include "BoardItems/CCPawn.h"
+#include "BoardItems/CCCell.h"
 #include "Kismet/GameplayStatics.h"
 #include "CCCoreTypes.h"
 
@@ -195,17 +196,19 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
 
     for (ETurnColors Color : PlayersColors)
     {
-        TArray<AActor*> FoundSpawnCells;
         FName SpawnCellTag = UEnum::GetValueAsName(Color);
 
-        UGameplayStatics::GetAllActorsWithTag(GetWorld(), SpawnCellTag, FoundSpawnCells);
+        TArray<AActor*> FoundSpawnActors;
+        UGameplayStatics::GetAllActorsWithTag(GetWorld(), SpawnCellTag, FoundSpawnActors);
 
-        for (AActor* PlaceActor : FoundSpawnCells)
+        for (AActor* PlaceActor : FoundSpawnActors)
         {
+            ACCCell* SpawnCell = Cast<ACCCell>(PlaceActor);
+
             UE_LOG(LogTemp, Display, TEXT("Spawn Dices for %s Player. Cell Name: %s"), *SpawnCellTag.ToString(), *PlaceActor->GetName());
             FRotator Rotation;
             ACCPawn* SpawnedPawn = GetWorld()->SpawnActor<ACCPawn>(PawnClass, PlaceActor->GetActorLocation(), Rotation);
-            SpawnedPawn->Multicast_SetupPawnData(Color);
+            SpawnedPawn->Multicast_SetupPawnData(Color, SpawnCell->GetCellIndex());
         }
     }
 }

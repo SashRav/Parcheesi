@@ -28,3 +28,11 @@ enum class ETurnColors : uint8
     Blue,
     None
 };
+
+UENUM(BlueprintType)
+enum class EPawnPosition : uint8
+{
+    OnStart,
+    OnBoard,
+    OnFinish
+};

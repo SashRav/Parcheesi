@@ -11,16 +11,19 @@ UStaticMeshComponent;
 UCLASS()
 class PARCHEESI_API ACCCell : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	ACCCell();
+    GENERATED_BODY()
+
+public:
+    ACCCell();
+
+    int32 GetCellIndex() { return CellIndex; }
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly)
     UStaticMeshComponent* CellMeshComponent;
+
+    UPROPERTY(EditAnywhere)
+    int32 CellIndex;
 };
