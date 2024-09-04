@@ -13,12 +13,20 @@
 #include "InputActionValue.h"
 #include "Components/CCDiceComponent.h"
 #include "Components/CCSelectItem.h"
+#include "Net/UnrealNetwork.h"
 
 ACCPlayerPawnGame::ACCPlayerPawnGame()
 {
     DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
     SelectItemDiceComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionDiceComponent"));
     SelectItemPawnComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionPawnComponent"));
+}
+
+void ACCPlayerPawnGame::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ACCPlayerPawnGame, PlayerTagName);
 }
 
 void ACCPlayerPawnGame::BeginPlay()
@@ -30,7 +38,6 @@ void ACCPlayerPawnGame::BeginPlay()
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
     OwningPlayerController = Cast<ACCControllerGame>(GetController());
-
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Client_EnableTurnButton);
 }
 
@@ -58,7 +65,8 @@ void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& C
 void ACCPlayerPawnGame::Server_EndPlayerTurn_Implementation()
 {
     UE_LOG(LogTemp, Display, TEXT("End turn from Pawn"));
-    Multicast_CleanTurnData();
+    Server_CleanSelectionData();
+    Multicast_SetCurrentTurn(false);
     Server_CleanAllDices();
     ServerGameMode->StartNextTurn();
 }
@@ -81,19 +89,18 @@ void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
     ServerGameState->CleanSpawnedDicesArray();
 }
 
-void ACCPlayerPawnGame::Multicast_CleanTurnData_Implementation()
+void ACCPlayerPawnGame::Server_CleanSelectionData_Implementation()
 {
     if (SelectedDiceActor)
     {
-        SelectItemDiceComponent->DeselectThisItem(SelectedDiceActor->GetStaticMeshComponent());
+        Client_VisualDeselectActor(SelectItemDiceComponent, SelectedDiceActor->GetStaticMeshComponent());
+        SelectedDiceActor = nullptr;
     }
-
     if (SelectedPawnActor)
     {
-        SelectItemPawnComponent->DeselectThisItem(SelectedPawnActor->PawnMeshComponent);
+        Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
+        SelectedPawnActor = nullptr;
     }
-
-    Multicast_SetCurrentTurn(false);
 }
 
 void ACCPlayerPawnGame::Multicast_SetCurrentTurn_Implementation(bool Turn)
@@ -114,26 +121,37 @@ void ACCPlayerPawnGame::UpdateSelectedDiceOnUI()
     }
 }
 
-void ACCPlayerPawnGame::SelectDiceActor(ACCDice* HitDice)
+void ACCPlayerPawnGame::Client_VisualDeselectActor_Implementation(UCCSelectItem* Component, UMeshComponent* Mesh)
 {
-    if (SelectedDiceActor)
-        SelectItemDiceComponent->DeselectThisItem(SelectedDiceActor->GetStaticMeshComponent());
-
-    SelectedDiceActor = HitDice;
-    SelectItemDiceComponent->SelectThisItem(SelectedDiceActor->GetStaticMeshComponent());
-
-    UpdateSelectedDiceOnUI();
-
-    UE_LOG(LogTemp, Log, TEXT("Dice Actor Selected"));
+    Component->DeselectThisItem(Mesh);
 }
 
-void ACCPlayerPawnGame::SelectPawnActor(ACCPawn* HitPawn)
+void ACCPlayerPawnGame::Client_VisualSelectActor_Implementation(UCCSelectItem* Component, UMeshComponent* Mesh)
 {
+    Component->SelectThisItem(Mesh);
+}
+
+void ACCPlayerPawnGame::Server_SelectDiceActor_Implementation(ACCDice* HitDice)
+{
+    if (SelectedDiceActor)
+        Client_VisualDeselectActor(SelectItemDiceComponent, SelectedDiceActor->GetStaticMeshComponent());
+
+    SelectedDiceActor = HitDice;
+    Client_VisualSelectActor(SelectItemDiceComponent, SelectedDiceActor->GetStaticMeshComponent());
+
+    UpdateSelectedDiceOnUI();
+}
+
+void ACCPlayerPawnGame::Server_SelectPawnActor_Implementation(ACCPawn* HitPawn)
+{
+    if (HitPawn->Tags[0] != PlayerTagName)
+        return;
+
     if (SelectedPawnActor)
-        SelectItemPawnComponent->DeselectThisItem(SelectedPawnActor->PawnMeshComponent);
+        Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
 
     SelectedPawnActor = HitPawn;
-    SelectItemPawnComponent->SelectThisItem(SelectedPawnActor->PawnMeshComponent);
+    Client_VisualSelectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
 
     UE_LOG(LogTemp, Log, TEXT("Pawn Actor Selected"));
 }
@@ -151,14 +169,35 @@ void ACCPlayerPawnGame::ClickOnBoard()
         {
             if (ACCDice* HitDice = Cast<ACCDice>(HitResult.GetActor()))
             {
-                SelectDiceActor(HitDice);
+                Server_SelectDiceActor(HitDice);
             }
             else if (ACCPawn* HitPawn = Cast<ACCPawn>(HitResult.GetActor()))
             {
-                SelectPawnActor(HitPawn);
+                Server_SelectPawnActor(HitPawn);
             }
         }
     }
 }
 
-void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation() {}
+void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation()
+{
+    UE_LOG(LogTemp, Log, TEXT("Moving Pawn"));
+
+    if (!SelectedDiceActor && !SelectedPawnActor)
+        return;
+
+    if (SelectedDiceActor)
+    {
+        ServerGameState->RemoveDice(SelectedDiceActor);
+        if (SelectedDiceActor->bDestryWhenUsed)
+        {
+            SelectedDiceActor->Destroy();
+        }
+        SelectedDiceActor = nullptr;
+    }
+    if (SelectedPawnActor)
+    {
+        Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
+        SelectedPawnActor = nullptr;
+    }
+}

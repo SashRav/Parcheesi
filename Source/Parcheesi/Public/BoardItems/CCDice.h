@@ -18,6 +18,9 @@ public:
 
     ACCDice();
 
+    UPROPERTY(EditAnywhere)
+    bool bDestryWhenUsed = true;
+
 protected:
     void GetHighestComponent();
 

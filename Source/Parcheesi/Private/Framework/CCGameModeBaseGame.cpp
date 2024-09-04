@@ -3,6 +3,7 @@
 #include "Framework/CCGameModeBaseGame.h"
 #include "Framework/CCGameStateGame.h"
 #include "Framework/CCControllerGame.h"
+#include "Framework/CCPlayerPawnGame.h"
 #include "GameFramework/PlayerState.h"
 #include "BoardItems/CCPawn.h"
 #include "Kismet/GameplayStatics.h"
@@ -79,6 +80,11 @@ void ACCGameModeBaseGame::UpdatePlayersTurnData()
         FUniqueNetIdRepl PlayerNetId = *AllPlayersTurnData.Find(Color);
         PlayerData.PlayerName = PlayerNetId->ToString();
         
+        // Set Local player tag
+        ACCPlayerPawnGame* PlayerPawn =
+            Cast<ACCPlayerPawnGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerNetId)->GetPawn());
+        PlayerPawn->SetPlayerTagName(UEnum::GetValueAsName(Color));
+
         // Set player turn status
         if (CurrentTurnColor == Color)
         {

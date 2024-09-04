@@ -23,6 +23,9 @@ class PARCHEESI_API ACCPlayerPawnGame : public APawn
 public:
     ACCPlayerPawnGame();
 
+    void SetPlayerTagName(FName TagName) { PlayerTagName = TagName; };
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
     UFUNCTION(Server, Reliable)
     void Server_UpdateSelectedColor(const FName& ColorTag);
 
@@ -44,8 +47,8 @@ public:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_SetCurrentTurn(bool Turn);
 
-        UFUNCTION(NetMulticast, Reliable)
-    void Multicast_CleanTurnData();
+    UFUNCTION(Server, Reliable)
+    void Server_CleanSelectionData();
 
 protected:
     virtual void BeginPlay() override;
@@ -55,14 +58,26 @@ protected:
     void ClickOnBoard();
     void UpdateSelectedDiceOnUI();
 
-    void SelectDiceActor(ACCDice* HitDice);
-    void SelectPawnActor(ACCPawn* HitPawn);
+    UFUNCTION(Server, Reliable)
+    void Server_SelectDiceActor(ACCDice* HitDice);
+
+    UFUNCTION(Server, Reliable)
+    void Server_SelectPawnActor(ACCPawn* HitPawn);
 
     UFUNCTION(Client, Reliable)
     void Client_EnableTurnButton();
 
+    UFUNCTION(Client, Reliable)
+    void Client_VisualSelectActor(UCCSelectItem* Component, UMeshComponent* Mesh);
+
+    UFUNCTION(Client, Reliable)
+    void Client_VisualDeselectActor(UCCSelectItem* Component, UMeshComponent* Mesh);
+
     UPROPERTY()
     bool bCurrentTurn = false;
+
+    UPROPERTY(Replicated)
+    FName PlayerTagName;
 
     UPROPERTY()
     ACCGameModeBaseGame* ServerGameMode;
@@ -76,10 +91,10 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UCCDiceComponent* DiceComponent;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere)
     UCCSelectItem* SelectItemDiceComponent;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere)
     UCCSelectItem* SelectItemPawnComponent;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
