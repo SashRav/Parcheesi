@@ -27,10 +27,14 @@ void ACCGameStateGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName Playe
     DisplayPlayersData();
 }
 
-void ACCGameStateGame::ChangeCellsDataItem(int32 Index, ACCPawn* Pawn) {
+void ACCGameStateGame::ChangeCellsDataItem(int32 Index, ACCPawn* Pawn)
+{
     if (CellsData.Find(Index))
     {
-        CellsData.Add(Index, Pawn);
+        FCellsData Data = *CellsData.Find(Index);
+        Data.PawnOnCell = Pawn;
+
+        CellsData.Add(Index, Data);
     }
 }
 
@@ -49,7 +53,8 @@ void ACCGameStateGame::DisplayPlayersData()
         }
 }
 
-void ACCGameStateGame::SetPlayerTurnData() {
+void ACCGameStateGame::SetPlayerTurnData()
+{
     if (AllPlayersData.Num() > 0)
         for (auto& Elem : AllPlayersData)
         {
@@ -75,17 +80,23 @@ ETurnColors ACCGameStateGame::GetEnumColorFromTag(FString PlayerTag)
     return ETurnColors::None;
 }
 
-void ACCGameStateGame::SetCellsData() {
+void ACCGameStateGame::SetCellsData()
+{
     TArray<AActor*> FoundCellsActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACCCell::StaticClass(), FoundCellsActors);
 
     for (AActor* CellActor : FoundCellsActors)
     {
         ACCCell* Cell = Cast<ACCCell>(CellActor);
-        CellsData.Add(Cell->GetCellIndex(), nullptr);
+        FCellsData Data;
+        Data.CellPosition = Cell->GetActorLocation();
+        Data.PawnOnCell = nullptr;
+
+        CellsData.Add(Cell->GetCellIndex(), Data);
     }
 }
 
-void ACCGameStateGame::BeginPlay() {
+void ACCGameStateGame::BeginPlay()
+{
     SetCellsData();
 }

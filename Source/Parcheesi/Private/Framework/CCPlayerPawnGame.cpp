@@ -13,6 +13,7 @@
 #include "InputActionValue.h"
 #include "Components/CCDiceComponent.h"
 #include "Components/CCSelectItem.h"
+#include "Components/CCPawnManagerComponent.h"
 #include "Net/UnrealNetwork.h"
 
 ACCPlayerPawnGame::ACCPlayerPawnGame()
@@ -20,6 +21,7 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
     SelectItemDiceComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionDiceComponent"));
     SelectItemPawnComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionPawnComponent"));
+    PawnManagerComponent = CreateDefaultSubobject<UCCPawnManagerComponent>(TEXT("PawnManagerComponent"));
 }
 
 void ACCPlayerPawnGame::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -206,21 +208,19 @@ void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation()
 {
     UE_LOG(LogTemp, Log, TEXT("Moving Pawn"));
 
-    if (!SelectedDiceActor && !SelectedPawnActor)
+    if (!SelectedDiceActor || !SelectedPawnActor)
         return;
 
-    if (SelectedDiceActor)
+    PawnManagerComponent->MoveSelectedPawn(SelectedPawnActor, SelectedDiceActor->GetDiceSide());
+
+    Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
+
+    ServerGameState->RemoveDice(SelectedDiceActor);//Exists for debug purpose
+    if (SelectedDiceActor->bDestryWhenUsed)
     {
-        ServerGameState->RemoveDice(SelectedDiceActor);
-        if (SelectedDiceActor->bDestryWhenUsed)
-        {
-            SelectedDiceActor->Destroy();
-        }
-        SelectedDiceActor = nullptr;
+        SelectedDiceActor->Destroy();
     }
-    if (SelectedPawnActor)
-    {
-        Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
-        SelectedPawnActor = nullptr;
-    }
+
+    SelectedPawnActor = nullptr;
+    SelectedDiceActor = nullptr;
 }

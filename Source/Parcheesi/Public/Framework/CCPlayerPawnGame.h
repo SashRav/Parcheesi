@@ -12,6 +12,7 @@ class ACCControllerGame;
 class UInputAction;
 class UCCDiceComponent;
 class UCCSelectItem;
+class UCCPawnManagerComponent;
 class ACCPawn;
 class ACCDice;
 
@@ -57,7 +58,7 @@ protected:
 
     void ClickOnBoard();
     void UpdateSelectedDiceOnUI();
-    
+
     UFUNCTION(Server, Reliable)
     void Server_SwitchMovePawnButtonIsEnabled(bool State);
 
@@ -93,6 +94,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UCCDiceComponent* DiceComponent;
+
+    UPROPERTY(EditAnywhere)
+    UCCPawnManagerComponent* PawnManagerComponent;
 
     UPROPERTY(EditAnywhere)
     UCCSelectItem* SelectItemDiceComponent;

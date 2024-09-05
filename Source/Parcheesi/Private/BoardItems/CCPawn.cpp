@@ -2,6 +2,7 @@
 
 #include "BoardItems/CCPawn.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SplineComponent.h"
 
 ACCPawn::ACCPawn()
 {
@@ -9,6 +10,9 @@ ACCPawn::ACCPawn()
 
     PawnMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pawn Mesh"));
     PawnMeshComponent->SetupAttachment(RootComponent);
+
+    SplienComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineMesh"));
+    SplienComponent->SetupAttachment(RootComponent);
 }
 
 void ACCPawn::BeginPlay()
@@ -21,11 +25,12 @@ void ACCPawn::BeginPlay()
     check(BlueMaterial);
 }
 
-void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor, int32 StartCell)
+void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell)
 {
     Tags.Add(UEnum::GetValueAsName(PawnColor));
 
     StartCellIndex = StartCell;
+    FirstBoardCellIndex = FirstBoardCell;
 
     switch (PawnColor)
     {

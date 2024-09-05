@@ -4,6 +4,8 @@
 
 #include "CCCoreTypes.generated.h"
 
+class ACCPawn;
+
 USTRUCT(BlueprintType)
 struct FPlayersTurnData : public FTableRowBase
 {
@@ -17,6 +19,19 @@ struct FPlayersTurnData : public FTableRowBase
 
     UPROPERTY()
     bool TurnSatus;
+};
+
+
+USTRUCT(BlueprintType)
+struct FCellsData : public FTableRowBase
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    FVector CellPosition;
+
+    UPROPERTY()
+    ACCPawn* PawnOnCell;
 };
 
 UENUM(BlueprintType)
