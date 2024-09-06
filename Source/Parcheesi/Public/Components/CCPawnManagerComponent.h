@@ -29,22 +29,23 @@ protected:
     void MovePawnOnFinish();
 
     void ChangePawnPosition();
+    void SetupStartAndTargetPositions();
 
     UPROPERTY()
     ACCPawn* SelectedPawn;
 
     UPROPERTY()
-    int32 StepsToMove;
-
-    UPROPERTY()
     ACCGameStateGame* GameState;
 
-    UPROPERTY()
     FTimerHandle PawnMovementTimerHandle;
 
     float Speed = 1000.0f;
     float CurrentTime;
     float MoveDuration = 1.0f;
+
+    int32 PawnCurrentCellIndex = 0;
+    int32 StepsAlredyMoved = 0;
+    int32 StepsToMove = 0;
 
     FVector StartLocation;
     FVector TargetLocation;
