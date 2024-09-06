@@ -32,7 +32,7 @@ void UCCPawnManagerComponent::MoveSelectedPawn(ACCPawn* Pawn, int32 Steps)
         MovePawnFromStart();
         break;
     case EPawnPosition::OnBoard:
-        MovePawnOnBoard();
+        MovePawnOnBoard(Steps);
         break;
     case EPawnPosition::OnFinish:
         MovePawnOnFinish();
@@ -40,21 +40,46 @@ void UCCPawnManagerComponent::MoveSelectedPawn(ACCPawn* Pawn, int32 Steps)
     }
 }
 
+int32 UCCPawnManagerComponent::GetTargetCellIndex(int32 Steps)
+{
+    TArray<int32> CellsIds;
+    GameState->GetAllCellsData().GetKeys(CellsIds);
+
+    int32 TargetCell = 0;
+    int32 MaxBoardCell = 0;
+    int32 PawnCellIndex = SelectedPawn->GetCurrentCellIndex();
+    UE_LOG(LogTemp, Display, TEXT("Current Cell: %d "), PawnCellIndex);
+
+
+    for (int32 CellId : CellsIds)
+    {
+        if (CellId > 100) // Hardcoded. Board cells ids are between 0-99, Start Cells ids are between 100-999, Finish cells 1000-9999
+            continue;
+        MaxBoardCell++;
+    }
+
+    if (PawnCellIndex + Steps <= MaxBoardCell)
+    {
+        return PawnCellIndex + Steps;
+    }
+    else
+    {
+        TargetCell = Steps - (MaxBoardCell - PawnCellIndex);
+    }
+
+    return TargetCell;
+}
+
 void UCCPawnManagerComponent::MovePawnFromStart()
 {
-    UE_LOG(LogTemp, Display, TEXT("MovePawnFromStart"));
-    if (!SelectedPawn)
-        return;
-
     SelectedPawn->SplienComponent->ClearSplinePoints(true);
 
     FCellsData TargetCellData = GameState->GetCellData(SelectedPawn->GetFirstBoardCellIndex());
+    StartLocation = SelectedPawn->GetActorLocation();
+    TargetLocation = TargetCellData.CellPosition;
 
-    SelectedPawn->SplienComponent->AddSplinePoint(SelectedPawn->GetActorLocation(), ESplineCoordinateSpace::World, true);
-    SelectedPawn->SplienComponent->AddSplinePoint(TargetCellData.CellPosition, ESplineCoordinateSpace::World, true);
-
-    StartLocation = SelectedPawn->SplienComponent->GetSplinePointAt(0, ESplineCoordinateSpace::World).Position;
-    TargetLocation = SelectedPawn->SplienComponent->GetSplinePointAt(1, ESplineCoordinateSpace::World).Position;
+    SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnBoard);
+    SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstBoardCellIndex());
 
     GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
 }
@@ -79,7 +104,24 @@ void UCCPawnManagerComponent::ChangePawnPosition()
     }
 }
 
-void UCCPawnManagerComponent::MovePawnOnBoard() {}
+void UCCPawnManagerComponent::MovePawnOnBoard(int32 Steps)
+{
+    int32 TargetCell = GetTargetCellIndex(Steps);
+    UE_LOG(LogTemp, Display, TEXT("Target Cell: %d "), TargetCell);
+
+    if (TargetCell == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Target Cell is Zero!"));
+        return;
+    }
+
+    FCellsData TargetCellData = GameState->GetCellData(TargetCell);
+    StartLocation = SelectedPawn->GetActorLocation();
+    TargetLocation = TargetCellData.CellPosition;
+
+    SelectedPawn->SetCurrentCellIndex(TargetCell);
+    GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
+}
 
 void UCCPawnManagerComponent::MovePawnToFinish() {}
 

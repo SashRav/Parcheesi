@@ -205,7 +205,6 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
         {
             ACCCellStart* SpawnCell = Cast<ACCCellStart>(PlaceActor);
 
-            UE_LOG(LogTemp, Display, TEXT("Spawn Dices for %s Player. Cell Name: %s"), *SpawnCellTag.ToString(), *PlaceActor->GetName());
             FRotator Rotation;
             ACCPawn* SpawnedPawn = GetWorld()->SpawnActor<ACCPawn>(PawnClass, PlaceActor->GetActorLocation(), Rotation);
             SpawnedPawn->Multicast_SetupPawnData(Color, SpawnCell->GetCellIndex(), SpawnCell->GetClosestBoardCellIndex());

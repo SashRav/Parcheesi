@@ -20,6 +20,7 @@ public:
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
     void ChangeCellsDataItem(int32 Index, ACCPawn* Pawn);
     FCellsData GetCellData(int32 Index) { return *CellsData.Find(Index); };
+    TMap<int32, FCellsData> GetAllCellsData() { return CellsData; }
 
     TMap<FUniqueNetIdRepl, FName> GetAllPlayersData() { return AllPlayersData; };
     TMap<ETurnColors, FUniqueNetIdRepl> GetPlayersTurnData() { return PlayersTurnData; }

@@ -18,12 +18,13 @@ public:
     UCCPawnManagerComponent();
 
     void MoveSelectedPawn(ACCPawn* Pawn, int32 Steps);
+    int32 GetTargetCellIndex(int32 Steps);
 
 protected:
     virtual void BeginPlay() override;
 
     void MovePawnFromStart();
-    void MovePawnOnBoard();
+    void MovePawnOnBoard(int32 Steps);
     void MovePawnToFinish();
     void MovePawnOnFinish();
 
