@@ -22,6 +22,13 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    void MovePawnFromStart();
+    void MovePawnOnBoard();
+    void MovePawnToFinish();
+    void MovePawnOnFinish();
+
+    void ChangePawnPosition();
+
     UPROPERTY()
     ACCPawn* SelectedPawn;
 
@@ -31,8 +38,13 @@ protected:
     UPROPERTY()
     ACCGameStateGame* GameState;
 
-    void MovePawnFromStart();
-    void MovePawnOnBoard();
-    void MovePawnToFinish();
-    void MovePawnOnFinish();
+    UPROPERTY()
+    FTimerHandle PawnMovementTimerHandle;
+
+    float Speed = 1000.0f;
+    float CurrentTime;
+    float MoveDuration = 1.0f;
+
+    FVector StartLocation;
+    FVector TargetLocation;
 };

@@ -47,4 +47,6 @@ void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor, int3
         PawnMeshComponent->SetMaterial(0, YellowMaterial);
         break;
     }
+
+    UE_LOG(LogTemp, Display, TEXT("Start cell: %d, First Board Cell: %d"), StartCellIndex, FirstBoardCellIndex);
 }

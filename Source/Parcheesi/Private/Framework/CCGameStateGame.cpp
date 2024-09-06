@@ -98,5 +98,7 @@ void ACCGameStateGame::SetCellsData()
 
 void ACCGameStateGame::BeginPlay()
 {
+    Super::BeginPlay();
+
     SetCellsData();
 }
