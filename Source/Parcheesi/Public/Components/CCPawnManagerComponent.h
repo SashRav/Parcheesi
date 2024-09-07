@@ -18,6 +18,7 @@ public:
     UCCPawnManagerComponent();
 
     void MoveSelectedPawn(ACCPawn* Pawn, int32 Steps);
+    bool CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 CellIndex);
 
 protected:
     virtual void BeginPlay() override;
@@ -33,12 +34,20 @@ protected:
     void SetupTargetPositions(int32 TargetCellIndex, FVector& StartLocationRef);
     bool CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex);
 
+    void MovePawnToSpawn(ACCPawn* Pawn);
+    void SetNewPawnDataInGameState(ACCPawn* PawnToAdd, int32 CellIndex);
     void FinishPawnMovement();
 
     int32 GetTargetCellIndex(int32 Steps, bool bIsOnFinish);
 
+    ACCPawn* GetPawnOnCell(int32 CellIndex);
+    bool InterractWithTargetCellPawn(int32 CellIndex);
+
     UPROPERTY()
     ACCPawn* SelectedPawn;
+
+    UPROPERTY()
+    ACCPawn* SecondaryPawn;
 
     UPROPERTY()
     ACCGameStateGame* GameState;
