@@ -18,7 +18,6 @@ public:
     UCCPawnManagerComponent();
 
     void MoveSelectedPawn(ACCPawn* Pawn, int32 Steps);
-    int32 GetTargetBoardCellIndex(int32 Steps);
 
 protected:
     virtual void BeginPlay() override;
@@ -30,12 +29,13 @@ protected:
 
     void ChangePawnPosition();
     void ChangePositionChecker();
-    
+
     void SetupTargetPositions(int32 TargetCellIndex, FVector& StartLocationRef);
     bool CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex);
 
     void FinishPawnMovement();
 
+    int32 GetTargetCellIndex(int32 Steps, bool bIsOnFinish);
 
     UPROPERTY()
     ACCPawn* SelectedPawn;
@@ -59,5 +59,6 @@ protected:
     FVector TargetLocation;
 
     bool bShouldMoveToFinish = false;
+    bool bIsMovingOnFinish = false;
     bool bIsMovementTimerActive = false;
 };

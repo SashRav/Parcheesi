@@ -44,8 +44,11 @@ void UCCPawnManagerComponent::MoveSelectedPawn(ACCPawn* Pawn, int32 Steps)
     }
 }
 
-int32 UCCPawnManagerComponent::GetTargetBoardCellIndex(int32 Steps)
+int32 UCCPawnManagerComponent::GetTargetCellIndex(int32 Steps, bool bIsOnFinish)
 {
+    if (bIsOnFinish)
+        return PawnCurrentCellIndex + Steps;
+
     TArray<int32> CellsIds;
     GameState->GetAllCellsData().GetKeys(CellsIds);
 
@@ -88,13 +91,16 @@ void UCCPawnManagerComponent::FinishPawnMovement()
     StartLocation = FVector(0, 0, 0);
     TargetLocation = FVector(0, 0, 0);
     SelectedPawn = nullptr;
+    bShouldMoveToFinish = false;
+    bIsMovingOnFinish = false;
+    bIsMovementTimerActive = false;
 }
 
 void UCCPawnManagerComponent::ChangePositionChecker()
 {
     if (!bIsMovementTimerActive)
     {
-        TargetCell = GetTargetBoardCellIndex(1);
+        TargetCell = GetTargetCellIndex(1, bIsMovingOnFinish);
 
         SetupTargetPositions(PawnCurrentCellIndex, StartLocation);
         SetupTargetPositions(TargetCell, TargetLocation);
@@ -105,6 +111,7 @@ void UCCPawnManagerComponent::ChangePositionChecker()
         GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
     }
 }
+
 
 void UCCPawnManagerComponent::ChangePawnPosition()
 {
@@ -123,14 +130,30 @@ void UCCPawnManagerComponent::ChangePawnPosition()
         TargetCell = -1;
         StartLocation = FVector(0, 0, 0);
         TargetLocation = FVector(0, 0, 0);
+        
+        UE_LOG(LogTemp, Display, TEXT("StepsAlredyMoved: %d,  StepsToMove: %d"), StepsAlredyMoved, StepsToMove);
 
         if (StepsAlredyMoved >= StepsToMove)
         {
             GetWorld()->GetTimerManager().ClearTimer(MovementCheckerTimerHandle);
-            FinishPawnMovement();
-            return;
+
+            if (bShouldMoveToFinish)
+                MovePawnToFinish();
+            else
+                FinishPawnMovement();
         }
     }
+}
+
+bool UCCPawnManagerComponent::CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex)
+{
+    if (SelectedPawn->GetCurrentPawnPosition() != EPawnPosition::OnBoard)
+        return false;
+
+    if (SelectedPawn->GetFirstBoardCellIndex() == TargetCellIndex)
+        return true;
+    else
+        return false;
 }
 
 void UCCPawnManagerComponent::MovePawnFromStart()
@@ -147,58 +170,40 @@ void UCCPawnManagerComponent::MovePawnFromStart()
     GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
 }
 
-bool UCCPawnManagerComponent::CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex)
-{
-    // if (SelectedPawn->GetCurrentPawnPosition() != EPawnPosition::OnBoard)
-    //     return false;
-
-    // if (SelectedPawn->GetFirstBoardCellIndex() == TargetCell)
-    //     return true;
-    // else
-    return false;
-}
-
 void UCCPawnManagerComponent::MovePawnOnBoard()
 {
-    SelectedPawn->SetCurrentCellIndex(GetTargetBoardCellIndex(StepsToMove));
+    int32 Index = GetTargetCellIndex(StepsToMove,false);
+    SelectedPawn->SetCurrentCellIndex(Index);
+    if (CheckIsTargetCellLeadsToFinish(Index))
+    {
+        bShouldMoveToFinish = true;
+    }
+
     GetWorld()->GetTimerManager().SetTimer(MovementCheckerTimerHandle, this, &UCCPawnManagerComponent::ChangePositionChecker, 0.033f, true);
-
-    // GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePositionChecker, 0.033f, true);
-
-    // int32 TargetCell = GetTargetCellIndex(Steps);
-    // UE_LOG(LogTemp, Display, TEXT("Target Cell: %d "), TargetCell);
-    // if (TargetCell == 0)
-    //{
-    //     UE_LOG(LogTemp, Warning, TEXT("Target Cell is Zero!"));
-    //     return;
-    // }
-
-    // if (CheckIsTargetCellLeadsToFinish(TargetCell))
-    //{
-    //     UE_LOG(LogTemp, Display, TEXT("Should Move To finish"));
-    //     bShouldMoveToFinish = true;
-    // }
-
-    // SetupStartAndTargetPositions(GetTargetCellIndex(StepsAlredyMoved + 1));
-
-    // SelectedPawn->SetCurrentCellIndex(TargetCell);
 }
 
 void UCCPawnManagerComponent::MovePawnToFinish()
 {
-    // bShouldMoveToFinish = false;
+    bShouldMoveToFinish = false;
 
-    // SetupStartAndTargetPositions(SelectedPawn->GetFirstFinishCellIndex());
+    SetupTargetPositions(PawnCurrentCellIndex, StartLocation);
+    SetupTargetPositions(SelectedPawn->GetFirstFinishCellIndex(), TargetLocation);
 
-    // SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstFinishCellIndex());
-    // SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnFinish);
+    SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnFinish);
+    SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstFinishCellIndex());
 
-    // GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
+    // Run only ChangePawnPosition because we need to move Pawn only one time
+    StepsAlredyMoved = 0;
+    StepsToMove = 1;
+    MoveDuration = 1.0f;
+    GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
 }
 
 void UCCPawnManagerComponent::MovePawnOnFinish()
 {
-    // SetupStartAndTargetPositions(GetTargetCellIndex(StepsAlredyMoved + 1));
-    // SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstFinishCellIndex());
-    // GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
+    int32 Index = GetTargetCellIndex(StepsToMove,true);
+    SelectedPawn->SetCurrentCellIndex(Index);
+    bIsMovingOnFinish = true;
+
+    GetWorld()->GetTimerManager().SetTimer(MovementCheckerTimerHandle, this, &UCCPawnManagerComponent::ChangePositionChecker, 0.033f, true);
 }
