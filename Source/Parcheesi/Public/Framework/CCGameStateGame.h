@@ -18,7 +18,7 @@ class PARCHEESI_API ACCGameStateGame : public AGameStateBase
 public:
     void AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
-    void ChangeCellsDataItem(int32 Index, ACCPawn* Pawn);
+    void ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn);
     FCellsData GetCellData(int32 Index) { return *CellsData.Find(Index); };
     TMap<int32, FCellsData> GetAllCellsData() { return CellsData; }
 

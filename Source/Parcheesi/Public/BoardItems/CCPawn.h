@@ -25,8 +25,10 @@ public:
     int32 GetCurrentCellIndex() { return CurrentCellIndex; }
     int32 GetFirstBoardCellIndex() { return FirstBoardCellIndex; }
     int32 GetFirstFinishCellIndex() { return FirstFinishCellIndex; }
+    bool GetIsInGates() { return bIsInGates; }
 
     void SetCurrentCellIndex(int32 Index) { CurrentCellIndex = Index; }
+    void SetIsInGates(bool State) { bIsInGates = State; }
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_SetupPawnData(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell, int32 FirstFinishCell);
@@ -63,6 +65,9 @@ protected:
 
     UPROPERTY()
     int32 CurrentCellIndex = -1;
+
+    UPROPERTY()
+    bool bIsInGates = false;
 
     UPROPERTY()
     EPawnPosition CurrentPawnPosition = EPawnPosition::OnStart;

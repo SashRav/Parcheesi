@@ -31,7 +31,10 @@ struct FCellsData : public FTableRowBase
     FVector CellPosition;
 
     UPROPERTY()
-    ACCPawn* PawnOnCell;
+    ACCPawn* FirstPawnOnCell;
+
+    UPROPERTY()
+    ACCPawn* SecondPawnOnCell;
 };
 
 UENUM(BlueprintType)

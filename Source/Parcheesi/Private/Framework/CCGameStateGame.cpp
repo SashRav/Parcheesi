@@ -27,12 +27,13 @@ void ACCGameStateGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName Playe
     DisplayPlayersData();
 }
 
-void ACCGameStateGame::ChangeCellsDataItem(int32 Index, ACCPawn* Pawn)
+void ACCGameStateGame::ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn)
 {
     if (CellsData.Find(Index))
     {
         FCellsData Data = *CellsData.Find(Index);
-        Data.PawnOnCell = Pawn;
+        Data.FirstPawnOnCell = FirstPawn;
+        Data.SecondPawnOnCell = SecondPawn;
 
         CellsData.Add(Index, Data);
     }
@@ -90,7 +91,8 @@ void ACCGameStateGame::SetCellsData()
         ACCCell* Cell = Cast<ACCCell>(CellActor);
         FCellsData Data;
         Data.CellPosition = Cell->GetActorLocation();
-        Data.PawnOnCell = nullptr;
+        Data.FirstPawnOnCell = nullptr;
+        Data.SecondPawnOnCell = nullptr;
 
         CellsData.Add(Cell->GetCellIndex(), Data);
     }

@@ -35,8 +35,11 @@ protected:
     bool CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex);
 
     void MovePawnToSpawn(ACCPawn* Pawn);
-    void SetNewPawnDataInGameState(ACCPawn* PawnToAdd, int32 CellIndex);
+    void SetNewPawnDataInGameState(int32 CellIndex, ACCPawn* FirstPawnToAdd, ACCPawn* SecondPawnToAdd);
     void FinishPawnMovement();
+
+    void BuildGates();
+    void DestroyGates();
 
     int32 GetTargetCellIndex(int32 Steps, bool bIsOnFinish);
 
@@ -70,4 +73,7 @@ protected:
     bool bShouldMoveToFinish = false;
     bool bIsMovingOnFinish = false;
     bool bIsMovementTimerActive = false;
+
+    bool bShouldBuildGates = false;
+    bool bShouldAttackEnemy = false;
 };
