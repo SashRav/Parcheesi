@@ -25,12 +25,13 @@ void ACCPawn::BeginPlay()
     check(BlueMaterial);
 }
 
-void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell)
+void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell, int32 FirstFinishCell)
 {
     Tags.Add(UEnum::GetValueAsName(PawnColor));
 
     StartCellIndex = StartCell;
     FirstBoardCellIndex = FirstBoardCell;
+    FirstFinishCellIndex = FirstFinishCell;
 
     switch (PawnColor)
     {

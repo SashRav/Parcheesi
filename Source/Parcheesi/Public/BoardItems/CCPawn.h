@@ -24,12 +24,12 @@ public:
     int32 GetStartCellIndex() { return StartCellIndex; }
     int32 GetCurrentCellIndex() { return CurrentCellIndex; }
     int32 GetFirstBoardCellIndex() { return FirstBoardCellIndex; }
+    int32 GetFirstFinishCellIndex() { return FirstFinishCellIndex; }
 
     void SetCurrentCellIndex(int32 Index) { CurrentCellIndex = Index; }
 
-
     UFUNCTION(NetMulticast, Reliable)
-    void Multicast_SetupPawnData(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell);
+    void Multicast_SetupPawnData(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell, int32 FirstFinishCell);
 
     UPROPERTY(EditDefaultsOnly)
     UStaticMeshComponent* PawnMeshComponent;
@@ -57,6 +57,9 @@ protected:
 
     UPROPERTY()
     int32 FirstBoardCellIndex = -1;
+
+    UPROPERTY()
+    int32 FirstFinishCellIndex = -1;
 
     UPROPERTY()
     int32 CurrentCellIndex = -1;

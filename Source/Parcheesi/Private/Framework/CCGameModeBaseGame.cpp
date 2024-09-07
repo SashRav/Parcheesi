@@ -207,7 +207,8 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
 
             FRotator Rotation;
             ACCPawn* SpawnedPawn = GetWorld()->SpawnActor<ACCPawn>(PawnClass, PlaceActor->GetActorLocation(), Rotation);
-            SpawnedPawn->Multicast_SetupPawnData(Color, SpawnCell->GetCellIndex(), SpawnCell->GetClosestBoardCellIndex());
+            SpawnedPawn->Multicast_SetupPawnData(
+                Color, SpawnCell->GetCellIndex(), SpawnCell->GetClosestBoardCellIndex(), SpawnCell->GetClosestFinishCellIndex());
         }
     }
 }
