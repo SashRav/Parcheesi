@@ -29,6 +29,9 @@ void ACCGameStateGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName Playe
 
 void ACCGameStateGame::ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn)
 {
+    if (Index <= 0)
+        return;
+
     if (CellsData.Find(Index))
     {
         FCellsData Data = *CellsData.Find(Index);

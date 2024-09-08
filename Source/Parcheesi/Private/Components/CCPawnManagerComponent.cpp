@@ -61,6 +61,9 @@ int32 UCCPawnManagerComponent::GetTargetCellIndex(int32 Steps, bool bIsOnFinish)
             continue;
         MaxBoardCell++;
     }
+    if (PawnCurrentCellIndex + Steps < 1) // Check for previus cell fo building gates if previus cell has max id
+        return MaxBoardCell;
+
     if (PawnCurrentCellIndex + Steps <= MaxBoardCell)
     {
         TargetCellToMove = PawnCurrentCellIndex + Steps;
@@ -177,7 +180,7 @@ bool UCCPawnManagerComponent::CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 Cell
     if (TargetCellData.FirstPawnOnCell == nullptr)
         return true;
 
-    if (TargetCellData.FirstPawnOnCell->Tags[0] != Pawn->Tags[0])
+    if (TargetCellData.FirstPawnOnCell->Tags[0] != Pawn->Tags[0] && !TargetCellData.FirstPawnOnCell->GetIsInGates())
         return true;
 
     if (!TargetCellData.FirstPawnOnCell->GetIsInGates())
@@ -197,7 +200,7 @@ bool UCCPawnManagerComponent::InterractWithTargetCellPawn(int32 CellIndex)
     FCellsData TargetCellData = GameState->GetCellData(CellIndex);
     if (TargetCellData.FirstPawnOnCell == nullptr)
         return true;
-    if (TargetCellData.FirstPawnOnCell->Tags[0] != SelectedPawn->Tags[0])
+    if (TargetCellData.FirstPawnOnCell->Tags[0] != SelectedPawn->Tags[0 && !TargetCellData.FirstPawnOnCell->GetIsInGates()])
     {
         SecondaryPawn = TargetCellData.FirstPawnOnCell;
         bShouldAttackEnemy = true;
@@ -220,12 +223,14 @@ void UCCPawnManagerComponent::MovePawnFromStart()
     if (!InterractWithTargetCellPawn(SelectedPawn->GetFirstBoardCellIndex()))
         return;
 
+    if (!bShouldBuildGates)
+        SetNewPawnDataInGameState(SelectedPawn->GetFirstBoardCellIndex(), SelectedPawn, nullptr);
+    
+    SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstBoardCellIndex());
+    SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnBoard);
+    
     SetupTargetPositions(SelectedPawn->GetStartCellIndex(), StartLocation);
     SetupTargetPositions(SelectedPawn->GetFirstBoardCellIndex(), TargetLocation);
-
-    SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnBoard);
-    SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstBoardCellIndex());
-    SetNewPawnDataInGameState(SelectedPawn->GetFirstBoardCellIndex(), SelectedPawn, nullptr);
 
     // Run only ChangePawnPosition because we need to move Pawn only one time
     StepsToMove = 1;
@@ -254,7 +259,7 @@ void UCCPawnManagerComponent::MovePawnOnBoard()
 
     SetNewPawnDataInGameState(Index, SelectedPawn, nullptr);
     SelectedPawn->SetCurrentCellIndex(Index);
-    
+
     if (CheckIsTargetCellLeadsToFinish(Index))
     {
         bShouldMoveToFinish = true;
@@ -310,27 +315,36 @@ void UCCPawnManagerComponent::SetNewPawnDataInGameState(int32 CellIndex, ACCPawn
     GameState->ChangeCellsDataItem(CellIndex, FirstPawnToAdd, SecondPawnToAdd);
 }
 
-void UCCPawnManagerComponent::BuildGates() {
+void UCCPawnManagerComponent::BuildGates()
+{
     SelectedPawn->SetIsInGates(true);
     SecondaryPawn->SetIsInGates(true);
 
-    SetNewPawnDataInGameState(SelectedPawn->GetCurrentCellIndex(), SelectedPawn, SecondaryPawn);
+    SetNewPawnDataInGameState(SecondaryPawn->GetCurrentCellIndex(), SelectedPawn, SecondaryPawn);
 
-    FVector NewLocation = SelectedPawn->GetActorLocation();
-    NewLocation.X += 100.0f;
-    SelectedPawn->SetActorLocation(NewLocation);
+    FCellsData PreviusCellData = GameState->GetCellData(GetTargetCellIndex(-1, false));
+    FCellsData CurrentCellData = GameState->GetCellData(SelectedPawn->GetCurrentCellIndex());
 
-    NewLocation.X += -100.0f;
-    SecondaryPawn->SetActorLocation(NewLocation);
+    FVector Direction = PreviusCellData.CellPosition - CurrentCellData.CellPosition;
+    Direction.Normalize();
+
+    FVector Perpendicular = FVector::CrossProduct(Direction, FVector::UpVector);
+    Perpendicular.Normalize();
+
+    FVector RightPosition = CurrentCellData.CellPosition + Perpendicular * 150;
+    FVector LeftPosition = CurrentCellData.CellPosition - Perpendicular * 150;
+
+    SelectedPawn->SetActorLocation(RightPosition);
+    SecondaryPawn->SetActorLocation(LeftPosition);
 
     SecondaryPawn = nullptr;
     FinishPawnMovement();
 }
 
-void UCCPawnManagerComponent::DestroyGates() 
+void UCCPawnManagerComponent::DestroyGates()
 {
     FCellsData TargetCellData = GameState->GetCellData(SelectedPawn->GetCurrentCellIndex());
-    
+
     TargetCellData.FirstPawnOnCell->SetIsInGates(false);
     TargetCellData.SecondPawnOnCell->SetIsInGates(false);
 
