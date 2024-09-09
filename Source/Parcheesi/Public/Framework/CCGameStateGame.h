@@ -21,6 +21,7 @@ public:
     void ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn);
     FCellsData GetCellData(int32 Index) { return *CellsData.Find(Index); };
     TMap<int32, FCellsData> GetAllCellsData() { return CellsData; }
+    bool CheckCellIsValidOnIndex(int32 CellIndex);
 
     TMap<FUniqueNetIdRepl, FName> GetAllPlayersData() { return AllPlayersData; };
     TMap<ETurnColors, FUniqueNetIdRepl> GetPlayersTurnData() { return PlayersTurnData; }
@@ -32,6 +33,8 @@ public:
     void RemoveDice(ACCDice* Dice) { SpawnedDices.Remove(Dice); }
     TArray<ACCDice*> GetSpawnedDices() { return SpawnedDices; }
     void CleanSpawnedDicesArray() { SpawnedDices.Empty(); }
+
+    TArray<ACCPawn*> GetAllPawns();
 
 protected:
     virtual void BeginPlay() override;

@@ -42,6 +42,14 @@ void ACCGameStateGame::ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCP
     }
 }
 
+bool ACCGameStateGame::CheckCellIsValidOnIndex(int32 CellIndex)
+{
+    if (CellsData.Find(CellIndex))
+        return true;
+
+    return false;
+}
+
 void ACCGameStateGame::DisplayPlayersData()
 {
 
@@ -99,6 +107,20 @@ void ACCGameStateGame::SetCellsData()
 
         CellsData.Add(Cell->GetCellIndex(), Data);
     }
+}
+
+TArray<ACCPawn*> ACCGameStateGame::GetAllPawns()
+{
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACCPawn::StaticClass(), FoundActors);
+
+    TArray<ACCPawn*> FoundPawns;
+    for (AActor* PawnActot : FoundActors)
+    {
+        FoundPawns.Add(Cast<ACCPawn>(PawnActot));
+    }
+
+    return FoundPawns;
 }
 
 void ACCGameStateGame::BeginPlay()

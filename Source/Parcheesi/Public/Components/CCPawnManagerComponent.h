@@ -34,6 +34,8 @@ protected:
 
     void SetupTargetPositions(int32 TargetCellIndex, FVector& StartLocationRef);
     bool CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex);
+    bool CheckFirstFinishCellIsEmpty();
+    bool CheckIfCanMoveOnFinishCells(int32 TargetCellIndex);
 
     void MovePawnToSpawn(ACCPawn* Pawn);
     void SetNewPawnDataInGameState(int32 CellIndex, ACCPawn* FirstPawnToAdd, ACCPawn* SecondPawnToAdd);
@@ -42,6 +44,7 @@ protected:
     void BuildGates();
     void DestroyGates();
 
+    void CheckVictory();
 
     int32 GetTargetCellIndex(int32 CurrentCellIndex, int32 Steps, bool bIsOnFinish);
 
