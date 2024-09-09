@@ -19,6 +19,7 @@ public:
 
     void MoveSelectedPawn(ACCPawn* Pawn, int32 Steps);
     bool CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 CellIndex);
+    bool CheckPawnPath(ACCPawn* Pawn, int32 Steps);
 
 protected:
     virtual void BeginPlay() override;
@@ -41,7 +42,8 @@ protected:
     void BuildGates();
     void DestroyGates();
 
-    int32 GetTargetCellIndex(int32 Steps, bool bIsOnFinish);
+
+    int32 GetTargetCellIndex(int32 CurrentCellIndex, int32 Steps, bool bIsOnFinish);
 
     ACCPawn* GetPawnOnCell(int32 CellIndex);
     bool InterractWithTargetCellPawn(int32 CellIndex);
