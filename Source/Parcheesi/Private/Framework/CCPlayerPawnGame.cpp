@@ -22,6 +22,8 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     SelectItemDiceComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionDiceComponent"));
     SelectItemPawnComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionPawnComponent"));
     PawnManagerComponent = CreateDefaultSubobject<UCCPawnManagerComponent>(TEXT("PawnManagerComponent"));
+
+    PawnManagerComponent->OnPawnMovementFinished.AddDynamic(this, &ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished);
 }
 
 void ACCPlayerPawnGame::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -182,8 +184,7 @@ void ACCPlayerPawnGame::Server_SelectPawnActor_Implementation(ACCPawn* HitPawn)
 
 void ACCPlayerPawnGame::ClickOnBoard()
 {
-    UE_LOG(LogTemp, Log, TEXT("Click action hit"));
-    if (!bCurrentTurn)
+    if (!bCurrentTurn || bIsPawnMoving)
         return;
 
     if (OwningPlayerController)
@@ -206,21 +207,33 @@ void ACCPlayerPawnGame::ClickOnBoard()
 
 void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation()
 {
-    UE_LOG(LogTemp, Log, TEXT("Moving Pawn"));
-
-    if (!SelectedDiceActor || !SelectedPawnActor)
+    if (!SelectedDiceActor || !SelectedPawnActor || bIsPawnMoving)
         return;
 
     PawnManagerComponent->MoveSelectedPawn(SelectedPawnActor, SelectedDiceActor->GetDiceSide());
+    Multicast_HandlePawnMovementStarted();
 
     Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
 
-    ServerGameState->RemoveDice(SelectedDiceActor);//Exists for debug purpose
+    ServerGameState->RemoveDice(SelectedDiceActor); // Exists for debug purpose
     if (SelectedDiceActor->bDestryWhenUsed)
     {
         SelectedDiceActor->Destroy();
     }
 
+    ACCControllerGame* PlayerController = Cast<ACCControllerGame>(GetController());
+    PlayerController->Client_SetDiceSideOnUI(0);
+
     SelectedPawnActor = nullptr;
     SelectedDiceActor = nullptr;
+}
+
+void ACCPlayerPawnGame::Multicast_HandlePawnMovementStarted_Implementation()
+{
+    bIsPawnMoving = true;
+}
+
+void ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished_Implementation()
+{
+    bIsPawnMoving = false;
 }

@@ -116,7 +116,7 @@ void UCCPawnManagerComponent::FinishPawnMovement()
     bIsMovementTimerActive = false;
     bShouldBuildGates = false;
     bShouldAttackEnemy = false;
-
+    OnPawnMovementFinished.Broadcast();
     
 }
 

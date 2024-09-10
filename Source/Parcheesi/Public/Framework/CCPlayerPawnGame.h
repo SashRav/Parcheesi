@@ -59,6 +59,8 @@ protected:
     void ClickOnBoard();
     void UpdateSelectedDiceOnUI();
 
+    bool bIsPawnMoving = false;
+
     UFUNCTION(Server, Reliable)
     void Server_SwitchMovePawnButtonIsEnabled(bool State);
 
@@ -76,6 +78,12 @@ protected:
 
     UFUNCTION(Client, Reliable)
     void Client_VisualDeselectActor(UCCSelectItem* Component, UMeshComponent* Mesh);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_HandlePawnMovementFinished();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_HandlePawnMovementStarted();
 
     UPROPERTY()
     bool bCurrentTurn = false;

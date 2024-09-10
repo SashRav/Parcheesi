@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "CCPawnManagerComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPawnMovementFinished);
+
 class ACCPawn;
 class ACCGameStateGame;
 
@@ -20,6 +22,9 @@ public:
     void MoveSelectedPawn(ACCPawn* Pawn, int32 Steps);
     bool CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 CellIndex);
     bool CheckPawnPath(ACCPawn* Pawn, int32 Steps);
+
+    UPROPERTY(BlueprintAssignable)
+    FOnPawnMovementFinished OnPawnMovementFinished;
 
 protected:
     virtual void BeginPlay() override;
