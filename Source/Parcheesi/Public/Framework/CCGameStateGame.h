@@ -55,7 +55,7 @@ protected:
     TMap<int32, FCellsData> CellsData;
 
     UPROPERTY()
-    ETurnColors CurrentTurnColor = ETurnColors::Blue;
+    ETurnColors CurrentTurnColor = ETurnColors::None;
 
     UPROPERTY()
     TArray<ACCDice*> SpawnedDices;

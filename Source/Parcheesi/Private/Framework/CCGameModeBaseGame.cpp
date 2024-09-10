@@ -76,11 +76,11 @@ void ACCGameModeBaseGame::UpdatePlayersTurnData()
     for (ETurnColors Color : PlayersColors)
     {
         FPlayersTurnData PlayerData;
-        
+
         // Set Player name
         FUniqueNetIdRepl PlayerNetId = *AllPlayersTurnData.Find(Color);
         PlayerData.PlayerName = PlayerNetId->ToString();
-        
+
         // Set Local player tag
         ACCPlayerPawnGame* PlayerPawn =
             Cast<ACCPlayerPawnGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerNetId)->GetPawn());
@@ -94,21 +94,21 @@ void ACCGameModeBaseGame::UpdatePlayersTurnData()
         }
         else
             PlayerData.TurnSatus = false;
-        
-        //Set player color
+
+        // Set player color
         switch (Color)
         {
         case ETurnColors::Red:
             PlayerData.PlayerColor = FColor::Red;
-            break;
-        case ETurnColors::Blue:
-            PlayerData.PlayerColor = FColor::Blue;
             break;
         case ETurnColors::Yellow:
             PlayerData.PlayerColor = FColor::Yellow;
             break;
         case ETurnColors::Green:
             PlayerData.PlayerColor = FColor::Green;
+            break;
+        case ETurnColors::Blue:
+            PlayerData.PlayerColor = FColor::Blue;
             break;
         }
 
@@ -142,6 +142,18 @@ void ACCGameModeBaseGame::StartNextTurn()
 void ACCGameModeBaseGame::SetNextTurnColor()
 {
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    
+    // Set the same color if only one player
+    if (GameStateGame->GetAllPlayersData().Num() == 1)
+    {
+        UE_LOG(LogTemp, Display, TEXT(""));
+        TArray<ETurnColors> PlayersColors;
+        GameStateGame->GetPlayersTurnData().GetKeys(PlayersColors);
+        GameStateGame->SetCurrentTurnColor(PlayersColors[0]);
+        UE_LOG(LogTemp, Display, TEXT("Set the same turn color: %s"), *UEnum::GetValueAsString(GameStateGame->GetCurrentTurnColor()));
+        return;
+    }
+
     ETurnColors CurrentTurnColor = GameStateGame->GetCurrentTurnColor();
 
     uint8 TurnNumber = static_cast<uint8>(CurrentTurnColor);
@@ -150,8 +162,7 @@ void ACCGameModeBaseGame::SetNextTurnColor()
     UEnum* EnumPtr = StaticEnum<ETurnColors>();
     if (EnumPtr)
     {
-
-        int64 MaxEnumValue = EnumPtr->GetMaxEnumValue() - 2; // Returns +1 then existing, and removing None element from count
+        int64 MaxEnumValue = EnumPtr->GetMaxEnumValue() - 1; // Returns +1 then existing
         bool NextColorNotFound = true;
         int32 TryIterator = 0;
         do
@@ -167,7 +178,7 @@ void ACCGameModeBaseGame::SetNextTurnColor()
             if (TryIterator + 1 > MaxEnumValue)
             {
                 NextColorNotFound = false;
-                UE_LOG(LogTemp, Fatal, TEXT("Error in setting Next Turn Color. Do While ended with no result"));
+                UE_LOG(LogTemp, Warning, TEXT("Error in setting Next Turn Color. Do While ended with no result"));
             }
 
             TryIterator++;
@@ -175,15 +186,15 @@ void ACCGameModeBaseGame::SetNextTurnColor()
         } while (NextColorNotFound);
 
         GameStateGame->SetCurrentTurnColor(CurrentTurnColor);
-        uint8 NextTurn = static_cast<uint8>(CurrentTurnColor);
-        UE_LOG(LogTemp, Display, TEXT("Next turn color number: %d"), NextTurn);
+        UE_LOG(LogTemp, Display, TEXT("Next turn For player color number: %s"), *UEnum::GetValueAsString(CurrentTurnColor));
     }
 }
 
-void ACCGameModeBaseGame::StartNextTurnForPlayer(FUniqueNetIdRepl PlayerNetId) {
+void ACCGameModeBaseGame::StartNextTurnForPlayer(FUniqueNetIdRepl PlayerNetId)
+{
     ACCControllerGame* PlayerController =
         Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerNetId)->GetOwningController());
-    
+
     PlayerController->Client_ShowTurnButtonsWidget();
 }
 
@@ -192,7 +203,6 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
     TArray<ETurnColors> PlayersColors;
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameStateGame->GetPlayersTurnData().GetKeys(PlayersColors);
-
 
     for (ETurnColors Color : PlayersColors)
     {
