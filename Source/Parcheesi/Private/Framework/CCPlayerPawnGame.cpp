@@ -42,7 +42,7 @@ void ACCPlayerPawnGame::BeginPlay()
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
     OwningPlayerController = Cast<ACCControllerGame>(GetController());
-    DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Client_EnableTurnButton);
+    DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
 }
 
 void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputComponent)
@@ -56,6 +56,7 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
 
 void ACCPlayerPawnGame::Server_RollDices_Implementation()
 {
+    bDicesSpawned = true;
     DiceComponent->RollDices();
 }
 
@@ -73,6 +74,7 @@ void ACCPlayerPawnGame::Server_EndPlayerTurn_Implementation()
     Multicast_SetCurrentTurn(false);
     Server_CleanAllDices();
     ServerGameMode->StartNextTurn();
+    bDicesSpawned = false;
 }
 
 void ACCPlayerPawnGame::Server_DebugEndPlayerTurn_Implementation()
@@ -207,6 +209,9 @@ void ACCPlayerPawnGame::ClickOnBoard()
                 Server_SelectPawnActor(HitPawn);
             }
         }
+        if (bDicesSpawned)
+            Server_CheckIfCanEnableEndTurn();
+
         Server_TrySwitchMovePawnButtonIsEnabled(true);
     }
 }
@@ -242,4 +247,41 @@ void ACCPlayerPawnGame::Multicast_HandlePawnMovementStarted_Implementation()
 void ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished_Implementation()
 {
     bIsPawnMoving = false;
+    Server_CheckIfCanEnableEndTurn();
+}
+
+void ACCPlayerPawnGame::Server_CheckIsAnyMoveAvailable_Implementation()
+{
+    TArray<ACCPawn*> AllPawns = ServerGameState->GetAllPawns();
+    TArray<ACCDice*> SpawnedDices = ServerGameState->GetSpawnedDices();
+    bIsAnyPawnCanMove = false;
+
+    if (SpawnedDices.Num() == 0)
+        return;
+
+    TArray<ACCPawn*> PlayerPawns;
+
+    for (ACCPawn* Pawn : AllPawns)
+    {
+        if (Pawn->Tags[0] == PlayerTagName)
+            PlayerPawns.Add(Pawn);
+    }
+    for (ACCPawn* MyPawn : PlayerPawns)
+    {
+        for (ACCDice* Dice : SpawnedDices)
+        {
+            if (PawnManagerComponent->CheckPawnCanMove(MyPawn, Dice->GetDiceSide()))
+            {
+                bIsAnyPawnCanMove = true;
+                return;
+            }
+        }
+    }
+}
+
+void ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn_Implementation()
+{
+    Server_CheckIsAnyMoveAvailable();
+    if (!bIsAnyPawnCanMove)
+        Client_EnableTurnButton();
 }

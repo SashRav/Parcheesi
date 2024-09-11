@@ -60,6 +60,14 @@ protected:
     void UpdateSelectedDiceOnUI();
 
     bool bIsPawnMoving = false;
+    bool bIsAnyPawnCanMove = false;
+    bool bDicesSpawned = false;
+
+    UFUNCTION(Server, Reliable)
+    void Server_CheckIsAnyMoveAvailable();
+
+    UFUNCTION(Server, Reliable)
+    void Server_CheckIfCanEnableEndTurn();
 
     UFUNCTION(Server, Reliable)
     void Server_TrySwitchMovePawnButtonIsEnabled(bool State);
