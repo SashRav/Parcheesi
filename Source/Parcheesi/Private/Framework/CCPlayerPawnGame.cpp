@@ -24,6 +24,7 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     PawnManagerComponent = CreateDefaultSubobject<UCCPawnManagerComponent>(TEXT("PawnManagerComponent"));
 
     PawnManagerComponent->OnPawnMovementFinished.AddDynamic(this, &ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished);
+    PawnManagerComponent->OnGameFinished.AddDynamic(this, &ACCPlayerPawnGame::Server_HandleGameFinished);
 }
 
 void ACCPlayerPawnGame::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -284,4 +285,9 @@ void ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn_Implementation()
     Server_CheckIsAnyMoveAvailable();
     if (!bIsAnyPawnCanMove)
         Client_EnableTurnButton();
+}
+
+void ACCPlayerPawnGame::Server_HandleGameFinished_Implementation()
+{
+    ServerGameMode->FinishGame(PlayerTagName);
 }

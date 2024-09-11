@@ -12,6 +12,7 @@ class ACCPlayerPawnGame;
 class UCCPlayersTurnContainer;
 class UCCGameTurnButtons;
 class UCCQuickMenuWidget;
+class UCCWinWidget;
 
 UCLASS()
 class PARCHEESI_API ACCHUDGame : public AHUD
@@ -29,6 +30,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UCCQuickMenuWidget> QuickMenuWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCCWinWidget> WinWidgetClass;
 
     UFUNCTION()
     void StartGameFromLobby();
@@ -65,6 +69,7 @@ public:
     void SwitchMovePawnButtonIsEnabled(bool State);
     void SetSeclectedDiceSideOnUI(int32 Side);
 
+    void ShowWinWidget(FText WinnerName);
 
 private:
     UPROPERTY()
@@ -78,6 +83,9 @@ private:
 
     UPROPERTY()
     UCCQuickMenuWidget* QuickMenuWidget = nullptr;
+
+    UPROPERTY()
+    UCCWinWidget* WinWidget;
 
     UPROPERTY()
     ACCPlayerPawnGame* OwningPlayerPawn;

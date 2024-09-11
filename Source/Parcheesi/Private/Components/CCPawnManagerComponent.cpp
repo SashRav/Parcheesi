@@ -117,7 +117,6 @@ void UCCPawnManagerComponent::FinishPawnMovement()
     bShouldBuildGates = false;
     bShouldAttackEnemy = false;
     OnPawnMovementFinished.Broadcast();
-    
 }
 
 void UCCPawnManagerComponent::ChangePositionChecker()
@@ -183,7 +182,7 @@ bool UCCPawnManagerComponent::CheckFirstFinishCellIsEmpty()
     FCellsData TargetCellData = GameState->GetCellData(SelectedPawn->GetFirstFinishCellIndex());
     if (TargetCellData.FirstPawnOnCell != nullptr)
         return false;
-    
+
     return true;
 }
 
@@ -336,7 +335,6 @@ void UCCPawnManagerComponent::MovePawnOnBoard()
         return;
     }
 
-
     if (SelectedPawn->GetIsInGates())
     {
         DestroyGates();
@@ -469,7 +467,8 @@ void UCCPawnManagerComponent::DestroyGates()
     }
 }
 
-void UCCPawnManagerComponent::CheckVictory() {
+void UCCPawnManagerComponent::CheckVictory()
+{
     TArray<ACCPawn*> AllPawns = GameState->GetAllPawns();
     FName PawnTag = SelectedPawn->Tags[0];
 
@@ -479,12 +478,14 @@ void UCCPawnManagerComponent::CheckVictory() {
     {
         if (Pawn->Tags[0] != PawnTag)
             continue;
-        
+
         if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnFinish)
             PawnsOnFinish++;
     }
     UE_LOG(LogTemp, Display, TEXT("Pawns On Finish: %d"), PawnsOnFinish);
     if (PawnsOnFinish >= 4)
+    {
         UE_LOG(LogTemp, Display, TEXT("VICTORY !!!!!!!!!!!!!!!!"));
-
+        OnGameFinished.Broadcast();
+    }
 }

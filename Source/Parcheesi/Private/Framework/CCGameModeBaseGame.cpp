@@ -142,7 +142,7 @@ void ACCGameModeBaseGame::StartNextTurn()
 void ACCGameModeBaseGame::SetNextTurnColor()
 {
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-    
+
     // Set the same color if only one player
     if (GameStateGame->GetAllPlayersData().Num() == 1)
     {
@@ -220,5 +220,19 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
             SpawnedPawn->Multicast_SetupPawnData(
                 Color, SpawnCell->GetCellIndex(), SpawnCell->GetClosestBoardCellIndex(), SpawnCell->GetClosestFinishCellIndex());
         }
+    }
+}
+
+void ACCGameModeBaseGame::FinishGame(FName PlayerTagName)
+{
+    TArray<FUniqueNetIdRepl> PlayersNetId;
+    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    GameStateGame->GetAllPlayersData().GetKeys(PlayersNetId);
+
+    for (FUniqueNetIdRepl NetId : PlayersNetId)
+    {
+        ACCControllerGame* GameController =
+            Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), NetId)->GetOwningController());
+        GameController->Client_ShowWinWidget(FText::FromName(PlayerTagName));
     }
 }

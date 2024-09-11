@@ -7,6 +7,7 @@
 #include "CCPawnManagerComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPawnMovementFinished);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameFinished);
 
 class ACCPawn;
 class ACCGameStateGame;
@@ -19,13 +20,16 @@ class PARCHEESI_API UCCPawnManagerComponent : public UActorComponent
 public:
     UCCPawnManagerComponent();
 
-    void MoveSelectedPawn(ACCPawn* Pawn, int32 Steps); 
+    void MoveSelectedPawn(ACCPawn* Pawn, int32 Steps);
     bool CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 CellIndex);
     bool CheckPawnCanMove(ACCPawn* Pawn, int32 Steps);
     bool CheckPawnPath(ACCPawn* Pawn, int32 Steps);
 
     UPROPERTY(BlueprintAssignable)
     FOnPawnMovementFinished OnPawnMovementFinished;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnGameFinished OnGameFinished;
 
 protected:
     virtual void BeginPlay() override;

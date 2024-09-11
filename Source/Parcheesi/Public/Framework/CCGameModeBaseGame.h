@@ -22,6 +22,8 @@ public:
     void StartNextTurn();
 
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
+    
+    void FinishGame(FName PlayerTagName);
 
 protected:
     UPROPERTY()

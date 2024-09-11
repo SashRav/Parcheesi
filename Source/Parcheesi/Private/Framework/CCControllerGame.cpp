@@ -19,7 +19,7 @@ void ACCControllerGame::BeginPlay()
     FInputModeGameAndUI InputModeData;
     InputModeData.SetHideCursorDuringCapture(false);
     SetInputMode(InputModeData);
-    
+
     bShowMouseCursor = true;
 
     OwningHUD = Cast<ACCHUDGame>(GetHUD());
@@ -41,7 +41,8 @@ void ACCControllerGame::SetupInputComponent()
     }
 }
 
-void ACCControllerGame::Client_SwitchQuickMenuVisibility_Implementation() {
+void ACCControllerGame::Client_SwitchQuickMenuVisibility_Implementation()
+{
     if (OwningHUD)
         OwningHUD->SwitchQuickMenuVisibility();
 }
@@ -74,17 +75,32 @@ void ACCControllerGame::Client_HideTurnButtonsWidget_Implementation()
         OwningHUD->HideTurnButtons();
 }
 
-void ACCControllerGame::Client_EnableEndTurnButton_Implementation() {
+void ACCControllerGame::Client_EnableEndTurnButton_Implementation()
+{
     if (OwningHUD)
         OwningHUD->EnableEndTurnButton();
 }
 
-void ACCControllerGame::Client_SetDiceSideOnUI_Implementation(int32 Side) {
+void ACCControllerGame::Client_SetDiceSideOnUI_Implementation(int32 Side)
+{
     if (OwningHUD)
         OwningHUD->SetSeclectedDiceSideOnUI(Side);
 }
 
-void ACCControllerGame::Client_SwitchMovePawnButtonIsEnabled_Implementation(bool State) {
+void ACCControllerGame::Client_SwitchMovePawnButtonIsEnabled_Implementation(bool State)
+{
     if (OwningHUD)
         OwningHUD->SwitchMovePawnButtonIsEnabled(State);
+}
+
+void ACCControllerGame::Client_ShowWinWidget_Implementation(const FText& WinnerName)
+{
+    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    {
+        Subsystem->RemoveMappingContext(LevelInputContext);
+        Subsystem->RemoveMappingContext(GameMappingContext);
+    }
+    bShowMouseCursor = true;
+    if (OwningHUD)
+        OwningHUD->ShowWinWidget(WinnerName);
 }

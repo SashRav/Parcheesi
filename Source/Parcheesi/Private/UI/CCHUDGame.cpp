@@ -5,6 +5,7 @@
 #include "UI/Widgets/CCPlayersTurnContainer.h"
 #include "UI/Widgets/CCGameTurnButtons.h"
 #include "UI/Widgets/CCQuickMenuWidget.h"
+#include "UI/Widgets/CCWinWidget.h"
 #include "Framework/CCPlayerPawnGame.h"
 #include "Framework/CCControllerGame.h"
 #include "Kismet/GameplayStatics.h"
@@ -18,6 +19,7 @@ void ACCHUDGame::BeginPlay()
     check(TurnInfoContainerWidgetClass);
     check(GameTurnButtonsWidgetClass);
     check(QuickMenuWidgetClass);
+    check(WinWidgetClass);
 
     LobbyWidget = CreateWidget<UCCGameLobbyUI>(GetWorld(), LobbyWidgetClass);
     LobbyWidget->AddToViewport();
@@ -36,6 +38,10 @@ void ACCHUDGame::BeginPlay()
     GameTurnButtonsWidget->OnMovePawnPressedEvent.AddDynamic(this, &ACCHUDGame::MovePawn);
 
     QuickMenuWidget = CreateWidget<UCCQuickMenuWidget>(GetWorld(), QuickMenuWidgetClass);
+
+    WinWidget = CreateWidget<UCCWinWidget>(GetWorld(), WinWidgetClass);
+    WinWidget->SetVisibility(ESlateVisibility::Hidden);
+    WinWidget->AddToViewport();
 
     OwningPlayerPawn = Cast<ACCPlayerPawnGame>(GetOwningPawn());
 }
@@ -127,4 +133,10 @@ void ACCHUDGame::SwitchQuickMenuVisibility()
 void ACCHUDGame::SwitchMovePawnButtonIsEnabled(bool State)
 {
     GameTurnButtonsWidget->SetIsEnabledMovePawnButton(State);
+}
+
+void ACCHUDGame::ShowWinWidget(FText WinnerName)
+{
+    WinWidget->SetWinner(WinnerName);
+    WinWidget->SetVisibility(ESlateVisibility::Visible);
 }

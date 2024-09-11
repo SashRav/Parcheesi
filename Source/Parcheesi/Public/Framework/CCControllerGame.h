@@ -41,6 +41,9 @@ public:
     UFUNCTION(Client, Reliable)
     void Client_SetDiceSideOnUI(int32 Side);
 
+    UFUNCTION(Client, Reliable)
+    void Client_ShowWinWidget(const FText& WinnerName);
+
 protected:
     UPROPERTY()
     ACCHUDGame* OwningHUD;

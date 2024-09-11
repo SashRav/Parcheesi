@@ -51,6 +51,9 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_CleanSelectionData();
 
+    UFUNCTION(Server, Reliable)
+    void Server_HandleGameFinished();
+
 protected:
     virtual void BeginPlay() override;
 
