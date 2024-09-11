@@ -214,20 +214,51 @@ bool UCCPawnManagerComponent::CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 Cell
     return false;
 }
 
+bool UCCPawnManagerComponent::CheckPawnCanMove(ACCPawn* Pawn, int32 Steps)
+{
+    int32 LocalTargetCell = -1;
+
+    if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnStart)
+    {
+        return CheckCanMoveToTargetCell(Pawn, Pawn->GetFirstBoardCellIndex());
+    }
+    if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnFinish)
+    {
+        LocalTargetCell = GetTargetCellIndex(Pawn->GetCurrentCellIndex(), Steps, true);
+        return CheckIfCanMoveOnFinishCells(LocalTargetCell);
+    }
+    if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnBoard)
+    {
+        LocalTargetCell = GetTargetCellIndex(Pawn->GetCurrentCellIndex(), Steps, false);
+        if (!CheckCanMoveToTargetCell(Pawn, LocalTargetCell))
+        {
+            return false;
+        }
+        if (!CheckPawnPath(Pawn, Steps))
+        {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
 bool UCCPawnManagerComponent::CheckPawnPath(ACCPawn* Pawn, int32 Steps)
 {
     for (int32 Step = 1; Step < Steps; Step++)
     {
         int32 TargetCellIndex = GetTargetCellIndex(Pawn->GetCurrentCellIndex(), Step, false);
-
         // Check if finish cell on the path
         if (Pawn->GetFirstBoardCellIndex() == TargetCellIndex)
+        {
             return false;
-
+        }
         FCellsData TargetCellData = GameState->GetCellData(TargetCellIndex);
 
         if (TargetCellData.FirstPawnOnCell && TargetCellData.FirstPawnOnCell->GetIsInGates())
+        {
             return false;
+        }
     }
     return true;
 }

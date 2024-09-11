@@ -21,6 +21,7 @@ public:
 
     void MoveSelectedPawn(ACCPawn* Pawn, int32 Steps);
     bool CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 CellIndex);
+    bool CheckPawnCanMove(ACCPawn* Pawn, int32 Steps);
     bool CheckPawnPath(ACCPawn* Pawn, int32 Steps);
 
     UPROPERTY(BlueprintAssignable)

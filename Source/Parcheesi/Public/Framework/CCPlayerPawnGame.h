@@ -62,7 +62,7 @@ protected:
     bool bIsPawnMoving = false;
 
     UFUNCTION(Server, Reliable)
-    void Server_SwitchMovePawnButtonIsEnabled(bool State);
+    void Server_TrySwitchMovePawnButtonIsEnabled(bool State);
 
     UFUNCTION(Server, Reliable)
     void Server_SelectDiceActor(ACCDice* HitDice);

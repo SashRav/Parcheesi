@@ -134,7 +134,7 @@ void ACCPlayerPawnGame::UpdateSelectedDiceOnUI()
     PlayerController->Client_SetDiceSideOnUI(SelectedDiceActor->GetDiceSide());
 }
 
-void ACCPlayerPawnGame::Server_SwitchMovePawnButtonIsEnabled_Implementation(bool State)
+void ACCPlayerPawnGame::Server_TrySwitchMovePawnButtonIsEnabled_Implementation(bool State)
 {
     // Needed to get Player controller because it does not exist in the context
     ACCControllerGame* PlayerController = Cast<ACCControllerGame>(GetController());
@@ -143,8 +143,14 @@ void ACCPlayerPawnGame::Server_SwitchMovePawnButtonIsEnabled_Implementation(bool
         UE_LOG(LogTemp, Log, TEXT("OwningPlayerController is not valid in SwitchMovePawnButtonIsEnabled"));
         return;
     }
+
+    PlayerController->Client_SwitchMovePawnButtonIsEnabled(false);
+
     if (SelectedDiceActor && SelectedPawnActor)
-        PlayerController->Client_SwitchMovePawnButtonIsEnabled(true);
+    {
+        if (PawnManagerComponent->CheckPawnCanMove(SelectedPawnActor, SelectedDiceActor->GetDiceSide()))
+            PlayerController->Client_SwitchMovePawnButtonIsEnabled(true);
+    }
 }
 
 void ACCPlayerPawnGame::Client_VisualDeselectActor_Implementation(UCCSelectItem* Component, UMeshComponent* Mesh)
@@ -201,7 +207,7 @@ void ACCPlayerPawnGame::ClickOnBoard()
                 Server_SelectPawnActor(HitPawn);
             }
         }
-        Server_SwitchMovePawnButtonIsEnabled(true);
+        Server_TrySwitchMovePawnButtonIsEnabled(true);
     }
 }
 
