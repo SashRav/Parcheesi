@@ -427,7 +427,7 @@ void UCCPawnManagerComponent::BuildGates()
 
     SetNewPawnDataInGameState(SecondaryPawn->GetCurrentCellIndex(), SelectedPawn, SecondaryPawn);
 
-    FCellsData PreviusCellData = GameState->GetCellData(GetTargetCellIndex(PawnCurrentCellIndex, -1, false));
+    FCellsData PreviusCellData = GameState->GetCellData(GetTargetCellIndex(SelectedPawn->GetCurrentCellIndex(), -1, false));
     FCellsData CurrentCellData = GameState->GetCellData(SelectedPawn->GetCurrentCellIndex());
 
     FVector Direction = PreviusCellData.CellPosition - CurrentCellData.CellPosition;
