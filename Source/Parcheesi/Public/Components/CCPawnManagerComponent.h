@@ -44,7 +44,7 @@ protected:
 
     void SetupTargetPositions(int32 TargetCellIndex, FVector& StartLocationRef);
     bool CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex);
-    bool CheckFirstFinishCellIsEmpty();
+    bool CheckFirstFinishCellIsEmpty(ACCPawn* Pawn);
     bool CheckIfCanMoveOnFinishCells(int32 TargetCellIndex);
 
     void MovePawnToSpawn(ACCPawn* Pawn);

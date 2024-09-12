@@ -177,9 +177,9 @@ bool UCCPawnManagerComponent::CheckIsTargetCellLeadsToFinish(int32 TargetCellInd
     return true;
 }
 
-bool UCCPawnManagerComponent::CheckFirstFinishCellIsEmpty()
+bool UCCPawnManagerComponent::CheckFirstFinishCellIsEmpty(ACCPawn* Pawn)
 {
-    FCellsData TargetCellData = GameState->GetCellData(SelectedPawn->GetFirstFinishCellIndex());
+    FCellsData TargetCellData = GameState->GetCellData(Pawn->GetFirstFinishCellIndex());
     if (TargetCellData.FirstPawnOnCell != nullptr)
         return false;
 
@@ -207,8 +207,16 @@ bool UCCPawnManagerComponent::CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 Cell
     if (TargetCellData.FirstPawnOnCell->Tags[0] != Pawn->Tags[0] && !TargetCellData.FirstPawnOnCell->GetIsInGates())
         return true;
 
-    if (!TargetCellData.FirstPawnOnCell->GetIsInGates())
+    if (Pawn->GetCurrentPawnPosition() != EPawnPosition::OnBoard && !TargetCellData.FirstPawnOnCell->GetIsInGates())
         return true;
+
+    if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnBoard && Pawn->GetFirstBoardCellIndex() != CellIndex)
+        if (!TargetCellData.FirstPawnOnCell->GetIsInGates())
+            return true;
+
+    if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnBoard && Pawn->GetFirstBoardCellIndex() == CellIndex)
+        if (!TargetCellData.FirstPawnOnCell->GetIsInGates() && CheckFirstFinishCellIsEmpty(Pawn))
+            return true;
 
     return false;
 }
@@ -282,12 +290,15 @@ bool UCCPawnManagerComponent::InterractWithTargetCellPawn(int32 CellIndex)
         bShouldAttackEnemy = true;
         return true;
     }
-    if (!TargetCellData.FirstPawnOnCell->GetIsInGates())
+    if (!TargetCellData.FirstPawnOnCell->GetIsInGates() && !bShouldMoveToFinish)
     {
         SecondaryPawn = TargetCellData.FirstPawnOnCell;
         bShouldBuildGates = true;
         return true;
     }
+    if (bShouldMoveToFinish)
+        return true;
+
     return false;
 }
 
@@ -319,21 +330,15 @@ void UCCPawnManagerComponent::MovePawnOnBoard()
     int32 Index = GetTargetCellIndex(PawnCurrentCellIndex, StepsToMove, false);
 
     if (!CheckCanMoveToTargetCell(SelectedPawn, Index))
-    {
-        UE_LOG(LogTemp, Display, TEXT("CheckCanMoveToTargetCell"));
         return;
-    }
+
     if (!CheckPawnPath(SelectedPawn, StepsToMove))
-    {
-        UE_LOG(LogTemp, Display, TEXT("CheckPawnPath"));
         return;
-    }
+
+    bShouldMoveToFinish = CheckIsTargetCellLeadsToFinish(Index);
 
     if (!InterractWithTargetCellPawn(Index))
-    {
-        UE_LOG(LogTemp, Display, TEXT("CheckFirstFinishCellIsEmpty"));
         return;
-    }
 
     if (SelectedPawn->GetIsInGates())
     {
@@ -344,11 +349,6 @@ void UCCPawnManagerComponent::MovePawnOnBoard()
         SetNewPawnDataInGameState(SelectedPawn->GetCurrentCellIndex(), nullptr, nullptr); // Clean previus cell if is not in gates
     }
 
-    if (CheckIsTargetCellLeadsToFinish(Index))
-    {
-        bShouldMoveToFinish = true;
-    }
-
     if (!bShouldMoveToFinish)
     {
         SetNewPawnDataInGameState(Index, SelectedPawn, nullptr);
@@ -356,9 +356,9 @@ void UCCPawnManagerComponent::MovePawnOnBoard()
     }
     else
     {
-        if (!CheckFirstFinishCellIsEmpty())
+        if (!CheckFirstFinishCellIsEmpty(SelectedPawn))
         {
-            UE_LOG(LogTemp, Display, TEXT("CheckFirstFinishCellIsEmpty"));
+            UE_LOG(LogTemp, Display, TEXT("CheckFirstFinishCellIsEmpty is false"));
             return;
         }
     }
