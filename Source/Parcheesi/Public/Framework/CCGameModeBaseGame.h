@@ -21,7 +21,7 @@ public:
     void StartNewGame();
     void StartNextTurn();
 
-    void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
+    void ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo);
     
     void FinishGame(FName PlayerTagName);
 

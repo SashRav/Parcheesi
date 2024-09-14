@@ -51,10 +51,10 @@ void ACCGameModeBaseGame::StartNewGame()
     StartNextTurn();
 }
 
-void ACCGameModeBaseGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
+void ACCGameModeBaseGame::ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo)
 {
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-    GameStateGame->ChangePlayerTag(PlayerNetId, PlayerTag);
+    GameStateGame->ChangePlayerInfo(PlayerNetId, PlayerInfo);
 }
 
 void ACCGameModeBaseGame::AddPlayerToAllPlayersData(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
@@ -69,7 +69,7 @@ void ACCGameModeBaseGame::UpdatePlayersTurnData()
     TArray<ETurnColors> PlayersColors;
 
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-    TMap<FUniqueNetIdRepl, FName> AllPlayersData = GameStateGame->GetAllPlayersData();
+    //TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersData = GameStateGame->GetAllPlayersData();
     TMap<ETurnColors, FUniqueNetIdRepl> AllPlayersTurnData = GameStateGame->GetPlayersTurnData();
     ETurnColors CurrentTurnColor = GameStateGame->GetCurrentTurnColor();
     AllPlayersTurnData.GetKeys(PlayersColors);

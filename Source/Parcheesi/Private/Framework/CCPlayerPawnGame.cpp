@@ -69,7 +69,26 @@ void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& C
 {
     UE_LOG(LogTemp, Display, TEXT("Color Tag clicked: %s"), *ColorTag.ToString());
 
-    ServerGameMode->ChangePlayerTag(GetPlayerState()->GetUniqueId(), ColorTag);
+    FPlayerInfo PlayerInfo;
+    PlayerInfo.Tag = ColorTag;
+
+    if (OwningPlayerController && OwningPlayerController->HasAuthority()) // Server don't have Ready button and it is ready by default
+        PlayerInfo.bIsReady = true;
+    else
+        PlayerInfo.bIsReady = false;
+
+    ServerGameMode->ChangePlayerInfo(GetPlayerState()->GetUniqueId(), PlayerInfo);
+}
+
+void ACCPlayerPawnGame::Server_PlayerIsReady_Implementation()
+{
+    TMap<FUniqueNetIdRepl, FPlayerInfo> PlayersData = ServerGameState->GetAllPlayersData();
+
+    FUniqueNetIdRepl LocalID = GetPlayerState()->GetUniqueId();
+    FPlayerInfo PlayerInfo = *PlayersData.Find(LocalID);
+    PlayerInfo.bIsReady = true;
+
+    ServerGameMode->ChangePlayerInfo(GetPlayerState()->GetUniqueId(), PlayerInfo);
 }
 
 void ACCPlayerPawnGame::Server_EndPlayerTurn_Implementation()
@@ -299,14 +318,16 @@ void ACCPlayerPawnGame::Server_HandleGameFinished_Implementation()
 void ACCPlayerPawnGame::Server_UpdateLobbySelection_Implementation()
 {
     TArray<FAllPlayersData> AllPlayersData;
-    TMap<FUniqueNetIdRepl, FName> AllPlayersDataMap = ServerGameState->GetAllPlayersData();
+    TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersDataMap = ServerGameState->GetAllPlayersData();
 
     if (AllPlayersDataMap.Num() > 0)
-        for (TPair<FUniqueNetIdRepl, FName>& Player : AllPlayersDataMap)
+        for (TPair<FUniqueNetIdRepl, FPlayerInfo>& Player : AllPlayersDataMap)
         {
             FAllPlayersData NewPlayerData;
+            FPlayerInfo DataValue = Player.Value;
             NewPlayerData.PlayerName = FText::FromString(Player.Key.GetUniqueNetId()->ToString().Right(5));
-            NewPlayerData.Tag = Player.Value;
+            NewPlayerData.Tag = DataValue.Tag;
+            NewPlayerData.bIsReady = DataValue.bIsReady;
 
             AllPlayersData.Add(NewPlayerData);
         }

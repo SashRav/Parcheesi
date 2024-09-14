@@ -48,6 +48,21 @@ struct FAllPlayersData : public FTableRowBase
 
     UPROPERTY()
     FName Tag;
+
+    UPROPERTY()
+    bool bIsReady;
+};
+
+USTRUCT(BlueprintType)
+struct FPlayerInfo : public FTableRowBase
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    FName Tag;
+
+    UPROPERTY()
+    bool bIsReady;
 };
 
 UENUM(BlueprintType)

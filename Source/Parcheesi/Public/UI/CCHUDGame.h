@@ -41,6 +41,9 @@ protected:
     void SelectColorInLobby(FName ColorTag);
 
     UFUNCTION()
+    void PlayerReady();
+
+    UFUNCTION()
     void EndPlayerTurn();
 
     UFUNCTION()

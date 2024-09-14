@@ -27,6 +27,7 @@ void ACCHUDGame::BeginPlay()
     LobbyWidget->AddToViewport();
     LobbyWidget->OnStartGameButtonPressedEvent.AddDynamic(this, &ACCHUDGame::StartGameFromLobby);
     LobbyWidget->OnColorButtonPressed.AddDynamic(this, &ACCHUDGame::SelectColorInLobby);
+    LobbyWidget->OnReadyButtonPressed.AddDynamic(this, &ACCHUDGame::PlayerReady);
 
     TurnInfoContainerWidget = CreateWidget<UCCPlayersTurnContainer>(GetWorld(), TurnInfoContainerWidgetClass);
     TurnInfoContainerWidget->AddToViewport();
@@ -79,6 +80,11 @@ void ACCHUDGame::StartGameFromLobby()
 void ACCHUDGame::SelectColorInLobby(FName ColorTag)
 {
     OwningPlayerPawn->Server_UpdateSelectedColor(ColorTag);
+}
+
+void ACCHUDGame::PlayerReady()
+{
+    OwningPlayerPawn->Server_PlayerIsReady();
 }
 
 void ACCHUDGame::EndPlayerTurn()

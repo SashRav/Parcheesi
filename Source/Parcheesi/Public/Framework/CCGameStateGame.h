@@ -19,14 +19,14 @@ class PARCHEESI_API ACCGameStateGame : public AGameStateBase
 
 public:
     void AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
-    void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
+    void ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo);
     void ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn);
     void SetupPlayersTurnData();
     FCellsData GetCellData(int32 Index) { return *CellsData.Find(Index); };
     TMap<int32, FCellsData> GetAllCellsData() { return CellsData; }
     bool CheckCellIsValidOnIndex(int32 CellIndex);
 
-    TMap<FUniqueNetIdRepl, FName> GetAllPlayersData() { return AllPlayersData; };
+    TMap<FUniqueNetIdRepl, FPlayerInfo> GetAllPlayersData() { return AllPlayersData; };
     TMap<ETurnColors, FUniqueNetIdRepl> GetPlayersTurnData() { return PlayersTurnData; }
 
     void SetCurrentTurnColor(ETurnColors Color) { CurrentTurnColor = Color; };
@@ -45,14 +45,12 @@ public:
 protected:
     virtual void BeginPlay() override;
 
-    void DisplayPlayersData();
-
     ETurnColors GetEnumColorFromTag(FString PlayerTag);
 
     void SetCellsData();
 
     UPROPERTY()
-    TMap<FUniqueNetIdRepl, FName> AllPlayersData;
+    TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersData;
 
     UPROPERTY()
     TMap<ETurnColors, FUniqueNetIdRepl> PlayersTurnData;

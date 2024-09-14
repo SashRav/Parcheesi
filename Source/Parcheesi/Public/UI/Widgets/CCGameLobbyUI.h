@@ -13,6 +13,7 @@ class UCheckBox;
 class USlider;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartGameButtonPressed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorButtonPressed, FName, ColorTag);
 
 UCLASS() class PARCHEESI_API UCCGameLobbyUI : public UUserWidget
@@ -26,11 +27,14 @@ public:
     UPROPERTY(BlueprintAssignable)
     FOnColorButtonPressed OnColorButtonPressed;
 
+    UPROPERTY(BlueprintAssignable)
+    FOnReadyButtonPressed OnReadyButtonPressed;
+
     void UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPlayersData);
 
 protected:
     virtual void NativeConstruct() override;
-    void UpdateSelectionPlayerName(FText PlayerName, FName Tag);
+    void UpdateSelectionPlayerName(FText PlayerName, FName Tag, FText IsReadyText);
 
     // Global lobby buttons
     UPROPERTY(meta = (BindWidget))
@@ -41,6 +45,9 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     class UButton* B_SaveSettings;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* B_ReadyToGame;
 
     // Pawn selecting buttons
 
@@ -109,6 +116,9 @@ protected:
 
     UFUNCTION()
     void StartGameButtonClicked();
+
+    UFUNCTION()
+    void ReadyButtonClicked();
 
     UFUNCTION()
     void SelectRedButtonClicked();
