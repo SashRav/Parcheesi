@@ -37,6 +37,19 @@ struct FCellsData : public FTableRowBase
     ACCPawn* SecondPawnOnCell;
 };
 
+
+USTRUCT(BlueprintType)
+struct FAllPlayersData : public FTableRowBase
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    FText PlayerName;
+
+    UPROPERTY()
+    FName Tag;
+};
+
 UENUM(BlueprintType)
 enum class ETurnColors : uint8
 {

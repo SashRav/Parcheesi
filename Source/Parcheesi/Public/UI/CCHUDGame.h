@@ -71,6 +71,8 @@ public:
 
     void ShowWinWidget(FText WinnerName);
 
+    void UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
+
 private:
     UPROPERTY()
     UCCGameLobbyUI* LobbyWidget = nullptr;

@@ -15,6 +15,8 @@
 
 void ACCHUDGame::BeginPlay()
 {
+    Super::BeginPlay();
+
     check(LobbyWidgetClass);
     check(TurnInfoContainerWidgetClass);
     check(GameTurnButtonsWidgetClass);
@@ -139,4 +141,9 @@ void ACCHUDGame::ShowWinWidget(FText WinnerName)
 {
     WinWidget->SetWinner(WinnerName);
     WinWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ACCHUDGame::UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData)
+{
+    LobbyWidget->UpdateSelectionStatus(AllPlayersData);
 }

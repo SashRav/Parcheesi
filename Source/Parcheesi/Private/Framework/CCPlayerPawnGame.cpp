@@ -43,7 +43,11 @@ void ACCPlayerPawnGame::BeginPlay()
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
     OwningPlayerController = Cast<ACCControllerGame>(GetController());
+
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
+    ServerGameState->OnSelectingColorInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySelection);
+
+    Server_UpdateLobbySelection();
 }
 
 void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputComponent)
@@ -290,4 +294,28 @@ void ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn_Implementation()
 void ACCPlayerPawnGame::Server_HandleGameFinished_Implementation()
 {
     ServerGameMode->FinishGame(PlayerTagName);
+}
+
+void ACCPlayerPawnGame::Server_UpdateLobbySelection_Implementation()
+{
+    TArray<FAllPlayersData> AllPlayersData;
+    TMap<FUniqueNetIdRepl, FName> AllPlayersDataMap = ServerGameState->GetAllPlayersData();
+
+    if (AllPlayersDataMap.Num() > 0)
+        for (TPair<FUniqueNetIdRepl, FName>& Player : AllPlayersDataMap)
+        {
+            FAllPlayersData NewPlayerData;
+            NewPlayerData.PlayerName = FText::FromString(Player.Key.GetUniqueNetId()->ToString().Right(5));
+            NewPlayerData.Tag = Player.Value;
+
+            AllPlayersData.Add(NewPlayerData);
+        }
+
+    Client_UpdateLobbySelection(AllPlayersData);
+}
+
+void ACCPlayerPawnGame::Client_UpdateLobbySelection_Implementation(const TArray<FAllPlayersData>& AllPlayersData)
+{
+    if (OwningPlayerController)
+        OwningPlayerController->Client_UpdateLobbySelection(AllPlayersData);
 }

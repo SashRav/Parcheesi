@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "CCCoreTypes.h"
 #include "CCGameLobbyUI.generated.h"
 
 class UButton;
 class UTextBlock;
+class UCheckBox;
+class USlider;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartGameButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorButtonPressed, FName, ColorTag);
@@ -23,7 +26,12 @@ public:
     UPROPERTY(BlueprintAssignable)
     FOnColorButtonPressed OnColorButtonPressed;
 
+    void UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPlayersData);
+
 protected:
+    virtual void NativeConstruct() override;
+    void UpdateSelectionPlayerName(FText PlayerName, FName Tag);
+
     // Global lobby buttons
     UPROPERTY(meta = (BindWidget))
     class UButton* B_StartGame;
@@ -86,6 +94,19 @@ protected:
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* T_BluePlayerReady;
 
+    // Settings UI
+    UPROPERTY(meta = (BindWidget))
+    class USlider* S_RoundsToBonus;
+
+    UPROPERTY(meta = (BindWidget))
+    class USlider* S_DicesCount;
+
+    UPROPERTY(meta = (BindWidget))
+    class UCheckBox* C_MoveFromStart;
+
+    UPROPERTY(meta = (BindWidget))
+    class UCheckBox* C_CatMode;
+
     UFUNCTION()
     void StartGameButtonClicked();
 
@@ -100,6 +121,4 @@ protected:
 
     UFUNCTION()
     void SelectBlueButtonClicked();
-
-    virtual void NativeConstruct() override;
 };

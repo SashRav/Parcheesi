@@ -54,6 +54,9 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_HandleGameFinished();
 
+    UFUNCTION(Server, Reliable)
+    void Server_UpdateLobbySelection();
+
 protected:
     virtual void BeginPlay() override;
 
@@ -89,6 +92,9 @@ protected:
 
     UFUNCTION(Client, Reliable)
     void Client_VisualDeselectActor(UCCSelectItem* Component, UMeshComponent* Mesh);
+
+    UFUNCTION(Client, Reliable)
+    void Client_UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_HandlePawnMovementFinished();

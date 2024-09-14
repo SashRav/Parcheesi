@@ -35,6 +35,7 @@ void ACCGameModeBaseGame::StartNewGame()
 
     TArray<FUniqueNetIdRepl> PlayersNetId;
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    GameStateGame->SetupPlayersTurnData();
     GameStateGame->GetAllPlayersData().GetKeys(PlayersNetId);
 
     for (FUniqueNetIdRepl NetId : PlayersNetId)

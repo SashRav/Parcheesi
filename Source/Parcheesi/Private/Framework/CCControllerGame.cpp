@@ -104,3 +104,9 @@ void ACCControllerGame::Client_ShowWinWidget_Implementation(const FText& WinnerN
     if (OwningHUD)
         OwningHUD->ShowWinWidget(WinnerName);
 }
+
+void ACCControllerGame::Client_UpdateLobbySelection_Implementation(const TArray<FAllPlayersData>& AllPlayersData)
+{
+    if (OwningHUD)
+        OwningHUD->UpdateLobbySelection(AllPlayersData);
+}

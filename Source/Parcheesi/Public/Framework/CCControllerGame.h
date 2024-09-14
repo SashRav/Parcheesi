@@ -44,6 +44,9 @@ public:
     UFUNCTION(Client, Reliable)
     void Client_ShowWinWidget(const FText& WinnerName);
 
+    UFUNCTION(Client, Reliable)
+    void Client_UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
+
 protected:
     UPROPERTY()
     ACCHUDGame* OwningHUD;

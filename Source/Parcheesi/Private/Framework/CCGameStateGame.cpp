@@ -9,7 +9,7 @@
 void ACCGameStateGame::AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
 {
     UE_LOG(LogTemp, Display, TEXT("Run game state function"));
-    if (PlayerTag != "")
+    if (PlayerNetId.IsValid())
     {
         AllPlayersData.Add(PlayerNetId, PlayerTag);
         FString UserIdSerialized = PlayerNetId.GetUniqueNetId()->ToString();
@@ -23,8 +23,9 @@ void ACCGameStateGame::AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName Playe
 void ACCGameStateGame::ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
 {
     AllPlayersData.Emplace(PlayerNetId, PlayerTag);
-    SetPlayerTurnData();
+    //SetupPlayersTurnData();
     DisplayPlayersData();
+    OnSelectingColorInLobby.Broadcast();
 }
 
 void ACCGameStateGame::ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn)
@@ -57,7 +58,7 @@ void ACCGameStateGame::DisplayPlayersData()
 
     // Debug display of all availiable players
     if (AllPlayersData.Num() > 0)
-        for (auto& Elem : AllPlayersData)
+        for (TPair<FUniqueNetIdRepl, FName>& Elem : AllPlayersData)
         {
             const FString PlayerId = Elem.Key.GetUniqueNetId()->ToString();
             const FString Tag = Elem.Value.ToString();
@@ -65,10 +66,10 @@ void ACCGameStateGame::DisplayPlayersData()
         }
 }
 
-void ACCGameStateGame::SetPlayerTurnData()
+void ACCGameStateGame::SetupPlayersTurnData()
 {
     if (AllPlayersData.Num() > 0)
-        for (auto& Elem : AllPlayersData)
+        for (TPair<FUniqueNetIdRepl, FName>& Elem : AllPlayersData)
         {
             const FUniqueNetIdRepl PlayerId = Elem.Key.GetUniqueNetId();
             const ETurnColors ColorEnum = GetEnumColorFromTag(Elem.Value.ToString());

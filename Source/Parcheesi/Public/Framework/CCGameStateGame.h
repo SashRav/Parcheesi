@@ -7,6 +7,8 @@
 #include "CCCoreTypes.h"
 #include "CCGameStateGame.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectingColorInLobby);
+
 class ACCDice;
 class ACCPawn;
 
@@ -19,6 +21,7 @@ public:
     void AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
     void ChangePlayerTag(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
     void ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn);
+    void SetupPlayersTurnData();
     FCellsData GetCellData(int32 Index) { return *CellsData.Find(Index); };
     TMap<int32, FCellsData> GetAllCellsData() { return CellsData; }
     bool CheckCellIsValidOnIndex(int32 CellIndex);
@@ -36,11 +39,14 @@ public:
 
     TArray<ACCPawn*> GetAllPawns();
 
+    UPROPERTY(BlueprintAssignable)
+    FOnSelectingColorInLobby OnSelectingColorInLobby;
+
 protected:
     virtual void BeginPlay() override;
 
     void DisplayPlayersData();
-    void SetPlayerTurnData();
+
     ETurnColors GetEnumColorFromTag(FString PlayerTag);
 
     void SetCellsData();
