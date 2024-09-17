@@ -18,7 +18,6 @@ void UCCGameLobbyUI::NativeConstruct()
 
     if (!GetOwningPlayer()->HasAuthority())
     {
-        B_StartGame->SetIsEnabled(false);
         B_StartGame->SetVisibility(ESlateVisibility::Hidden);
         B_BotRed->SetVisibility(ESlateVisibility::Hidden);
         B_BotYellow->SetVisibility(ESlateVisibility::Hidden);
@@ -35,7 +34,11 @@ void UCCGameLobbyUI::NativeConstruct()
     T_GreenPlayerName->SetText(FText::FromString("Empty"));
     T_BluePlayerName->SetText(FText::FromString("Empty"));
 
+    B_StartGame->SetIsEnabled(false);
     B_ReadyToGame->SetIsEnabled(false);
+    B_StartGame->SetToolTipText(FText::FromString("You need at least 2 players ready to start the game"));
+    
+    T_PlayersReady->SetText(FText::FromString("Players Ready: 0/1"));
 
     /// Disable unused UI untill it will be implemented
     B_BotRed->SetIsEnabled(false);
@@ -69,31 +72,47 @@ void UCCGameLobbyUI::StartGameButtonClicked()
 
 void UCCGameLobbyUI::ReadyButtonClicked()
 {
-    B_ReadyToGame->SetIsEnabled(false);
+    if (!GetOwningPlayer()->HasAuthority())
+    {
+        B_ReadyToGame->SetIsEnabled(false);
+    }
+
     OnReadyButtonPressed.Broadcast();
 }
 
 void UCCGameLobbyUI::SelectRedButtonClicked()
 {
-    B_ReadyToGame->SetIsEnabled(true);
+    if (!GetOwningPlayer()->HasAuthority())
+    {
+        B_ReadyToGame->SetIsEnabled(true);
+    }
     OnColorButtonPressed.Broadcast("Red");
 }
 
 void UCCGameLobbyUI::SelectYellowButtonClicked()
 {
-    B_ReadyToGame->SetIsEnabled(true);
+    if (!GetOwningPlayer()->HasAuthority())
+    {
+        B_ReadyToGame->SetIsEnabled(true);
+    }
     OnColorButtonPressed.Broadcast("Yellow");
 }
 
 void UCCGameLobbyUI::SelectGreenButtonClicked()
 {
-    B_ReadyToGame->SetIsEnabled(true);
+    if (!GetOwningPlayer()->HasAuthority())
+    {
+        B_ReadyToGame->SetIsEnabled(true);
+    }
     OnColorButtonPressed.Broadcast("Green");
 }
 
 void UCCGameLobbyUI::SelectBlueButtonClicked()
 {
-    B_ReadyToGame->SetIsEnabled(true);
+    if (!GetOwningPlayer()->HasAuthority())
+    {
+        B_ReadyToGame->SetIsEnabled(true);
+    }
     OnColorButtonPressed.Broadcast("Blue");
 }
 
@@ -125,6 +144,7 @@ void UCCGameLobbyUI::UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPla
 
         UpdateSelectionPlayerName(Player.PlayerName, Player.Tag, IsReadyText);
     }
+    UpdateReadyPlayers(AllPlayersData);
 }
 
 void UCCGameLobbyUI::UpdateSelectionPlayerName(FText PlayerName, FName Tag, FText IsReadyText)
@@ -156,5 +176,32 @@ void UCCGameLobbyUI::UpdateSelectionPlayerName(FText PlayerName, FName Tag, FTex
         B_SelectBlue->SetIsEnabled(false);
         T_BluePlayerReady->SetText(IsReadyText);
         return;
+    }
+}
+
+void UCCGameLobbyUI::UpdateReadyPlayers(const TArray<FAllPlayersData>& AllPlayersData)
+{
+    int32 TotalPlayers = AllPlayersData.Num();
+
+    if (TotalPlayers == 0)
+        return;
+
+    int32 ReadyPlayers = 0;
+
+    for (FAllPlayersData PlayerData : AllPlayersData)
+    {
+        if (PlayerData.bIsReady)
+            ReadyPlayers++;
+    }
+
+    FString ResultString = "Players Ready: " + FString::FromInt(ReadyPlayers) + "/" + FString::FromInt(TotalPlayers);
+    T_PlayersReady->SetText(FText::FromString(ResultString));
+
+    if (!GetOwningPlayer()->HasAuthority())
+        return;
+
+    if (TotalPlayers > 1 && ReadyPlayers == TotalPlayers)
+    {
+        B_StartGame->SetIsEnabled(true);
     }
 }

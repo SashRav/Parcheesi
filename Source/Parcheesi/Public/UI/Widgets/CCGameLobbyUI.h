@@ -35,6 +35,7 @@ public:
 protected:
     virtual void NativeConstruct() override;
     void UpdateSelectionPlayerName(FText PlayerName, FName Tag, FText IsReadyText);
+    void UpdateReadyPlayers(const TArray<FAllPlayersData>& AllPlayersData);
 
     // Global lobby buttons
     UPROPERTY(meta = (BindWidget))
@@ -48,6 +49,9 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     class UButton* B_ReadyToGame;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* T_PlayersReady;
 
     // Pawn selecting buttons
 
