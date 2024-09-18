@@ -32,8 +32,9 @@ void ACCGameStateGame::AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName Playe
     else
         UE_LOG(LogTemp, Display, TEXT("Trying to add player with Not valide Net ID"));
 
+    // Update Players List in lobby
+    OnNewPlayerJoined.Broadcast();
     // Update widgets for players that are alredy in lobby
-    // Will update to separate delegate when will start working on lobby players list
     OnSelectingColorInLobby.Broadcast();
 }
 

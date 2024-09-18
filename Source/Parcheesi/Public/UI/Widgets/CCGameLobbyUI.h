@@ -11,6 +11,9 @@ class UButton;
 class UTextBlock;
 class UCheckBox;
 class USlider;
+class UScrollBox;
+class UCCLobbyPlayerItem;
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartGameButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyButtonPressed);
@@ -36,6 +39,7 @@ public:
 
     void UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPlayersData);
     void UpdateSettings(FGameSettings GameSettings);
+    void UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers);
 
 protected:
     virtual void NativeConstruct() override;
@@ -125,6 +129,13 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* T_DiceCount;
+
+    //Players List
+    UPROPERTY(meta = (BindWidget))
+    class UScrollBox* SB_PlayersList;
+
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<UCCLobbyPlayerItem> LobbyPlayerItemClass;
 
     UFUNCTION()
     void StartGameButtonClicked();

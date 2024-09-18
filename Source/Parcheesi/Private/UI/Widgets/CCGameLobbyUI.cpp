@@ -1,14 +1,18 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
 #include "UI/Widgets/CCGameLobbyUI.h"
+#include "UI/Widgets/CCLobbyPlayerItem.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Slider.h"
 #include "Components/CheckBox.h"
+#include "Components/ScrollBox.h"
 #include "CCCoreTypes.h"
 
 void UCCGameLobbyUI::NativeConstruct()
 {
+    Super::NativeConstruct();
+
     B_StartGame->OnClicked.AddDynamic(this, &UCCGameLobbyUI::StartGameButtonClicked);
     B_SelectRed->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectRedButtonClicked);
     B_SelectYellow->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectYellowButtonClicked);
@@ -246,4 +250,18 @@ void UCCGameLobbyUI::UpdateSettings(FGameSettings GameSettings)
     T_DiceCount->SetText(FText::FromString(FString::SanitizeFloat(GameSettings.DicesToRool, 0)));
     S_DicesCount->SetValue(GameSettings.DicesToRool);
     C_MoveFromStart->SetIsChecked(GameSettings.bMoveWithSix);
+}
+
+void UCCGameLobbyUI::UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers)
+{
+    SB_PlayersList->ClearChildren();
+    if (AllPlayers.Num() == 0)
+        return;
+
+    for (FUniqueNetIdRepl Item : AllPlayers)
+    {
+        UCCLobbyPlayerItem* PlayerInfo = CreateWidget<UCCLobbyPlayerItem>(GetWorld(), LobbyPlayerItemClass);
+        PlayerInfo->SetPlayerName(FText::FromString(Item->ToString().Left(20))); // Hardcoded untill using Players names
+        SB_PlayersList->AddChild(PlayerInfo);
+    }
 }

@@ -116,3 +116,9 @@ void ACCControllerGame::Client_UpdateLobbySettings_Implementation(FGameSettings 
     if (OwningHUD)
         OwningHUD->UpdateLobbySettings(GameSettings);
 }
+
+void ACCControllerGame::Client_UpdatePlayersList_Implementation(const TArray<FUniqueNetIdRepl>& AllPlayers)
+{
+    if (OwningHUD)
+        OwningHUD->UpdatePlayersList(AllPlayers);
+}

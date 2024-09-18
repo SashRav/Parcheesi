@@ -47,9 +47,11 @@ void ACCPlayerPawnGame::BeginPlay()
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
     ServerGameState->OnSelectingColorInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySelection);
     ServerGameState->OnUpdatingSettingsInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySettings);
+    ServerGameState->OnNewPlayerJoined.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbyPlayers);
 
     Server_UpdateLobbySelection();
     Server_UpdateLobbySettings();
+    Server_UpdateLobbyPlayers();
 }
 
 void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputComponent)
@@ -343,7 +345,7 @@ void ACCPlayerPawnGame::Client_UpdateLobbySelection_Implementation(const TArray<
         OwningPlayerController->Client_UpdateLobbySelection(AllPlayersData);
 }
 
-void ACCPlayerPawnGame::Server_UpdateLobbySettings_Implementation() 
+void ACCPlayerPawnGame::Server_UpdateLobbySettings_Implementation()
 {
     FGameSettings GameSettings = ServerGameState->GetGameSettings();
     Client_UpdateLobbySettings(GameSettings);
@@ -353,4 +355,18 @@ void ACCPlayerPawnGame::Client_UpdateLobbySettings_Implementation(FGameSettings 
 {
     if (OwningPlayerController)
         OwningPlayerController->Client_UpdateLobbySettings(GameSettings);
+}
+
+void ACCPlayerPawnGame::Server_UpdateLobbyPlayers_Implementation()
+{
+    TArray<FUniqueNetIdRepl> PlayersArray;
+    ServerGameState->GetAllPlayersData().GetKeys(PlayersArray);
+
+    Client_UpdateLobbyPlayers(PlayersArray);
+}
+
+void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FUniqueNetIdRepl>& AllPlayers)
+{
+    if (OwningPlayerController)
+        OwningPlayerController->Client_UpdatePlayersList(AllPlayers);
 }

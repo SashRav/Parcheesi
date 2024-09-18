@@ -63,6 +63,9 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_UpdateLobbySettings();
 
+    UFUNCTION(Server, Reliable)
+    void Server_UpdateLobbyPlayers();
+
 protected:
     virtual void BeginPlay() override;
 
@@ -104,6 +107,9 @@ protected:
 
     UFUNCTION(Client, Reliable)
     void Client_UpdateLobbySettings(FGameSettings GameSettings);
+
+    UFUNCTION(Client, Reliable)
+    void Client_UpdateLobbyPlayers(const TArray<FUniqueNetIdRepl>& AllPlayers);
 
 
     UFUNCTION(NetMulticast, Reliable)

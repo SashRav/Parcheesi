@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectingColorInLobby);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUpdatingSettingsInLobby);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNewPlayerJoined);
 
 class ACCDice;
 class ACCPawn;
@@ -48,6 +49,9 @@ public:
 
     UPROPERTY(BlueprintAssignable)
     FOnUpdatingSettingsInLobby OnUpdatingSettingsInLobby;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnNewPlayerJoined OnNewPlayerJoined;
 
 protected:
     virtual void BeginPlay() override;

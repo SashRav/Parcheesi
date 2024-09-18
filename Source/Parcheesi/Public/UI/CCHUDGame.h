@@ -81,6 +81,7 @@ public:
 
     void UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
     void UpdateLobbySettings(FGameSettings GameSettings);
+    void UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers);
 
 private:
     UPROPERTY()
