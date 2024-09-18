@@ -237,3 +237,9 @@ void ACCGameModeBaseGame::FinishGame(FName PlayerTagName)
         GameController->Client_ShowWinWidget(FText::FromName(PlayerTagName));
     }
 }
+
+void ACCGameModeBaseGame::SaveGameSettings(FGameSettings Settings) 
+{
+    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    GameStateGame->SetGameSettings(Settings);
+}

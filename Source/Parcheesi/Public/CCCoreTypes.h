@@ -65,6 +65,18 @@ struct FPlayerInfo : public FTableRowBase
     bool bIsReady;
 };
 
+USTRUCT(BlueprintType)
+struct FGameSettings : public FTableRowBase
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    bool bMoveWithSix;
+
+    UPROPERTY()
+    int32 DicesToRool;
+};
+
 UENUM(BlueprintType)
 enum class ETurnColors : uint8
 {

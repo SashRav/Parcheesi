@@ -15,6 +15,9 @@ void UCCGameLobbyUI::NativeConstruct()
     B_SelectGreen->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectGreenButtonClicked);
     B_SelectBlue->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectBlueButtonClicked);
     B_ReadyToGame->OnClicked.AddDynamic(this, &UCCGameLobbyUI::ReadyButtonClicked);
+    B_SaveSettings->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SaveSettingsButtonClicked);
+    C_MoveFromStart->OnCheckStateChanged.AddDynamic(this, &UCCGameLobbyUI::MoveFromStartChecked);
+    S_DicesCount->OnValueChanged.AddDynamic(this, &UCCGameLobbyUI::DicesToUseCountChanged);
 
     if (!GetOwningPlayer()->HasAuthority())
     {
@@ -23,6 +26,8 @@ void UCCGameLobbyUI::NativeConstruct()
         B_BotYellow->SetVisibility(ESlateVisibility::Hidden);
         B_BotGreen->SetVisibility(ESlateVisibility::Hidden);
         B_BotBlue->SetVisibility(ESlateVisibility::Hidden);
+        C_MoveFromStart->SetIsEnabled(false);
+        S_DicesCount->SetIsEnabled(false);
     }
     else
     {
@@ -37,7 +42,10 @@ void UCCGameLobbyUI::NativeConstruct()
     B_StartGame->SetIsEnabled(false);
     B_ReadyToGame->SetIsEnabled(false);
     B_StartGame->SetToolTipText(FText::FromString("You need at least 2 players ready to start the game"));
-    
+
+    B_SaveSettings->SetIsEnabled(false);
+    B_SaveSettings->SetVisibility(ESlateVisibility::Hidden);
+
     T_PlayersReady->SetText(FText::FromString("Players Ready: 0/1"));
 
     /// Disable unused UI untill it will be implemented
@@ -51,17 +59,10 @@ void UCCGameLobbyUI::NativeConstruct()
     B_BotBlue->SetToolTipText(FText::FromString("Not yet implemented"));
 
     B_ExitLobby->SetIsEnabled(false);
-    B_SaveSettings->SetIsEnabled(false);
-    B_ExitLobby->SetToolTipText(FText::FromString("Not yet implemented"));
-    B_SaveSettings->SetToolTipText(FText::FromString("Not yet implemented"));
-
     C_CatMode->SetIsEnabled(false);
-    C_MoveFromStart->SetIsEnabled(false);
-    S_DicesCount->SetIsEnabled(false);
     S_RoundsToBonus->SetIsEnabled(false);
+    B_ExitLobby->SetToolTipText(FText::FromString("Not yet implemented"));
     C_CatMode->SetToolTipText(FText::FromString("Not yet implemented"));
-    C_MoveFromStart->SetToolTipText(FText::FromString("Not yet implemented"));
-    S_DicesCount->SetToolTipText(FText::FromString("Not yet implemented"));
     S_RoundsToBonus->SetToolTipText(FText::FromString("Not yet implemented"));
 }
 
@@ -147,6 +148,7 @@ void UCCGameLobbyUI::UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPla
     UpdateReadyPlayers(AllPlayersData);
 }
 
+
 void UCCGameLobbyUI::UpdateSelectionPlayerName(FText PlayerName, FName Tag, FText IsReadyText)
 {
     if (Tag == "Red")
@@ -204,4 +206,44 @@ void UCCGameLobbyUI::UpdateReadyPlayers(const TArray<FAllPlayersData>& AllPlayer
     {
         B_StartGame->SetIsEnabled(true);
     }
+}
+
+void UCCGameLobbyUI::SaveSettingsButtonClicked()
+{
+    if (GetOwningPlayer()->HasAuthority())
+    {
+        FGameSettings GameSettings;
+        GameSettings.bMoveWithSix = C_MoveFromStart->IsChecked();
+        GameSettings.DicesToRool = S_DicesCount->GetValue();
+
+        OnSaveSettingsButtonPressed.Broadcast(GameSettings);
+
+        B_SaveSettings->SetIsEnabled(false);
+        B_SaveSettings->SetVisibility(ESlateVisibility::Hidden);
+    }
+}
+
+void UCCGameLobbyUI::DicesToUseCountChanged(float Value)
+{
+    if (GetOwningPlayer()->HasAuthority())
+    {
+        T_DiceCount->SetText(FText::FromString(FString::SanitizeFloat(Value, 0)));
+        B_SaveSettings->SetIsEnabled(true);
+        B_SaveSettings->SetVisibility(ESlateVisibility::Visible);
+    }
+}
+void UCCGameLobbyUI::MoveFromStartChecked(bool bIsChecked)
+{
+    if (GetOwningPlayer()->HasAuthority())
+    {
+        B_SaveSettings->SetIsEnabled(true);
+        B_SaveSettings->SetVisibility(ESlateVisibility::Visible);
+    }
+}
+
+void UCCGameLobbyUI::UpdateSettings(FGameSettings GameSettings)
+{
+    T_DiceCount->SetText(FText::FromString(FString::SanitizeFloat(GameSettings.DicesToRool, 0)));
+    S_DicesCount->SetValue(GameSettings.DicesToRool);
+    C_MoveFromStart->SetIsChecked(GameSettings.bMoveWithSix);
 }

@@ -110,3 +110,9 @@ void ACCControllerGame::Client_UpdateLobbySelection_Implementation(const TArray<
     if (OwningHUD)
         OwningHUD->UpdateLobbySelection(AllPlayersData);
 }
+
+void ACCControllerGame::Client_UpdateLobbySettings_Implementation(FGameSettings GameSettings)
+{
+    if (OwningHUD)
+        OwningHUD->UpdateLobbySettings(GameSettings);
+}

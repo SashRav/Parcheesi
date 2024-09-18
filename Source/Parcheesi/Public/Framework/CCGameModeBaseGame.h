@@ -25,6 +25,8 @@ public:
     
     void FinishGame(FName PlayerTagName);
 
+    void SaveGameSettings(FGameSettings Settings);
+
 protected:
     UPROPERTY()
     TArray<FPlayersTurnData> PlayersTurnData;

@@ -227,7 +227,7 @@ bool UCCPawnManagerComponent::CheckPawnCanMove(ACCPawn* Pawn, int32 Steps)
 
     if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnStart)
     {
-        if (Steps != 6) // Hardcoded untill I will add this setting to lobby
+        if (GameState->GetGameSettings().bMoveWithSix && Steps != 6)
             return false;
         else
             return CheckCanMoveToTargetCell(Pawn, Pawn->GetFirstBoardCellIndex());

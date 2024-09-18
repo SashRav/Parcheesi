@@ -34,6 +34,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UCCWinWidget> WinWidgetClass;
 
+    // Lobby UI
     UFUNCTION()
     void StartGameFromLobby();
 
@@ -43,6 +44,10 @@ protected:
     UFUNCTION()
     void PlayerReady();
 
+    UFUNCTION()
+    void SaveGameSettings(FGameSettings Settings);
+
+    // Game UI
     UFUNCTION()
     void EndPlayerTurn();
 
@@ -75,6 +80,7 @@ public:
     void ShowWinWidget(FText WinnerName);
 
     void UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
+    void UpdateLobbySettings(FGameSettings GameSettings);
 
 private:
     UPROPERTY()

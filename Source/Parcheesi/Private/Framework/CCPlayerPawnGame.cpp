@@ -46,8 +46,10 @@ void ACCPlayerPawnGame::BeginPlay()
 
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
     ServerGameState->OnSelectingColorInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySelection);
+    ServerGameState->OnUpdatingSettingsInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySettings);
 
     Server_UpdateLobbySelection();
+    Server_UpdateLobbySettings();
 }
 
 void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputComponent)
@@ -339,4 +341,16 @@ void ACCPlayerPawnGame::Client_UpdateLobbySelection_Implementation(const TArray<
 {
     if (OwningPlayerController)
         OwningPlayerController->Client_UpdateLobbySelection(AllPlayersData);
+}
+
+void ACCPlayerPawnGame::Server_UpdateLobbySettings_Implementation() 
+{
+    FGameSettings GameSettings = ServerGameState->GetGameSettings();
+    Client_UpdateLobbySettings(GameSettings);
+}
+
+void ACCPlayerPawnGame::Client_UpdateLobbySettings_Implementation(FGameSettings GameSettings)
+{
+    if (OwningPlayerController)
+        OwningPlayerController->Client_UpdateLobbySettings(GameSettings);
 }

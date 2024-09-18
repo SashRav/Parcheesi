@@ -60,6 +60,9 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_UpdateLobbySelection();
 
+    UFUNCTION(Server, Reliable)
+    void Server_UpdateLobbySettings();
+
 protected:
     virtual void BeginPlay() override;
 
@@ -98,6 +101,10 @@ protected:
 
     UFUNCTION(Client, Reliable)
     void Client_UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
+
+    UFUNCTION(Client, Reliable)
+    void Client_UpdateLobbySettings(FGameSettings GameSettings);
+
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_HandlePawnMovementFinished();

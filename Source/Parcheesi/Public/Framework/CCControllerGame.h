@@ -47,6 +47,9 @@ public:
     UFUNCTION(Client, Reliable)
     void Client_UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
 
+    UFUNCTION(Client, Reliable)
+    void Client_UpdateLobbySettings(FGameSettings GameSettings);
+
 protected:
     UPROPERTY()
     ACCHUDGame* OwningHUD;

@@ -28,6 +28,7 @@ void ACCHUDGame::BeginPlay()
     LobbyWidget->OnStartGameButtonPressedEvent.AddDynamic(this, &ACCHUDGame::StartGameFromLobby);
     LobbyWidget->OnColorButtonPressed.AddDynamic(this, &ACCHUDGame::SelectColorInLobby);
     LobbyWidget->OnReadyButtonPressed.AddDynamic(this, &ACCHUDGame::PlayerReady);
+    LobbyWidget->OnSaveSettingsButtonPressed.AddDynamic(this, &ACCHUDGame::SaveGameSettings);
 
     TurnInfoContainerWidget = CreateWidget<UCCPlayersTurnContainer>(GetWorld(), TurnInfoContainerWidgetClass);
     TurnInfoContainerWidget->AddToViewport();
@@ -85,6 +86,12 @@ void ACCHUDGame::SelectColorInLobby(FName ColorTag)
 void ACCHUDGame::PlayerReady()
 {
     OwningPlayerPawn->Server_PlayerIsReady();
+}
+
+void ACCHUDGame::SaveGameSettings(FGameSettings Settings)
+{
+    ACCGameModeBaseGame* ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
+    ServerGameMode->SaveGameSettings(Settings);
 }
 
 void ACCHUDGame::EndPlayerTurn()
@@ -152,4 +159,9 @@ void ACCHUDGame::ShowWinWidget(FText WinnerName)
 void ACCHUDGame::UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData)
 {
     LobbyWidget->UpdateSelectionStatus(AllPlayersData);
+}
+
+void ACCHUDGame::UpdateLobbySettings(FGameSettings GameSettings)
+{
+    LobbyWidget->UpdateSettings(GameSettings);
 }

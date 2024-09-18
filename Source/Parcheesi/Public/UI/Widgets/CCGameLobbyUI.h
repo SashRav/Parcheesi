@@ -15,6 +15,7 @@ class USlider;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartGameButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorButtonPressed, FName, ColorTag);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSaveSettingsButtonPressed, FGameSettings, GameSettings);
 
 UCLASS() class PARCHEESI_API UCCGameLobbyUI : public UUserWidget
 {
@@ -30,7 +31,11 @@ public:
     UPROPERTY(BlueprintAssignable)
     FOnReadyButtonPressed OnReadyButtonPressed;
 
+    UPROPERTY(BlueprintAssignable)
+    FOnSaveSettingsButtonPressed OnSaveSettingsButtonPressed;
+
     void UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPlayersData);
+    void UpdateSettings(FGameSettings GameSettings);
 
 protected:
     virtual void NativeConstruct() override;
@@ -118,6 +123,9 @@ protected:
     UPROPERTY(meta = (BindWidget))
     class UCheckBox* C_CatMode;
 
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* T_DiceCount;
+
     UFUNCTION()
     void StartGameButtonClicked();
 
@@ -135,4 +143,13 @@ protected:
 
     UFUNCTION()
     void SelectBlueButtonClicked();
+
+    UFUNCTION()
+    void SaveSettingsButtonClicked();
+
+    UFUNCTION()
+    void DicesToUseCountChanged(float Value);
+
+    UFUNCTION()
+    void MoveFromStartChecked(bool bIsChecked);
 };

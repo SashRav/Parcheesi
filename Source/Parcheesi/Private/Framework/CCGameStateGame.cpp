@@ -6,6 +6,16 @@
 #include "Kismet/GameplayStatics.h"
 #include "CCCoreTypes.h"
 
+void ACCGameStateGame::BeginPlay()
+{
+    Super::BeginPlay();
+
+    SetCellsData();
+
+    GameSettingsData.bMoveWithSix = true;
+    GameSettingsData.DicesToRool = 2;
+}
+
 void ACCGameStateGame::AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
 {
     UE_LOG(LogTemp, Display, TEXT("Run game state function"));
@@ -21,10 +31,10 @@ void ACCGameStateGame::AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName Playe
     }
     else
         UE_LOG(LogTemp, Display, TEXT("Trying to add player with Not valide Net ID"));
-    
+
     // Update widgets for players that are alredy in lobby
     // Will update to separate delegate when will start working on lobby players list
-    OnSelectingColorInLobby.Broadcast(); 
+    OnSelectingColorInLobby.Broadcast();
 }
 
 void ACCGameStateGame::ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo)
@@ -101,6 +111,12 @@ void ACCGameStateGame::SetCellsData()
     }
 }
 
+void ACCGameStateGame::SetGameSettings(FGameSettings Settings)
+{
+    GameSettingsData = Settings;
+    OnUpdatingSettingsInLobby.Broadcast();
+}
+
 TArray<ACCPawn*> ACCGameStateGame::GetAllPawns()
 {
     TArray<AActor*> FoundActors;
@@ -113,11 +129,4 @@ TArray<ACCPawn*> ACCGameStateGame::GetAllPawns()
     }
 
     return FoundPawns;
-}
-
-void ACCGameStateGame::BeginPlay()
-{
-    Super::BeginPlay();
-
-    SetCellsData();
 }

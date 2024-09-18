@@ -35,19 +35,21 @@ void UCCDiceComponent::RollDices() {
 
     FRotator Rotation;
     FVector SpawnLocation(500.0f, -100.0f, 600.0f);
+    int32 DicesToSpawn = ServerGameState->GetGameSettings().DicesToRool;
 
-    Rotation.Pitch = FMath::RandRange(-180.0, 180.0);
-    Rotation.Yaw = FMath::RandRange(-180.0, 180.0);
-    Rotation.Roll = FMath::RandRange(-180.0, 180.0);
+    if (DicesToSpawn < 1 || DicesToSpawn > 4) // Additional check to not spawn 0 dices or more then places available
+        return;
 
-    SpawnDice(SpawnLocation, Rotation, true, true);
+    for (int32 DiceNumber = 1; DiceNumber <= DicesToSpawn; DiceNumber++)
+    {
+        Rotation.Pitch = FMath::RandRange(-180.0, 180.0);
+        Rotation.Yaw = FMath::RandRange(-180.0, 180.0);
+        Rotation.Roll = FMath::RandRange(-180.0, 180.0);
+        SpawnLocation.Y = FMath::RandRange(-150.0, 150.0);
+        SpawnLocation.X = FMath::RandRange(-150.0, 150.0);
 
-    Rotation.Pitch = FMath::RandRange(-180.0, 180.0);
-    Rotation.Yaw = FMath::RandRange(-180.0, 180.0);
-    Rotation.Roll = FMath::RandRange(-180.0, 180.0);
-    SpawnLocation.Y = 100.0f;
-
-    SpawnDice(SpawnLocation, Rotation, true, true);
+        SpawnDice(SpawnLocation, Rotation, true, true);
+    }
 
     TimerDelegate.BindUFunction(this, FName("MoveDicesToBoard"), DicePlacesLocation);
     GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, DiceMoveDelay, false);

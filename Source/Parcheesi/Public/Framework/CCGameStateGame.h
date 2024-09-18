@@ -8,6 +8,7 @@
 #include "CCGameStateGame.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectingColorInLobby);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUpdatingSettingsInLobby);
 
 class ACCDice;
 class ACCPawn;
@@ -37,10 +38,16 @@ public:
     TArray<ACCDice*> GetSpawnedDices() { return SpawnedDices; }
     void CleanSpawnedDicesArray() { SpawnedDices.Empty(); }
 
+    FGameSettings GetGameSettings() { return GameSettingsData; }
+    void SetGameSettings(FGameSettings Settings);
+
     TArray<ACCPawn*> GetAllPawns();
 
     UPROPERTY(BlueprintAssignable)
     FOnSelectingColorInLobby OnSelectingColorInLobby;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnUpdatingSettingsInLobby OnUpdatingSettingsInLobby;
 
 protected:
     virtual void BeginPlay() override;
@@ -63,4 +70,7 @@ protected:
 
     UPROPERTY()
     TArray<ACCDice*> SpawnedDices;
+
+    UPROPERTY()
+    FGameSettings GameSettingsData;
 };
