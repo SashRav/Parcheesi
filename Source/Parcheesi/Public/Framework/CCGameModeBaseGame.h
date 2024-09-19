@@ -26,6 +26,7 @@ public:
     void FinishGame(FName PlayerTagName);
 
     void SaveGameSettings(FGameSettings Settings);
+    void DisconnectPlayer(FUniqueNetIdRepl PlayerID);
 
 protected:
     UPROPERTY()

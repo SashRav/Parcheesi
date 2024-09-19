@@ -7,10 +7,10 @@
 #include "UI/Widgets/CCQuickMenuWidget.h"
 #include "UI/Widgets/CCWinWidget.h"
 #include "Framework/CCPlayerPawnGame.h"
-#include "Framework/CCControllerGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "Framework/CCGameModeBaseGame.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
 #include "CCCoreTypes.h"
 
 void ACCHUDGame::BeginPlay()
@@ -29,6 +29,7 @@ void ACCHUDGame::BeginPlay()
     LobbyWidget->OnColorButtonPressed.AddDynamic(this, &ACCHUDGame::SelectColorInLobby);
     LobbyWidget->OnReadyButtonPressed.AddDynamic(this, &ACCHUDGame::PlayerReady);
     LobbyWidget->OnSaveSettingsButtonPressed.AddDynamic(this, &ACCHUDGame::SaveGameSettings);
+    LobbyWidget->OnExitToMenuButtonPressed.AddDynamic(this, &ACCHUDGame::DisconnectCurrentPlayerFromLobby);
 
     TurnInfoContainerWidget = CreateWidget<UCCPlayersTurnContainer>(GetWorld(), TurnInfoContainerWidgetClass);
     TurnInfoContainerWidget->AddToViewport();
@@ -170,3 +171,14 @@ void ACCHUDGame::UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers)
 {
     LobbyWidget->UpdatePlayersList(AllPlayers);
 }
+
+void ACCHUDGame::RemovePlayerFromLobby(FUniqueNetIdRepl PlayerID)
+{
+    OwningPlayerPawn->Server_DisconnectPlayer(PlayerID);
+}
+
+void ACCHUDGame::DisconnectCurrentPlayerFromLobby() 
+{
+    RemovePlayerFromLobby(OwningPlayerPawn->GetPlayerState()->GetUniqueId());
+}
+

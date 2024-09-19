@@ -20,6 +20,7 @@ void UCCGameLobbyUI::NativeConstruct()
     B_SelectBlue->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectBlueButtonClicked);
     B_ReadyToGame->OnClicked.AddDynamic(this, &UCCGameLobbyUI::ReadyButtonClicked);
     B_SaveSettings->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SaveSettingsButtonClicked);
+    B_ExitLobby->OnClicked.AddDynamic(this, &UCCGameLobbyUI::DisconnectCurrentPlayer);
     C_MoveFromStart->OnCheckStateChanged.AddDynamic(this, &UCCGameLobbyUI::MoveFromStartChecked);
     S_DicesCount->OnValueChanged.AddDynamic(this, &UCCGameLobbyUI::DicesToUseCountChanged);
 
@@ -52,6 +53,8 @@ void UCCGameLobbyUI::NativeConstruct()
 
     T_PlayersReady->SetText(FText::FromString("Players Ready: 0/1"));
 
+    B_ExitLobby->SetIsEnabled(true);
+
     /// Disable unused UI untill it will be implemented
     B_BotRed->SetIsEnabled(false);
     B_BotYellow->SetIsEnabled(false);
@@ -62,10 +65,9 @@ void UCCGameLobbyUI::NativeConstruct()
     B_BotGreen->SetToolTipText(FText::FromString("Not yet implemented"));
     B_BotBlue->SetToolTipText(FText::FromString("Not yet implemented"));
 
-    B_ExitLobby->SetIsEnabled(false);
+    
     C_CatMode->SetIsEnabled(false);
     S_RoundsToBonus->SetIsEnabled(false);
-    B_ExitLobby->SetToolTipText(FText::FromString("Not yet implemented"));
     C_CatMode->SetToolTipText(FText::FromString("Not yet implemented"));
     S_RoundsToBonus->SetToolTipText(FText::FromString("Not yet implemented"));
 }
@@ -264,4 +266,9 @@ void UCCGameLobbyUI::UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayer
         PlayerInfo->SetPlayerName(FText::FromString(Item->ToString().Left(20))); // Hardcoded untill using Players names
         SB_PlayersList->AddChild(PlayerInfo);
     }
+}
+
+void UCCGameLobbyUI::DisconnectCurrentPlayer() 
+{
+    OnExitToMenuButtonPressed.Broadcast();
 }

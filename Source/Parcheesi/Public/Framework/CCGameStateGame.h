@@ -9,7 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectingColorInLobby);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUpdatingSettingsInLobby);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNewPlayerJoined);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayersCountChanged);
 
 class ACCDice;
 class ACCPawn;
@@ -29,6 +29,7 @@ public:
     bool CheckCellIsValidOnIndex(int32 CellIndex);
 
     TMap<FUniqueNetIdRepl, FPlayerInfo> GetAllPlayersData() { return AllPlayersData; };
+    void RemovePlayerFromPlayersData(FUniqueNetIdRepl PlayerID);
     TMap<ETurnColors, FUniqueNetIdRepl> GetPlayersTurnData() { return PlayersTurnData; }
 
     void SetCurrentTurnColor(ETurnColors Color) { CurrentTurnColor = Color; };
@@ -51,7 +52,7 @@ public:
     FOnUpdatingSettingsInLobby OnUpdatingSettingsInLobby;
 
     UPROPERTY(BlueprintAssignable)
-    FOnNewPlayerJoined OnNewPlayerJoined;
+    FOnPlayersCountChanged OnPlayersCountChanged;
 
 protected:
     virtual void BeginPlay() override;

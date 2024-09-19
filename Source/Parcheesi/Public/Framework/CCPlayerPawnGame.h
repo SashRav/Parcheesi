@@ -66,6 +66,9 @@ public:
     UFUNCTION(Server, Reliable)
     void Server_UpdateLobbyPlayers();
 
+    UFUNCTION(Server, Reliable)
+    void Server_DisconnectPlayer(FUniqueNetIdRepl PlayerID);
+
 protected:
     virtual void BeginPlay() override;
 
@@ -110,7 +113,6 @@ protected:
 
     UFUNCTION(Client, Reliable)
     void Client_UpdateLobbyPlayers(const TArray<FUniqueNetIdRepl>& AllPlayers);
-
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_HandlePawnMovementFinished();

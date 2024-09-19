@@ -47,7 +47,7 @@ void ACCPlayerPawnGame::BeginPlay()
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
     ServerGameState->OnSelectingColorInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySelection);
     ServerGameState->OnUpdatingSettingsInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySettings);
-    ServerGameState->OnNewPlayerJoined.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbyPlayers);
+    ServerGameState->OnPlayersCountChanged.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbyPlayers);
 
     Server_UpdateLobbySelection();
     Server_UpdateLobbySettings();
@@ -369,4 +369,9 @@ void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FU
 {
     if (OwningPlayerController)
         OwningPlayerController->Client_UpdatePlayersList(AllPlayers);
+}
+
+void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl PlayerID) 
+{
+    ServerGameMode->DisconnectPlayer(PlayerID);
 }

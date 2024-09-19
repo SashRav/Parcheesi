@@ -14,9 +14,9 @@ class USlider;
 class UScrollBox;
 class UCCLobbyPlayerItem;
 
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartGameButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyButtonPressed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnExitToMenuFromLobbyButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorButtonPressed, FName, ColorTag);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSaveSettingsButtonPressed, FGameSettings, GameSettings);
 
@@ -36,6 +36,9 @@ public:
 
     UPROPERTY(BlueprintAssignable)
     FOnSaveSettingsButtonPressed OnSaveSettingsButtonPressed;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnExitToMenuFromLobbyButtonPressed OnExitToMenuButtonPressed;
 
     void UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPlayersData);
     void UpdateSettings(FGameSettings GameSettings);
@@ -130,7 +133,7 @@ protected:
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* T_DiceCount;
 
-    //Players List
+    // Players List
     UPROPERTY(meta = (BindWidget))
     class UScrollBox* SB_PlayersList;
 
@@ -163,4 +166,7 @@ protected:
 
     UFUNCTION()
     void MoveFromStartChecked(bool bIsChecked);
+
+    UFUNCTION()
+    void DisconnectCurrentPlayer();
 };

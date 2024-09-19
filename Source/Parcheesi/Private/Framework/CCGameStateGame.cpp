@@ -33,7 +33,7 @@ void ACCGameStateGame::AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName Playe
         UE_LOG(LogTemp, Display, TEXT("Trying to add player with Not valide Net ID"));
 
     // Update Players List in lobby
-    OnNewPlayerJoined.Broadcast();
+    OnPlayersCountChanged.Broadcast();
     // Update widgets for players that are alredy in lobby
     OnSelectingColorInLobby.Broadcast();
 }
@@ -65,6 +65,12 @@ bool ACCGameStateGame::CheckCellIsValidOnIndex(int32 CellIndex)
         return true;
 
     return false;
+}
+
+void ACCGameStateGame::RemovePlayerFromPlayersData(FUniqueNetIdRepl PlayerID)
+{
+    AllPlayersData.Remove(PlayerID);
+    OnPlayersCountChanged.Broadcast();
 }
 
 void ACCGameStateGame::SetupPlayersTurnData()

@@ -60,9 +60,14 @@ protected:
     UFUNCTION()
     void MovePawn();
 
+    UFUNCTION()
+    void DisconnectCurrentPlayerFromLobby();
+
     virtual void BeginPlay() override;
 
     void AddQuickMenuWidget();
+    
+    void RemovePlayerFromLobby(FUniqueNetIdRepl PlayerID);
 
 public:
     void RemoveLobbyWidget();

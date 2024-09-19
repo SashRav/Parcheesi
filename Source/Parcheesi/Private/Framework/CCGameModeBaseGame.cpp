@@ -69,7 +69,6 @@ void ACCGameModeBaseGame::UpdatePlayersTurnData()
     TArray<ETurnColors> PlayersColors;
 
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-    //TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersData = GameStateGame->GetAllPlayersData();
     TMap<ETurnColors, FUniqueNetIdRepl> AllPlayersTurnData = GameStateGame->GetPlayersTurnData();
     ETurnColors CurrentTurnColor = GameStateGame->GetCurrentTurnColor();
     AllPlayersTurnData.GetKeys(PlayersColors);
@@ -238,8 +237,19 @@ void ACCGameModeBaseGame::FinishGame(FName PlayerTagName)
     }
 }
 
-void ACCGameModeBaseGame::SaveGameSettings(FGameSettings Settings) 
+void ACCGameModeBaseGame::SaveGameSettings(FGameSettings Settings)
 {
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameStateGame->SetGameSettings(Settings);
+}
+
+void ACCGameModeBaseGame::DisconnectPlayer(FUniqueNetIdRepl PlayerID)
+{
+    ACCControllerGame* PlayerController =
+        Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerID)->GetOwningController());
+
+    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    GameStateGame->RemovePlayerFromPlayersData(PlayerID);
+
+    PlayerController->ClientTravel("/Game/Maps/MenuMap", ETravelType::TRAVEL_Absolute);
 }
