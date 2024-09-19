@@ -9,6 +9,9 @@
 #include "BoardItems/CCCellStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "CCCoreTypes.h"
+#include "OnlineSubsystemUtils.h"
+#include "Interfaces/OnlineSessionInterface.h"
+
 
 ACCGameModeBaseGame::ACCGameModeBaseGame() {}
 
@@ -250,6 +253,15 @@ void ACCGameModeBaseGame::DisconnectPlayer(FUniqueNetIdRepl PlayerID)
 
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameStateGame->RemovePlayerFromPlayersData(PlayerID);
+
+    if (PlayerController->HasAuthority())
+    {
+        IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
+        if (SessionInterface.IsValid())
+        {
+            SessionInterface->DestroySession(FName("My session")); // Hardcoded untill session creation system will be implemented properly
+        }
+    }
 
     PlayerController->ClientTravel("/Game/Maps/MenuMap", ETravelType::TRAVEL_Absolute);
 }

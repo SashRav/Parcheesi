@@ -26,7 +26,7 @@ public:
     FOnBackButtonPressed FOnBackButtonPressedEvent;
 
     UPROPERTY(BlueprintAssignable)
-    FOnExitToMenuButtonPressed FOnExitToMenuButtonPressedEvent;
+    FOnExitToMenuButtonPressed OnExitToMenuButtonPressedEvent;
 
     void SwitchQuickMenuVisibility();
 

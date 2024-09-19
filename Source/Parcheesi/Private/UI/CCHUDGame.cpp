@@ -43,6 +43,7 @@ void ACCHUDGame::BeginPlay()
     GameTurnButtonsWidget->OnMovePawnPressedEvent.AddDynamic(this, &ACCHUDGame::MovePawn);
 
     QuickMenuWidget = CreateWidget<UCCQuickMenuWidget>(GetWorld(), QuickMenuWidgetClass);
+    QuickMenuWidget->OnExitToMenuButtonPressedEvent.AddDynamic(this, &ACCHUDGame::DisconnectCurrentPlayerFromGame);
 
     WinWidget = CreateWidget<UCCWinWidget>(GetWorld(), WinWidgetClass);
     WinWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -172,13 +173,19 @@ void ACCHUDGame::UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers)
     LobbyWidget->UpdatePlayersList(AllPlayers);
 }
 
-void ACCHUDGame::RemovePlayerFromLobby(FUniqueNetIdRepl PlayerID)
+void ACCHUDGame::RemovePlayerFromGame(FUniqueNetIdRepl PlayerID)
 {
     OwningPlayerPawn->Server_DisconnectPlayer(PlayerID);
 }
 
 void ACCHUDGame::DisconnectCurrentPlayerFromLobby() 
 {
-    RemovePlayerFromLobby(OwningPlayerPawn->GetPlayerState()->GetUniqueId());
+    RemovePlayerFromGame(OwningPlayerPawn->GetPlayerState()->GetUniqueId());
 }
 
+
+void ACCHUDGame::DisconnectCurrentPlayerFromGame() 
+{
+    // Will be additional functional to set bot instead of player
+    RemovePlayerFromGame(OwningPlayerPawn->GetPlayerState()->GetUniqueId());
+}
