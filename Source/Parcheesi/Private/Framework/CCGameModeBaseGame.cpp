@@ -254,7 +254,7 @@ void ACCGameModeBaseGame::DisconnectPlayer(FUniqueNetIdRepl PlayerID)
     ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameStateGame->RemovePlayerFromPlayersData(PlayerID);
 
-    if (PlayerController->HasAuthority())
+    if (PlayerController->GetRemoteRole() != ROLE_AutonomousProxy)
     {
         IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
         if (SessionInterface.IsValid())

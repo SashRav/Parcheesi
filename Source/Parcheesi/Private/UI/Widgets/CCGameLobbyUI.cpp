@@ -8,6 +8,7 @@
 #include "Components/CheckBox.h"
 #include "Components/ScrollBox.h"
 #include "CCCoreTypes.h"
+#include "GameFramework/PlayerState.h"
 
 void UCCGameLobbyUI::NativeConstruct()
 {
@@ -65,7 +66,6 @@ void UCCGameLobbyUI::NativeConstruct()
     B_BotGreen->SetToolTipText(FText::FromString("Not yet implemented"));
     B_BotBlue->SetToolTipText(FText::FromString("Not yet implemented"));
 
-    
     C_CatMode->SetIsEnabled(false);
     S_RoundsToBonus->SetIsEnabled(false);
     C_CatMode->SetToolTipText(FText::FromString("Not yet implemented"));
@@ -153,7 +153,6 @@ void UCCGameLobbyUI::UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPla
     }
     UpdateReadyPlayers(AllPlayersData);
 }
-
 
 void UCCGameLobbyUI::UpdateSelectionPlayerName(FText PlayerName, FName Tag, FText IsReadyText)
 {
@@ -256,19 +255,44 @@ void UCCGameLobbyUI::UpdateSettings(FGameSettings GameSettings)
 
 void UCCGameLobbyUI::UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers)
 {
+    for (int32 i = 0; i < SB_PlayersList->GetChildrenCount(); i++)
+    {
+        UCCLobbyPlayerItem* ChildWidget = Cast<UCCLobbyPlayerItem>(SB_PlayersList->GetChildAt(i));
+        if (ChildWidget)
+        {
+            ChildWidget->OnKickPlayerButtonPressed.RemoveAll(this);
+        }
+    }
+
     SB_PlayersList->ClearChildren();
+
     if (AllPlayers.Num() == 0)
         return;
 
     for (FUniqueNetIdRepl Item : AllPlayers)
     {
         UCCLobbyPlayerItem* PlayerInfo = CreateWidget<UCCLobbyPlayerItem>(GetWorld(), LobbyPlayerItemClass);
-        PlayerInfo->SetPlayerName(FText::FromString(Item->ToString().Left(20))); // Hardcoded untill using Players names
+        bool bShowButton = GetOwningPlayer()->HasAuthority();
+
+        if (bShowButton && GetOwningPlayerPawn()->GetPlayerState()->GetUniqueId() == Item)
+            bShowButton = false;
+
+        PlayerInfo->SetPlayerData(FText::FromString(Item->ToString().Left(20)), Item, bShowButton); // Hardcoded untill using Players names
+
+        if (bShowButton)
+            PlayerInfo->OnKickPlayerButtonPressed.AddDynamic(this,
+                &UCCGameLobbyUI::DisconnectPlayerByID); // Potential memory leak. Will need to check does GC removes widgets with binidng
+
         SB_PlayersList->AddChild(PlayerInfo);
     }
 }
 
-void UCCGameLobbyUI::DisconnectCurrentPlayer() 
+void UCCGameLobbyUI::DisconnectCurrentPlayer()
 {
     OnExitToMenuButtonPressed.Broadcast();
+}
+
+void UCCGameLobbyUI::DisconnectPlayerByID(FUniqueNetIdRepl PlayerNetID)
+{
+    OnKickPlayerFromLobby.Broadcast(PlayerNetID);
 }

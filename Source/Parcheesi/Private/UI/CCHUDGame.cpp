@@ -30,6 +30,7 @@ void ACCHUDGame::BeginPlay()
     LobbyWidget->OnReadyButtonPressed.AddDynamic(this, &ACCHUDGame::PlayerReady);
     LobbyWidget->OnSaveSettingsButtonPressed.AddDynamic(this, &ACCHUDGame::SaveGameSettings);
     LobbyWidget->OnExitToMenuButtonPressed.AddDynamic(this, &ACCHUDGame::DisconnectCurrentPlayerFromLobby);
+    LobbyWidget->OnKickPlayerFromLobby.AddDynamic(this, &ACCHUDGame::RemovePlayerFromGame);
 
     TurnInfoContainerWidget = CreateWidget<UCCPlayersTurnContainer>(GetWorld(), TurnInfoContainerWidgetClass);
     TurnInfoContainerWidget->AddToViewport();
@@ -180,9 +181,9 @@ void ACCHUDGame::RemovePlayerFromGame(FUniqueNetIdRepl PlayerID)
 
 void ACCHUDGame::DisconnectCurrentPlayerFromLobby() 
 {
+    // Add checks is player ready or not
     RemovePlayerFromGame(OwningPlayerPawn->GetPlayerState()->GetUniqueId());
 }
-
 
 void ACCHUDGame::DisconnectCurrentPlayerFromGame() 
 {

@@ -66,11 +66,12 @@ protected:
     UFUNCTION()
     void DisconnectCurrentPlayerFromGame();
 
+    UFUNCTION()
+    void RemovePlayerFromGame(FUniqueNetIdRepl PlayerID);
+
     virtual void BeginPlay() override;
 
     void AddQuickMenuWidget();
-
-    void RemovePlayerFromGame(FUniqueNetIdRepl PlayerID);
 
 public:
     void RemoveLobbyWidget();

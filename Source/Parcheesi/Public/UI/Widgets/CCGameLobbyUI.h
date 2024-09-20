@@ -19,6 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnExitToMenuFromLobbyButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorButtonPressed, FName, ColorTag);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSaveSettingsButtonPressed, FGameSettings, GameSettings);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKickPlayerFromLobby, FUniqueNetIdRepl, PlayerID);
 
 UCLASS() class PARCHEESI_API UCCGameLobbyUI : public UUserWidget
 {
@@ -39,6 +40,9 @@ public:
 
     UPROPERTY(BlueprintAssignable)
     FOnExitToMenuFromLobbyButtonPressed OnExitToMenuButtonPressed;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnKickPlayerFromLobby OnKickPlayerFromLobby;
 
     void UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPlayersData);
     void UpdateSettings(FGameSettings GameSettings);
@@ -169,4 +173,7 @@ protected:
 
     UFUNCTION()
     void DisconnectCurrentPlayer();
+
+    UFUNCTION()
+    void DisconnectPlayerByID(FUniqueNetIdRepl PlayerNetID);
 };
