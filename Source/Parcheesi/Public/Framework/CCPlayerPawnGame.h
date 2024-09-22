@@ -31,7 +31,7 @@ public:
     void Server_UpdateSelectedColor(const FName& ColorTag);
 
     UFUNCTION(Server, Reliable)
-    void Server_PlayerIsReady();
+    void Server_PlayerIsReady(bool bIsReady);
 
     UFUNCTION(Server, Reliable)
     void Server_EndPlayerTurn();

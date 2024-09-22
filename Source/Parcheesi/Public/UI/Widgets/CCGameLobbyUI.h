@@ -15,11 +15,11 @@ class UScrollBox;
 class UCCLobbyPlayerItem;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartGameButtonPressed);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnExitToMenuFromLobbyButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorButtonPressed, FName, ColorTag);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSaveSettingsButtonPressed, FGameSettings, GameSettings);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKickPlayerFromLobby, FUniqueNetIdRepl, PlayerID);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReadyButtonPressed, bool, bIsReady);
 
 UCLASS() class PARCHEESI_API UCCGameLobbyUI : public UUserWidget
 {
@@ -65,6 +65,9 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     class UButton* B_ReadyToGame;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* B_NotReadyToGame;
 
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* T_PlayersReady;
@@ -149,6 +152,9 @@ protected:
 
     UFUNCTION()
     void ReadyButtonClicked();
+
+    UFUNCTION()
+    void NotReadyButtonClicked();
 
     UFUNCTION()
     void SelectRedButtonClicked();

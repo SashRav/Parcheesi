@@ -71,6 +71,7 @@ void ACCGameStateGame::RemovePlayerFromPlayersData(FUniqueNetIdRepl PlayerID)
 {
     AllPlayersData.Remove(PlayerID);
     OnPlayersCountChanged.Broadcast();
+    OnSelectingColorInLobby.Broadcast(); // Reset Ready players 
 }
 
 void ACCGameStateGame::SetupPlayersTurnData()

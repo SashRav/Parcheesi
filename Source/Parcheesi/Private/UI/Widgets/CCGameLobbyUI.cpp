@@ -20,6 +20,7 @@ void UCCGameLobbyUI::NativeConstruct()
     B_SelectGreen->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectGreenButtonClicked);
     B_SelectBlue->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SelectBlueButtonClicked);
     B_ReadyToGame->OnClicked.AddDynamic(this, &UCCGameLobbyUI::ReadyButtonClicked);
+    B_NotReadyToGame->OnClicked.AddDynamic(this, &UCCGameLobbyUI::NotReadyButtonClicked);
     B_SaveSettings->OnClicked.AddDynamic(this, &UCCGameLobbyUI::SaveSettingsButtonClicked);
     B_ExitLobby->OnClicked.AddDynamic(this, &UCCGameLobbyUI::DisconnectCurrentPlayer);
     C_MoveFromStart->OnCheckStateChanged.AddDynamic(this, &UCCGameLobbyUI::MoveFromStartChecked);
@@ -38,6 +39,7 @@ void UCCGameLobbyUI::NativeConstruct()
     else
     {
         B_ReadyToGame->SetVisibility(ESlateVisibility::Hidden);
+        B_NotReadyToGame->SetVisibility(ESlateVisibility::Hidden);
     }
 
     T_RedPlayerName->SetText(FText::FromString("Empty"));
@@ -47,6 +49,8 @@ void UCCGameLobbyUI::NativeConstruct()
 
     B_StartGame->SetIsEnabled(false);
     B_ReadyToGame->SetIsEnabled(false);
+    B_NotReadyToGame->SetIsEnabled(false);
+    B_NotReadyToGame->SetVisibility(ESlateVisibility::Hidden);
     B_StartGame->SetToolTipText(FText::FromString("You need at least 2 players ready to start the game"));
 
     B_SaveSettings->SetIsEnabled(false);
@@ -81,10 +85,26 @@ void UCCGameLobbyUI::ReadyButtonClicked()
 {
     if (!GetOwningPlayer()->HasAuthority())
     {
+        B_ReadyToGame->SetVisibility(ESlateVisibility::Hidden);
         B_ReadyToGame->SetIsEnabled(false);
+        B_NotReadyToGame->SetVisibility(ESlateVisibility::Visible);
+        B_NotReadyToGame->SetIsEnabled(true);
     }
 
-    OnReadyButtonPressed.Broadcast();
+    OnReadyButtonPressed.Broadcast(true);
+}
+
+void UCCGameLobbyUI::NotReadyButtonClicked() 
+{
+    if (!GetOwningPlayer()->HasAuthority())
+    {
+        B_ReadyToGame->SetVisibility(ESlateVisibility::Visible);
+        B_ReadyToGame->SetIsEnabled(true);
+        B_NotReadyToGame->SetVisibility(ESlateVisibility::Hidden);
+        B_NotReadyToGame->SetIsEnabled(false);
+    }
+
+    OnReadyButtonPressed.Broadcast(false);
 }
 
 void UCCGameLobbyUI::SelectRedButtonClicked()
@@ -210,6 +230,10 @@ void UCCGameLobbyUI::UpdateReadyPlayers(const TArray<FAllPlayersData>& AllPlayer
     if (TotalPlayers > 1 && ReadyPlayers == TotalPlayers)
     {
         B_StartGame->SetIsEnabled(true);
+    }
+    else
+    {
+        B_StartGame->SetIsEnabled(false);
     }
 }
 

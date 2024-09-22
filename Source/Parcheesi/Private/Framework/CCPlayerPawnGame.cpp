@@ -84,13 +84,13 @@ void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& C
     ServerGameMode->ChangePlayerInfo(GetPlayerState()->GetUniqueId(), PlayerInfo);
 }
 
-void ACCPlayerPawnGame::Server_PlayerIsReady_Implementation()
+void ACCPlayerPawnGame::Server_PlayerIsReady_Implementation(bool bIsReady)
 {
     TMap<FUniqueNetIdRepl, FPlayerInfo> PlayersData = ServerGameState->GetAllPlayersData();
 
     FUniqueNetIdRepl LocalID = GetPlayerState()->GetUniqueId();
     FPlayerInfo PlayerInfo = *PlayersData.Find(LocalID);
-    PlayerInfo.bIsReady = true;
+    PlayerInfo.bIsReady = bIsReady;
 
     ServerGameMode->ChangePlayerInfo(GetPlayerState()->GetUniqueId(), PlayerInfo);
 }

@@ -42,7 +42,7 @@ protected:
     void SelectColorInLobby(FName ColorTag);
 
     UFUNCTION()
-    void PlayerReady();
+    void PlayerReady(bool bIsReady);
 
     UFUNCTION()
     void SaveGameSettings(FGameSettings Settings);

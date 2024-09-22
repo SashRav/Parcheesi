@@ -86,9 +86,9 @@ void ACCHUDGame::SelectColorInLobby(FName ColorTag)
     OwningPlayerPawn->Server_UpdateSelectedColor(ColorTag);
 }
 
-void ACCHUDGame::PlayerReady()
+void ACCHUDGame::PlayerReady(bool bIsReady)
 {
-    OwningPlayerPawn->Server_PlayerIsReady();
+    OwningPlayerPawn->Server_PlayerIsReady(bIsReady);
 }
 
 void ACCHUDGame::SaveGameSettings(FGameSettings Settings)
