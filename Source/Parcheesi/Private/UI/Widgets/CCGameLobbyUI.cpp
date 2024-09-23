@@ -227,7 +227,7 @@ void UCCGameLobbyUI::UpdateReadyPlayers(const TArray<FAllPlayersData>& AllPlayer
     if (!GetOwningPlayer()->HasAuthority())
         return;
 
-    if (TotalPlayers > 1 && ReadyPlayers == TotalPlayers)
+    if (TotalPlayers > 1 && ReadyPlayers > 1)
     {
         B_StartGame->SetIsEnabled(true);
     }

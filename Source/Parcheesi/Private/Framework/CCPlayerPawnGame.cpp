@@ -45,13 +45,20 @@ void ACCPlayerPawnGame::BeginPlay()
     OwningPlayerController = Cast<ACCControllerGame>(GetController());
 
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
-    ServerGameState->OnSelectingColorInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySelection);
-    ServerGameState->OnUpdatingSettingsInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySettings);
-    ServerGameState->OnPlayersCountChanged.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbyPlayers);
+    
+    if (!ServerGameState->IsGameStarted())
+    {
+        if (OwningPlayerController)
+            OwningPlayerController->Client_CreateLobbyWidget();
 
-    Server_UpdateLobbySelection();
-    Server_UpdateLobbySettings();
-    Server_UpdateLobbyPlayers();
+        ServerGameState->OnSelectingColorInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySelection);
+        ServerGameState->OnUpdatingSettingsInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySettings);
+        ServerGameState->OnPlayersCountChanged.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbyPlayers);
+        
+        Server_UpdateLobbySelection();
+        Server_UpdateLobbySettings();
+        Server_UpdateLobbyPlayers();
+    }
 }
 
 void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputComponent)

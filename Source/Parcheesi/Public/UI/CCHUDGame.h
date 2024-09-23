@@ -92,6 +92,8 @@ public:
     void UpdateLobbySettings(FGameSettings GameSettings);
     void UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers);
 
+    void CreateLobbyWidget();
+
 private:
     UPROPERTY()
     UCCGameLobbyUI* LobbyWidget = nullptr;

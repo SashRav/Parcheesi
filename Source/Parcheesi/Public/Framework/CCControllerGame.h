@@ -53,6 +53,9 @@ public:
     UFUNCTION(Client, Reliable)
     void Client_UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers);
 
+    UFUNCTION(Client, Reliable)
+    void Client_CreateLobbyWidget();
+
 protected:
     UPROPERTY()
     ACCHUDGame* OwningHUD;

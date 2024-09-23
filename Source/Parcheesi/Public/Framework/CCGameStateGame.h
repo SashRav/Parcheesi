@@ -45,6 +45,9 @@ public:
 
     TArray<ACCPawn*> GetAllPawns();
 
+    bool IsGameStarted() { return bIsGameStarted; }
+    void SetIsGameStarted(bool Status) { bIsGameStarted = Status; }
+
     UPROPERTY(BlueprintAssignable)
     FOnSelectingColorInLobby OnSelectingColorInLobby;
 
@@ -78,4 +81,7 @@ protected:
 
     UPROPERTY()
     FGameSettings GameSettingsData;
+
+    UPROPERTY()
+    bool bIsGameStarted = false;
 };

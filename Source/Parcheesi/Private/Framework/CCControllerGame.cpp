@@ -26,7 +26,6 @@ void ACCControllerGame::BeginPlay()
 
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
-        Subsystem->AddMappingContext(LevelInputContext, 0);
         Subsystem->AddMappingContext(GameMappingContext, 1);
     }
 }
@@ -49,6 +48,11 @@ void ACCControllerGame::Client_SwitchQuickMenuVisibility_Implementation()
 
 void ACCControllerGame::Client_StartGameFromController_Implementation()
 {
+    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    {
+        Subsystem->AddMappingContext(LevelInputContext, 0);
+    }
+
     if (OwningHUD)
         OwningHUD->RemoveLobbyWidget();
 }
@@ -121,4 +125,11 @@ void ACCControllerGame::Client_UpdatePlayersList_Implementation(const TArray<FUn
 {
     if (OwningHUD)
         OwningHUD->UpdatePlayersList(AllPlayers);
+}
+
+
+void ACCControllerGame::Client_CreateLobbyWidget_Implementation() 
+{
+    if (OwningHUD)
+        OwningHUD->CreateLobbyWidget();
 }

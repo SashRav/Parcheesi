@@ -6,9 +6,6 @@
 #include "GameFramework/SpectatorPawn.h"
 #include "CCSpectatorPawnGame.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PARCHEESI_API ACCSpectatorPawnGame : public ASpectatorPawn
 {

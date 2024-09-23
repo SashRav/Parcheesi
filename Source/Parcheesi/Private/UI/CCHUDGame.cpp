@@ -23,15 +23,6 @@ void ACCHUDGame::BeginPlay()
     check(QuickMenuWidgetClass);
     check(WinWidgetClass);
 
-    LobbyWidget = CreateWidget<UCCGameLobbyUI>(GetWorld(), LobbyWidgetClass);
-    LobbyWidget->AddToViewport();
-    LobbyWidget->OnStartGameButtonPressedEvent.AddDynamic(this, &ACCHUDGame::StartGameFromLobby);
-    LobbyWidget->OnColorButtonPressed.AddDynamic(this, &ACCHUDGame::SelectColorInLobby);
-    LobbyWidget->OnReadyButtonPressed.AddDynamic(this, &ACCHUDGame::PlayerReady);
-    LobbyWidget->OnSaveSettingsButtonPressed.AddDynamic(this, &ACCHUDGame::SaveGameSettings);
-    LobbyWidget->OnExitToMenuButtonPressed.AddDynamic(this, &ACCHUDGame::DisconnectCurrentPlayerFromLobby);
-    LobbyWidget->OnKickPlayerFromLobby.AddDynamic(this, &ACCHUDGame::RemovePlayerFromGame);
-
     TurnInfoContainerWidget = CreateWidget<UCCPlayersTurnContainer>(GetWorld(), TurnInfoContainerWidgetClass);
     TurnInfoContainerWidget->AddToViewport();
 
@@ -51,6 +42,21 @@ void ACCHUDGame::BeginPlay()
     WinWidget->AddToViewport();
 
     OwningPlayerPawn = Cast<ACCPlayerPawnGame>(GetOwningPawn());
+
+    LobbyWidget = CreateWidget<UCCGameLobbyUI>(GetWorld(), LobbyWidgetClass);
+    LobbyWidget->AddToViewport();
+    LobbyWidget->SetVisibility(ESlateVisibility::Hidden);
+    LobbyWidget->OnStartGameButtonPressedEvent.AddDynamic(this, &ACCHUDGame::StartGameFromLobby);
+    LobbyWidget->OnColorButtonPressed.AddDynamic(this, &ACCHUDGame::SelectColorInLobby);
+    LobbyWidget->OnReadyButtonPressed.AddDynamic(this, &ACCHUDGame::PlayerReady);
+    LobbyWidget->OnSaveSettingsButtonPressed.AddDynamic(this, &ACCHUDGame::SaveGameSettings);
+    LobbyWidget->OnExitToMenuButtonPressed.AddDynamic(this, &ACCHUDGame::DisconnectCurrentPlayerFromLobby);
+    LobbyWidget->OnKickPlayerFromLobby.AddDynamic(this, &ACCHUDGame::RemovePlayerFromGame);
+}
+
+void ACCHUDGame::CreateLobbyWidget()
+{
+    LobbyWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ACCHUDGame::AddQuickMenuWidget()
@@ -179,13 +185,13 @@ void ACCHUDGame::RemovePlayerFromGame(FUniqueNetIdRepl PlayerID)
     OwningPlayerPawn->Server_DisconnectPlayer(PlayerID);
 }
 
-void ACCHUDGame::DisconnectCurrentPlayerFromLobby() 
+void ACCHUDGame::DisconnectCurrentPlayerFromLobby()
 {
     // Add checks is player ready or not
     RemovePlayerFromGame(OwningPlayerPawn->GetPlayerState()->GetUniqueId());
 }
 
-void ACCHUDGame::DisconnectCurrentPlayerFromGame() 
+void ACCHUDGame::DisconnectCurrentPlayerFromGame()
 {
     // Will be additional functional to set bot instead of player
     RemovePlayerFromGame(OwningPlayerPawn->GetPlayerState()->GetUniqueId());
