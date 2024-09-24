@@ -17,6 +17,7 @@ public:
     int32 GetDiceSide();
 
     ACCDice();
+    void EnablePhysicsSimulation();
 
     UPROPERTY(EditAnywhere)
     bool bDestryWhenUsed = true;

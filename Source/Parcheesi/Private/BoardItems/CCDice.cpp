@@ -5,7 +5,6 @@
 
 ACCDice::ACCDice()
 {
-
     BoxSideFirst = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
     BoxSideFirst->SetupAttachment(RootComponent);
     BoxSideFirst->InitBoxExtent(FVector(32.0f, 32.0f, 32.0f));

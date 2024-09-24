@@ -48,7 +48,7 @@ void UCCDiceComponent::RollDices() {
         SpawnLocation.Y = FMath::RandRange(-150.0, 150.0);
         SpawnLocation.X = FMath::RandRange(-150.0, 150.0);
 
-        SpawnDice(SpawnLocation, Rotation, true, true);
+        SpawnDice(SpawnLocation, Rotation, true, GetOwner()->HasAuthority()); // enable physic simulation only on server
     }
 
     TimerDelegate.BindUFunction(this, FName("MoveDicesToBoard"), DicePlacesLocation);
