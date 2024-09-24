@@ -76,6 +76,7 @@ protected:
 
     void ClickOnBoard();
     void UpdateSelectedDiceOnUI();
+    void InitLobby();
 
     bool bIsPawnMoving = false;
     bool bIsAnyPawnCanMove = false;

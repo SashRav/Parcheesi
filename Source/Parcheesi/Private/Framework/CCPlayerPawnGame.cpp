@@ -25,6 +25,8 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
 
     PawnManagerComponent->OnPawnMovementFinished.AddDynamic(this, &ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished);
     PawnManagerComponent->OnGameFinished.AddDynamic(this, &ACCPlayerPawnGame::Server_HandleGameFinished);
+
+    PrimaryActorTick.bCanEverTick = false;
 }
 
 void ACCPlayerPawnGame::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -45,7 +47,13 @@ void ACCPlayerPawnGame::BeginPlay()
     OwningPlayerController = Cast<ACCControllerGame>(GetController());
 
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
-    
+
+    FTimerHandle LobbyInitTimer;
+    GetWorld()->GetTimerManager().SetTimer(LobbyInitTimer, this, &ACCPlayerPawnGame::InitLobby, 0.1f, false);
+}
+
+void ACCPlayerPawnGame::InitLobby()
+{
     if (!ServerGameState->IsGameStarted())
     {
         if (OwningPlayerController)
@@ -54,7 +62,7 @@ void ACCPlayerPawnGame::BeginPlay()
         ServerGameState->OnSelectingColorInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySelection);
         ServerGameState->OnUpdatingSettingsInLobby.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbySettings);
         ServerGameState->OnPlayersCountChanged.AddDynamic(this, &ACCPlayerPawnGame::Server_UpdateLobbyPlayers);
-        
+
         Server_UpdateLobbySelection();
         Server_UpdateLobbySettings();
         Server_UpdateLobbyPlayers();
@@ -378,7 +386,7 @@ void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FU
         OwningPlayerController->Client_UpdatePlayersList(AllPlayers);
 }
 
-void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl PlayerID) 
+void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl PlayerID)
 {
     ServerGameMode->DisconnectPlayer(PlayerID);
 }

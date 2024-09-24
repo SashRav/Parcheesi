@@ -8,7 +8,7 @@
 
 UCCSelectItem::UCCSelectItem()
 {
-    PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UCCSelectItem::BeginPlay()
