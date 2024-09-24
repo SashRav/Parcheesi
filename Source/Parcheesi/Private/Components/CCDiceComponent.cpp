@@ -45,8 +45,8 @@ void UCCDiceComponent::RollDices() {
         Rotation.Pitch = FMath::RandRange(-180.0, 180.0);
         Rotation.Yaw = FMath::RandRange(-180.0, 180.0);
         Rotation.Roll = FMath::RandRange(-180.0, 180.0);
-        SpawnLocation.Y = FMath::RandRange(-150.0, 150.0);
-        SpawnLocation.X = FMath::RandRange(-150.0, 150.0);
+        SpawnLocation.Y = FMath::RandRange(-100.0, 100.0) * DiceNumber;
+        SpawnLocation.X = FMath::RandRange(-100.0, 100.0) * DiceNumber;
 
         SpawnDice(SpawnLocation, Rotation, true, GetOwner()->HasAuthority()); // enable physic simulation only on server
     }
