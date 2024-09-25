@@ -6,9 +6,6 @@
 #include "GameFramework/PlayerController.h"
 #include "CCControllerMainMenu.generated.h"
 
-/**
- *
- */
 UCLASS()
 class PARCHEESI_API ACCControllerMainMenu : public APlayerController
 {

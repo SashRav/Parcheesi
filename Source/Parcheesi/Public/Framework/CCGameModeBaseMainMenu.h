@@ -6,9 +6,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "CCGameModeBaseMainMenu.generated.h"
 
-/**
- *
- */
 UCLASS()
 class PARCHEESI_API ACCGameModeBaseMainMenu : public AGameModeBase
 {

@@ -54,6 +54,9 @@ void ACCPlayerPawnGame::BeginPlay()
 
 void ACCPlayerPawnGame::InitLobby()
 {
+    if (!ServerGameState)
+        return;
+
     if (!ServerGameState->IsGameStarted())
     {
         if (OwningPlayerController)
@@ -86,21 +89,24 @@ void ACCPlayerPawnGame::Server_RollDices_Implementation()
 
 void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& ColorTag)
 {
-    UE_LOG(LogTemp, Display, TEXT("Color Tag clicked: %s"), *ColorTag.ToString());
+    if (!ServerGameMode)
+        return;
 
     FPlayerInfo PlayerInfo;
     PlayerInfo.Tag = ColorTag;
+    PlayerInfo.bIsReady = true;
 
     if (OwningPlayerController && OwningPlayerController->HasAuthority()) // Server don't have Ready button and it is ready by default
         PlayerInfo.bIsReady = true;
-    else
-        PlayerInfo.bIsReady = false;
 
     ServerGameMode->ChangePlayerInfo(GetPlayerState()->GetUniqueId(), PlayerInfo);
 }
 
 void ACCPlayerPawnGame::Server_PlayerIsReady_Implementation(bool bIsReady)
 {
+    if (!ServerGameState)
+        return;
+
     TMap<FUniqueNetIdRepl, FPlayerInfo> PlayersData = ServerGameState->GetAllPlayersData();
 
     FUniqueNetIdRepl LocalID = GetPlayerState()->GetUniqueId();
@@ -112,7 +118,9 @@ void ACCPlayerPawnGame::Server_PlayerIsReady_Implementation(bool bIsReady)
 
 void ACCPlayerPawnGame::Server_EndPlayerTurn_Implementation()
 {
-    UE_LOG(LogTemp, Display, TEXT("End turn from Pawn"));
+    if (!ServerGameMode)
+        return;
+
     Server_CleanSelectionData();
     Multicast_SetCurrentTurn(false);
     Server_CleanAllDices();
@@ -128,8 +136,16 @@ void ACCPlayerPawnGame::Server_DebugEndPlayerTurn_Implementation()
 
 void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
 {
+    if (!ServerGameState)
+        return;
+
     SelectedDiceActor = nullptr;
-    for (ACCDice* Dice : ServerGameState->GetSpawnedDices())
+    TArray<ACCDice*> DicesArray = ServerGameState->GetSpawnedDices();
+    
+    if (DicesArray.Num() == 0)
+        return;
+
+    for (ACCDice* Dice : DicesArray)
     {
         ServerGameState->RemoveDice(Dice);
         Dice->Destroy();
@@ -159,7 +175,8 @@ void ACCPlayerPawnGame::Multicast_SetCurrentTurn_Implementation(bool Turn)
 
 void ACCPlayerPawnGame::Client_EnableTurnButton_Implementation()
 {
-    OwningPlayerController->Client_EnableEndTurnButton();
+    if (OwningPlayerController)
+        OwningPlayerController->Client_EnableEndTurnButton();
 }
 
 void ACCPlayerPawnGame::UpdateSelectedDiceOnUI()
@@ -200,12 +217,14 @@ void ACCPlayerPawnGame::Server_TrySwitchMovePawnButtonIsEnabled_Implementation(b
 
 void ACCPlayerPawnGame::Client_VisualDeselectActor_Implementation(UCCSelectItem* Component, UMeshComponent* Mesh)
 {
-    Component->DeselectThisItem(Mesh);
+    if (Component)
+        Component->DeselectThisItem(Mesh);
 }
 
 void ACCPlayerPawnGame::Client_VisualSelectActor_Implementation(UCCSelectItem* Component, UMeshComponent* Mesh)
 {
-    Component->SelectThisItem(Mesh);
+    if (Component)
+        Component->SelectThisItem(Mesh);
 }
 
 void ACCPlayerPawnGame::Server_SelectDiceActor_Implementation(ACCDice* HitDice)
@@ -229,8 +248,6 @@ void ACCPlayerPawnGame::Server_SelectPawnActor_Implementation(ACCPawn* HitPawn)
 
     SelectedPawnActor = HitPawn;
     Client_VisualSelectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
-
-    UE_LOG(LogTemp, Log, TEXT("Pawn Actor Selected"));
 }
 
 void ACCPlayerPawnGame::ClickOnBoard()
@@ -238,29 +255,28 @@ void ACCPlayerPawnGame::ClickOnBoard()
     if (!bCurrentTurn || bIsPawnMoving)
         return;
 
-    if (OwningPlayerController)
+    if (!OwningPlayerController)
+        return;
+ 
+    FHitResult HitResult;
+    if (OwningPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
     {
-        FHitResult HitResult;
-        if (OwningPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
-        {
-            if (ACCDice* HitDice = Cast<ACCDice>(HitResult.GetActor()))
-            {
-                Server_SelectDiceActor(HitDice);
-            }
-            else if (ACCPawn* HitPawn = Cast<ACCPawn>(HitResult.GetActor()))
-            {
-                Server_SelectPawnActor(HitPawn);
-            }
-        }
-        if (bDicesSpawned)
-            Server_CheckIfCanEnableEndTurn();
-
-        Server_TrySwitchMovePawnButtonIsEnabled(true);
+        if (ACCDice* HitDice = Cast<ACCDice>(HitResult.GetActor()))
+            Server_SelectDiceActor(HitDice);
+        else if (ACCPawn* HitPawn = Cast<ACCPawn>(HitResult.GetActor()))
+            Server_SelectPawnActor(HitPawn);
     }
+    if (bDicesSpawned)
+        Server_CheckIfCanEnableEndTurn();
+
+    Server_TrySwitchMovePawnButtonIsEnabled(true);
 }
 
 void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation()
 {
+    if (!ServerGameState)
+        return;
+    
     if (!SelectedDiceActor || !SelectedPawnActor || bIsPawnMoving)
         return;
 
@@ -271,12 +287,10 @@ void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation()
 
     ServerGameState->RemoveDice(SelectedDiceActor); // Exists for debug purpose
     if (SelectedDiceActor->bDestryWhenUsed)
-    {
         SelectedDiceActor->Destroy();
-    }
-
-    ACCControllerGame* PlayerController = Cast<ACCControllerGame>(GetController());
-    PlayerController->Client_SetDiceSideOnUI(0);
+   
+    if (ACCControllerGame* PlayerController = Cast<ACCControllerGame>(GetController()))
+        PlayerController->Client_SetDiceSideOnUI(0);
 
     SelectedPawnActor = nullptr;
     SelectedDiceActor = nullptr;
@@ -295,11 +309,14 @@ void ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished_Implementation()
 
 void ACCPlayerPawnGame::Server_CheckIsAnyMoveAvailable_Implementation()
 {
+    if (!ServerGameState)
+        return;
+
     TArray<ACCPawn*> AllPawns = ServerGameState->GetAllPawns();
     TArray<ACCDice*> SpawnedDices = ServerGameState->GetSpawnedDices();
     bIsAnyPawnCanMove = false;
 
-    if (SpawnedDices.Num() == 0)
+    if (SpawnedDices.Num() == 0 || AllPawns.Num() == 0)
         return;
 
     TArray<ACCPawn*> PlayerPawns;
@@ -325,17 +342,22 @@ void ACCPlayerPawnGame::Server_CheckIsAnyMoveAvailable_Implementation()
 void ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn_Implementation()
 {
     Server_CheckIsAnyMoveAvailable();
+    
     if (!bIsAnyPawnCanMove)
         Client_EnableTurnButton();
 }
 
 void ACCPlayerPawnGame::Server_HandleGameFinished_Implementation()
 {
-    ServerGameMode->FinishGame(PlayerTagName);
+    if (ServerGameMode)
+        ServerGameMode->FinishGame(PlayerTagName);
 }
 
 void ACCPlayerPawnGame::Server_UpdateLobbySelection_Implementation()
 {
+    if (!ServerGameState)
+        return;
+
     TArray<FAllPlayersData> AllPlayersData;
     TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersDataMap = ServerGameState->GetAllPlayersData();
 
@@ -362,6 +384,9 @@ void ACCPlayerPawnGame::Client_UpdateLobbySelection_Implementation(const TArray<
 
 void ACCPlayerPawnGame::Server_UpdateLobbySettings_Implementation()
 {
+    if (!ServerGameState)
+        return;
+
     FGameSettings GameSettings = ServerGameState->GetGameSettings();
     Client_UpdateLobbySettings(GameSettings);
 }
@@ -374,6 +399,9 @@ void ACCPlayerPawnGame::Client_UpdateLobbySettings_Implementation(FGameSettings 
 
 void ACCPlayerPawnGame::Server_UpdateLobbyPlayers_Implementation()
 {
+    if (!ServerGameState)
+        return;
+
     TArray<FUniqueNetIdRepl> PlayersArray;
     ServerGameState->GetAllPlayersData().GetKeys(PlayersArray);
 
@@ -388,5 +416,6 @@ void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FU
 
 void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl PlayerID)
 {
-    ServerGameMode->DisconnectPlayer(PlayerID);
+    if (ServerGameMode)
+        ServerGameMode->DisconnectPlayer(PlayerID);
 }

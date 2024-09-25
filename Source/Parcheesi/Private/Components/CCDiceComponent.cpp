@@ -14,6 +14,9 @@ void UCCDiceComponent::BeginPlay()
     TArray<AActor*> FoundDicePlaces;
     UGameplayStatics::GetAllActorsWithTag(GetWorld(), DicePlaceTag, FoundDicePlaces);
 
+    if (FoundDicePlaces.Num() == 0)
+        return;
+
     for (AActor* PlaceActor : FoundDicePlaces)
     {
         DicePlacesLocation.Add(PlaceActor->GetActorLocation());
@@ -22,14 +25,20 @@ void UCCDiceComponent::BeginPlay()
     TArray<AActor*> FoundDoubledDicePlaces;
     UGameplayStatics::GetAllActorsWithTag(GetWorld(), DoubledDicePlaceTag, FoundDoubledDicePlaces);
 
+    if (FoundDoubledDicePlaces.Num() == 0)
+        return;
+
     for (AActor* PlaceActor : FoundDoubledDicePlaces)
     {
         DoubledDicePlacesLocation.Add(PlaceActor->GetActorLocation());
-        UE_LOG(LogTemp, Display, TEXT("Doubled dice place added"));
     }
 }
 
-void UCCDiceComponent::RollDices() {
+void UCCDiceComponent::RollDices() 
+{
+    if (!ServerGameState)
+        return;
+
     FTimerHandle TimerHandle;
     FTimerDelegate TimerDelegate;
 
@@ -58,15 +67,26 @@ void UCCDiceComponent::RollDices() {
     GetWorld()->GetTimerManager().SetTimer(DoubleTimerHandle, this, &UCCDiceComponent::TryDoubleDices, DiceMoveDelay + 1.0f, false);
 }
 
-void UCCDiceComponent::SpawnDice(FVector SpawnLocation, FRotator Rotation, bool UseVelocity, bool SimulatePhysics) {
+void UCCDiceComponent::SpawnDice(FVector SpawnLocation, FRotator Rotation, bool UseVelocity, bool SimulatePhysics) 
+{
+    if (!ServerGameState)
+        return;
+
     ACCDice* SpawnedDice = GetWorld()->SpawnActor<ACCDice>(DiceClass, SpawnLocation, Rotation);
-    ServerGameState->AddSpawnedDice(SpawnedDice);
-    SpawnedDice->GetStaticMeshComponent()->SetSimulatePhysics(SimulatePhysics);
-    if (UseVelocity)
-        SetDiceVelocity(SpawnedDice);
+    if (SpawnedDice)
+    {
+        ServerGameState->AddSpawnedDice(SpawnedDice);
+        SpawnedDice->GetStaticMeshComponent()->SetSimulatePhysics(SimulatePhysics);
+        if (UseVelocity)
+            SetDiceVelocity(SpawnedDice);
+    }
 }
 
-void UCCDiceComponent::SetDiceVelocity(ACCDice* Dice) {
+void UCCDiceComponent::SetDiceVelocity(ACCDice* Dice) 
+{
+    if (!Dice)
+        return;
+
     FVector DiceVelocity(0.0f, 0.0f, 0.0f);
     // Hardcoded for now
     DiceVelocity.X = FMath::RandRange(-1750.0, -1250.0);
@@ -75,7 +95,8 @@ void UCCDiceComponent::SetDiceVelocity(ACCDice* Dice) {
     Dice->GetStaticMeshComponent()->SetPhysicsLinearVelocity(DiceVelocity);
 }
 
-void UCCDiceComponent::TryDoubleDices() {
+void UCCDiceComponent::TryDoubleDices() 
+{
     TArray<ACCDice*> SpawnedDices = ServerGameState->GetSpawnedDices();
     UE_LOG(LogTemp, Log, TEXT("Trying to double dices. Dices number: %d"), SpawnedDices.Num());
 
@@ -104,7 +125,11 @@ void UCCDiceComponent::TryDoubleDices() {
     OnDiceRollingEnd.Broadcast();
 }
 
-void UCCDiceComponent::MoveDicesToBoard(TArray<FVector> TargetLocations) {
+void UCCDiceComponent::MoveDicesToBoard(TArray<FVector> TargetLocations) 
+{
+    if (!ServerGameState)
+        return;
+
     TArray<ACCDice*> SpawnedDices = ServerGameState->GetSpawnedDices();
 
     if (SpawnedDices.Num() == 0)

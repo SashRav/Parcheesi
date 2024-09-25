@@ -15,9 +15,8 @@ UCLASS()
 class PARCHEESI_API ACCGameModeBaseGame : public AGameModeBase
 {
     GENERATED_BODY()
-public:
-    ACCGameModeBaseGame();
 
+public:
     void StartNewGame();
     void StartNextTurn();
 
@@ -29,12 +28,6 @@ public:
     void DisconnectPlayer(FUniqueNetIdRepl PlayerID);
 
 protected:
-    UPROPERTY()
-    TArray<FPlayersTurnData> PlayersTurnData;
-
-    UPROPERTY(EditDefaultsOnly)
-    TSubclassOf<ACCPawn> PawnClass;
-
     virtual void PostLogin(APlayerController* NewPlayer) override;
     virtual void BeginPlay() override;
 
@@ -47,4 +40,13 @@ protected:
     void SetNextTurnColor();
 
     void SpawnPawnsOnBoard();
+
+    UPROPERTY()
+    TArray<FPlayersTurnData> PlayersTurnData;
+
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<ACCPawn> PawnClass;
+
+    UPROPERTY()
+    ACCGameStateGame* GameStateGame;
 };

@@ -13,44 +13,47 @@
 #include "OnlineSubsystemUtils.h"
 #include "Interfaces/OnlineSessionInterface.h"
 
-ACCGameModeBaseGame::ACCGameModeBaseGame() {}
-
 void ACCGameModeBaseGame::BeginPlay()
 {
     Super::BeginPlay();
 
     check(PawnClass);
+
+    GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
 }
 
 void ACCGameModeBaseGame::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
-    if (NewPlayer->PlayerState)
-    {
-        FUniqueNetIdRepl PlayerNetId = NewPlayer->PlayerState->GetUniqueId();
-        AddPlayerToAllPlayersData(PlayerNetId, "Lobby");
-        ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-        if (GameStateGame->IsGameStarted())
-        {
-            NewPlayer->StartSpectatingOnly();
-        }
-    }
+
+    GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+
+    if (!NewPlayer->PlayerState)
+        return;
+
+    FUniqueNetIdRepl PlayerNetId = NewPlayer->PlayerState->GetUniqueId();
+    AddPlayerToAllPlayersData(PlayerNetId, "Lobby");
+
+    if (GameStateGame->IsGameStarted())
+        NewPlayer->StartSpectatingOnly();
 }
 
 void ACCGameModeBaseGame::StartNewGame()
 {
     UE_LOG(LogTemp, Display, TEXT("Start game in Game Mode"));
 
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    if (!GameStateGame)
+        return;
+
     TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersdata = GameStateGame->GetAllPlayersData();
     GameStateGame->SetupPlayersTurnData();
     GameStateGame->SetIsGameStarted(true);
-    
+
     for (TPair<FUniqueNetIdRepl, FPlayerInfo>& Elem : AllPlayersdata)
     {
         ACCControllerGame* GameController =
             Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), Elem.Key)->GetOwningController());
-         GameController->Client_StartGameFromController();
+        GameController->Client_StartGameFromController();
     }
 
     UpdatePlayersTurnData();
@@ -61,22 +64,24 @@ void ACCGameModeBaseGame::StartNewGame()
 
 void ACCGameModeBaseGame::ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo)
 {
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-    GameStateGame->ChangePlayerInfo(PlayerNetId, PlayerInfo);
+    if (GameStateGame)
+        GameStateGame->ChangePlayerInfo(PlayerNetId, PlayerInfo);
 }
 
 void ACCGameModeBaseGame::AddPlayerToAllPlayersData(FUniqueNetIdRepl PlayerNetId, FName PlayerTag)
 {
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-    GameStateGame->AddPlayerToList(PlayerNetId, PlayerTag);
+    if (GameStateGame)
+        GameStateGame->AddPlayerToList(PlayerNetId, PlayerTag);
 }
 
 void ACCGameModeBaseGame::UpdatePlayersTurnData()
 {
+    if (!GameStateGame)
+        return;
+
     PlayersTurnData.Empty();
     TArray<ETurnColors> PlayersColors;
 
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     TMap<ETurnColors, FUniqueNetIdRepl> AllPlayersTurnData = GameStateGame->GetPlayersTurnData();
     ETurnColors CurrentTurnColor = GameStateGame->GetCurrentTurnColor();
     AllPlayersTurnData.GetKeys(PlayersColors);
@@ -128,16 +133,21 @@ void ACCGameModeBaseGame::UpdatePlayersTurnData()
 
 void ACCGameModeBaseGame::UpdatePlayersTurnWidgets()
 {
+    if (!GameStateGame)
+        return;
+
     UpdatePlayersTurnData();
 
     TArray<FUniqueNetIdRepl> PlayersNetId;
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameStateGame->GetAllPlayersData().GetKeys(PlayersNetId);
 
     for (FUniqueNetIdRepl NetId : PlayersNetId)
     {
         ACCControllerGame* PlayerController =
             Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), NetId)->GetOwningController());
+        if (!PlayerController)
+            return;
+        
         if (PlayersTurnData.Num() > 0)
             PlayerController->Client_UpdateTurnWidgets(PlayersTurnData);
     }
@@ -151,16 +161,15 @@ void ACCGameModeBaseGame::StartNextTurn()
 
 void ACCGameModeBaseGame::SetNextTurnColor()
 {
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    if (!GameStateGame)
+        return;
 
     // Set the same color if only one player
     if (GameStateGame->GetAllPlayersData().Num() == 1)
     {
-        UE_LOG(LogTemp, Display, TEXT(""));
         TArray<ETurnColors> PlayersColors;
         GameStateGame->GetPlayersTurnData().GetKeys(PlayersColors);
         GameStateGame->SetCurrentTurnColor(PlayersColors[0]);
-        UE_LOG(LogTemp, Display, TEXT("Set the same turn color: %s"), *UEnum::GetValueAsString(GameStateGame->GetCurrentTurnColor()));
         return;
     }
 
@@ -205,13 +214,16 @@ void ACCGameModeBaseGame::StartNextTurnForPlayer(FUniqueNetIdRepl PlayerNetId)
     ACCControllerGame* PlayerController =
         Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerNetId)->GetOwningController());
 
-    PlayerController->Client_ShowTurnButtonsWidget();
+    if (PlayerController)
+        PlayerController->Client_ShowTurnButtonsWidget();
 }
 
 void ACCGameModeBaseGame::SpawnPawnsOnBoard()
 {
+    if (!GameStateGame)
+        return;
+
     TArray<ETurnColors> PlayersColors;
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameStateGame->GetPlayersTurnData().GetKeys(PlayersColors);
 
     for (ETurnColors Color : PlayersColors)
@@ -227,7 +239,8 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
 
             FRotator Rotation;
             ACCPawn* SpawnedPawn = GetWorld()->SpawnActor<ACCPawn>(PawnClass, PlaceActor->GetActorLocation(), Rotation);
-            SpawnedPawn->Multicast_SetupPawnData(
+            if (SpawnedPawn)
+                SpawnedPawn->Multicast_SetupPawnData(
                 Color, SpawnCell->GetCellIndex(), SpawnCell->GetClosestBoardCellIndex(), SpawnCell->GetClosestFinishCellIndex());
         }
     }
@@ -235,31 +248,40 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
 
 void ACCGameModeBaseGame::FinishGame(FName PlayerTagName)
 {
+    if (!GameStateGame)
+        return;
+
     TArray<FUniqueNetIdRepl> PlayersNetId;
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameStateGame->GetAllPlayersData().GetKeys(PlayersNetId);
 
     for (FUniqueNetIdRepl NetId : PlayersNetId)
     {
         ACCControllerGame* GameController =
             Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), NetId)->GetOwningController());
-        GameController->Client_ShowWinWidget(FText::FromName(PlayerTagName));
+        
+        if (GameController)
+            GameController->Client_ShowWinWidget(FText::FromName(PlayerTagName));
     }
 }
 
 void ACCGameModeBaseGame::SaveGameSettings(FGameSettings Settings)
 {
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-    GameStateGame->SetGameSettings(Settings);
+    if (GameStateGame)
+        GameStateGame->SetGameSettings(Settings);
 }
 
 void ACCGameModeBaseGame::DisconnectPlayer(FUniqueNetIdRepl PlayerID)
 {
+    if (!GameStateGame)
+        return;
+
+    GameStateGame->RemovePlayerFromPlayersData(PlayerID);
+
     ACCControllerGame* PlayerController =
         Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerID)->GetOwningController());
 
-    ACCGameStateGame* GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
-    GameStateGame->RemovePlayerFromPlayersData(PlayerID);
+    if (!PlayerController)
+        return;
 
     if (PlayerController->GetRemoteRole() != ROLE_AutonomousProxy)
     {

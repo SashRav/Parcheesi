@@ -78,6 +78,9 @@ int32 UCCPawnManagerComponent::GetTargetCellIndex(int32 CurrentCellIndex, int32 
 
 void UCCPawnManagerComponent::SetupTargetPositions(int32 TargetCellIndex, FVector& StartLocationRef)
 {
+    if (!GameState)
+        return;
+
     FCellsData TargetCellData = GameState->GetCellData(TargetCellIndex);
     StartLocationRef = TargetCellData.CellPosition;
 }
@@ -169,10 +172,10 @@ void UCCPawnManagerComponent::ChangePawnPosition()
 
 bool UCCPawnManagerComponent::CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex)
 {
-    if (SelectedPawn->GetCurrentPawnPosition() != EPawnPosition::OnBoard)
+    if (SelectedPawn && SelectedPawn->GetCurrentPawnPosition() != EPawnPosition::OnBoard)
         return false;
 
-    if (SelectedPawn->GetFirstBoardCellIndex() != TargetCellIndex)
+    if (SelectedPawn && SelectedPawn->GetFirstBoardCellIndex() != TargetCellIndex)
         return false;
     return true;
 }

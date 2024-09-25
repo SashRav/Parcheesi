@@ -107,6 +107,9 @@ void ACCGameStateGame::SetCellsData()
     TArray<AActor*> FoundCellsActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACCCell::StaticClass(), FoundCellsActors);
 
+    if (FoundCellsActors.Num() == 0)
+        return;
+
     for (AActor* CellActor : FoundCellsActors)
     {
         ACCCell* Cell = Cast<ACCCell>(CellActor);
@@ -131,6 +134,10 @@ TArray<ACCPawn*> ACCGameStateGame::GetAllPawns()
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACCPawn::StaticClass(), FoundActors);
 
     TArray<ACCPawn*> FoundPawns;
+
+    if (FoundActors.Num() == 0)
+        return FoundPawns;
+
     for (AActor* PawnActot : FoundActors)
     {
         FoundPawns.Add(Cast<ACCPawn>(PawnActot));

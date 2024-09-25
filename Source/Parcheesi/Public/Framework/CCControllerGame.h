@@ -8,6 +8,7 @@
 #include "CCControllerGame.generated.h"
 
 class ACCHUDGame;
+class ACCPlayerPawnGame;
 class UInputMappingContext;
 class UInputAction;
 
@@ -36,10 +37,10 @@ public:
     void Client_EnableEndTurnButton();
 
     UFUNCTION(Client, Reliable)
-    void Client_SwitchMovePawnButtonIsEnabled(bool State);
+    void Client_SwitchMovePawnButtonIsEnabled(const bool State);
 
     UFUNCTION(Client, Reliable)
-    void Client_SetDiceSideOnUI(int32 Side);
+    void Client_SetDiceSideOnUI(const int32 Side);
 
     UFUNCTION(Client, Reliable)
     void Client_ShowWinWidget(const FText& WinnerName);
@@ -48,7 +49,7 @@ public:
     void Client_UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
 
     UFUNCTION(Client, Reliable)
-    void Client_UpdateLobbySettings(FGameSettings GameSettings);
+    void Client_UpdateLobbySettings(const FGameSettings GameSettings);
 
     UFUNCTION(Client, Reliable)
     void Client_UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers);
@@ -59,6 +60,9 @@ public:
 protected:
     UPROPERTY()
     ACCHUDGame* OwningHUD;
+
+    UPROPERTY()
+    ACCPlayerPawnGame* PlayerPawn;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputMappingContext* GameMappingContext;

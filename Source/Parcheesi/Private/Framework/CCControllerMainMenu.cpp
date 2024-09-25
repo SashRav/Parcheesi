@@ -3,8 +3,8 @@
 
 #include "Framework/CCControllerMainMenu.h"
 
-void ACCControllerMainMenu::BeginPlay() {
-
+void ACCControllerMainMenu::BeginPlay() 
+{
 	SetInputMode(FInputModeUIOnly());
     bShowMouseCursor = true;
 }

@@ -23,6 +23,7 @@ void ACCControllerGame::BeginPlay()
     bShowMouseCursor = true;
 
     OwningHUD = Cast<ACCHUDGame>(GetHUD());
+    PlayerPawn = Cast<ACCPlayerPawnGame>(GetPawn());
 
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
@@ -68,7 +69,6 @@ void ACCControllerGame::Client_ShowTurnButtonsWidget_Implementation()
     if (OwningHUD)
         OwningHUD->ShowTurnButtons();
 
-    ACCPlayerPawnGame* PlayerPawn = Cast<ACCPlayerPawnGame>(GetPawn());
     if (PlayerPawn)
         PlayerPawn->Multicast_SetCurrentTurn(true);
 }
@@ -85,13 +85,13 @@ void ACCControllerGame::Client_EnableEndTurnButton_Implementation()
         OwningHUD->EnableEndTurnButton();
 }
 
-void ACCControllerGame::Client_SetDiceSideOnUI_Implementation(int32 Side)
+void ACCControllerGame::Client_SetDiceSideOnUI_Implementation(const int32 Side)
 {
     if (OwningHUD)
         OwningHUD->SetSeclectedDiceSideOnUI(Side);
 }
 
-void ACCControllerGame::Client_SwitchMovePawnButtonIsEnabled_Implementation(bool State)
+void ACCControllerGame::Client_SwitchMovePawnButtonIsEnabled_Implementation(const bool State)
 {
     if (OwningHUD)
         OwningHUD->SwitchMovePawnButtonIsEnabled(State);
@@ -104,7 +104,9 @@ void ACCControllerGame::Client_ShowWinWidget_Implementation(const FText& WinnerN
         Subsystem->RemoveMappingContext(LevelInputContext);
         Subsystem->RemoveMappingContext(GameMappingContext);
     }
+    
     bShowMouseCursor = true;
+    
     if (OwningHUD)
         OwningHUD->ShowWinWidget(WinnerName);
 }
@@ -115,7 +117,7 @@ void ACCControllerGame::Client_UpdateLobbySelection_Implementation(const TArray<
         OwningHUD->UpdateLobbySelection(AllPlayersData);
 }
 
-void ACCControllerGame::Client_UpdateLobbySettings_Implementation(FGameSettings GameSettings)
+void ACCControllerGame::Client_UpdateLobbySettings_Implementation(const FGameSettings GameSettings)
 {
     if (OwningHUD)
         OwningHUD->UpdateLobbySettings(GameSettings);
@@ -127,8 +129,7 @@ void ACCControllerGame::Client_UpdatePlayersList_Implementation(const TArray<FUn
         OwningHUD->UpdatePlayersList(AllPlayers);
 }
 
-
-void ACCControllerGame::Client_CreateLobbyWidget_Implementation() 
+void ACCControllerGame::Client_CreateLobbyWidget_Implementation()
 {
     if (OwningHUD)
         OwningHUD->CreateLobbyWidget();
