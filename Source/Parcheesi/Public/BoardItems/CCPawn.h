@@ -9,6 +9,7 @@
 
 class UStaticMeshComponent;
 class USplineComponent;
+class USkeletalMeshComponent;
 
 UCLASS()
 class PARCHEESI_API ACCPawn : public AActor
@@ -34,7 +35,7 @@ public:
     void Multicast_SetupPawnData(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell, int32 FirstFinishCell);
 
     UPROPERTY(EditDefaultsOnly)
-    UStaticMeshComponent* PawnMeshComponent;
+    USkeletalMeshComponent* PawnSkeletalMeshComponent;
 
     UPROPERTY(EditAnywhere)
     USplineComponent* SplienComponent;

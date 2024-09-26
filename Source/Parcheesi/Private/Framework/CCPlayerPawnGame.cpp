@@ -163,7 +163,7 @@ void ACCPlayerPawnGame::Server_CleanSelectionData_Implementation()
     }
     if (SelectedPawnActor)
     {
-        Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
+        Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnSkeletalMeshComponent);
         SelectedPawnActor = nullptr;
     }
 }
@@ -244,10 +244,10 @@ void ACCPlayerPawnGame::Server_SelectPawnActor_Implementation(ACCPawn* HitPawn)
         return;
 
     if (SelectedPawnActor)
-        Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
+        Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnSkeletalMeshComponent);
 
     SelectedPawnActor = HitPawn;
-    Client_VisualSelectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
+    Client_VisualSelectActor(SelectItemPawnComponent, SelectedPawnActor->PawnSkeletalMeshComponent);
 }
 
 void ACCPlayerPawnGame::ClickOnBoard()
@@ -283,7 +283,7 @@ void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation()
     PawnManagerComponent->MoveSelectedPawn(SelectedPawnActor, SelectedDiceActor->GetDiceSide());
     Multicast_HandlePawnMovementStarted();
 
-    Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnMeshComponent);
+    Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->PawnSkeletalMeshComponent);
 
     ServerGameState->RemoveDice(SelectedDiceActor); // Exists for debug purpose
     if (SelectedDiceActor->bDestryWhenUsed)
