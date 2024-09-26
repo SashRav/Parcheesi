@@ -18,14 +18,11 @@ class PARCHEESI_API UCCSessionItemUI : public UUserWidget
     GENERATED_BODY()
 
 public:
-    
-
     virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
    
-    //UPROPERTY(BlueprintAssignable)
     FOnSessionItemPressed OnSessionItemPressedEvent;
 
-    void SetSessionWidgetData(FString ServerName, int Players, int Ping);
+    void SetSessionWidgetData(FName ServerName, int Players, int MaxPlayers, int Ping);
     void SetSessionData(FOnlineSessionSearchResult SessionData);
     void CleanSelection();
 

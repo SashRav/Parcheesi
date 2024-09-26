@@ -16,7 +16,7 @@ void UCCSearchGameUI::NativeConstruct()
 {
     check(SessionResultWidgetClass)
 
-        const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     if (PlayerController)
         MainMenuHUD = Cast<ACCHUDMainMenu>(PlayerController->GetHUD());
 
@@ -55,7 +55,14 @@ void UCCSearchGameUI::JoinGameButtonClicked()
     if (SelectedSessionResult.IsValid())
     {
         StatusTextBox->SetText(FText::FromString("Connecting to the session"));
-        SessionInterface->JoinSession(0, "", SelectedSessionResult);
+
+        FString SessionNameString;
+        if (!SelectedSessionResult.Session.SessionSettings.Get(FName("SESSION_NAME_KEY"), SessionNameString))
+            SessionNameString = "";
+
+        FName SessionName = FName(*SessionNameString);
+
+        SessionInterface->JoinSession(0, SessionName, SelectedSessionResult);
     }
     else
         StatusTextBox->SetText(FText::FromString("No Session Selected"));

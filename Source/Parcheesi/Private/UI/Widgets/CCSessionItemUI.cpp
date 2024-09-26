@@ -6,7 +6,6 @@
 #include "OnlineSessionSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
-
 FReply UCCSessionItemUI::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
     Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
@@ -14,7 +13,7 @@ FReply UCCSessionItemUI::NativeOnMouseButtonDown(const FGeometry& InGeometry, co
 
     TArray<UUserWidget*> SessionWidgets;
     UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), SessionWidgets, SessionWidget, false);
-    for (UUserWidget*  ItemWidget : SessionWidgets)
+    for (UUserWidget* ItemWidget : SessionWidgets)
     {
         UCCSessionItemUI* MyNewWidget = Cast<UCCSessionItemUI>(ItemWidget);
         MyNewWidget->CleanSelection();
@@ -24,17 +23,29 @@ FReply UCCSessionItemUI::NativeOnMouseButtonDown(const FGeometry& InGeometry, co
     return FReply::Handled();
 }
 
-void UCCSessionItemUI::SetSessionWidgetData(FString ServerName, int Players, int Ping)
+void UCCSessionItemUI::SetSessionWidgetData(FName ServerName, int Players, int MaxPlayers, int Ping)
 {
-    ServerNameText->SetText(FText::FromString(ServerName));
-    PlayersText->SetText(FText::AsNumber(Players));
+    ServerNameText->SetText(FText::FromName(ServerName));
+    
+    FString PlayersData = FString::FromInt(Players) + " / " + FString::FromInt(MaxPlayers);
+    PlayersText->SetText(FText::FromString(*PlayersData));
     PingText->SetText(FText::AsNumber(Ping));
 }
 
 void UCCSessionItemUI::SetSessionData(FOnlineSessionSearchResult SessionData)
 {
     LocalSessionData = SessionData;
-    SetSessionWidgetData(SessionData.GetSessionIdStr(), 1, SessionData.PingInMs);
+    int32 MaxPlayers = LocalSessionData.Session.SessionSettings.NumPublicConnections;
+    int32 CurrentPlayers = MaxPlayers - LocalSessionData.Session.NumOpenPublicConnections;
+
+    FString SessionNameString;
+
+    if (!LocalSessionData.Session.SessionSettings.Get(FName("SESSION_NAME_KEY"), SessionNameString))
+        SessionNameString = "Underfind Session";
+
+    FName SessionName = FName(*SessionNameString);
+
+    SetSessionWidgetData(SessionName, CurrentPlayers, MaxPlayers, SessionData.PingInMs);
     SelectingBorder->SetBrushColor(FLinearColor(0.5f, 0.5f, 0.5f, 0.2f));
 }
 
