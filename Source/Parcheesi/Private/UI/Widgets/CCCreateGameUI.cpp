@@ -9,6 +9,7 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Components/EditableTextBox.h"
 #include "Components/CheckBox.h"
+#include "Framework/CCGameInstance.h"
 
 void UCCCreateGameUI::NativeConstruct()
 {
@@ -58,6 +59,10 @@ void UCCCreateGameUI::CreateSession()
 
     if (SessionInterface.IsValid())
         SessionInterface->CreateSession(0, SessionName, SessionSettings);
+
+    if (UCCGameInstance* GameInstance = Cast<UCCGameInstance>(GetGameInstance()))
+        GameInstance->SetSessionName(SessionName);
+
 }
 
 void UCCCreateGameUI::OnCreateSessionComplete(FName ServerName, bool Succeeded)

@@ -4,6 +4,7 @@
 #include "Framework/CCGameStateGame.h"
 #include "Framework/CCControllerGame.h"
 #include "Framework/CCPlayerPawnGame.h"
+#include "Framework/CCGameInstance.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "BoardItems/CCPawn.h"
@@ -20,6 +21,7 @@ void ACCGameModeBaseGame::BeginPlay()
     check(PawnClass);
 
     GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
+    GameInstance = Cast<UCCGameInstance>(GetGameInstance());
 }
 
 void ACCGameModeBaseGame::PostLogin(APlayerController* NewPlayer)
@@ -147,7 +149,7 @@ void ACCGameModeBaseGame::UpdatePlayersTurnWidgets()
             Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), NetId)->GetOwningController());
         if (!PlayerController)
             return;
-        
+
         if (PlayersTurnData.Num() > 0)
             PlayerController->Client_UpdateTurnWidgets(PlayersTurnData);
     }
@@ -241,7 +243,7 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
             ACCPawn* SpawnedPawn = GetWorld()->SpawnActor<ACCPawn>(PawnClass, PlaceActor->GetActorLocation(), Rotation);
             if (SpawnedPawn)
                 SpawnedPawn->Multicast_SetupPawnData(
-                Color, SpawnCell->GetCellIndex(), SpawnCell->GetClosestBoardCellIndex(), SpawnCell->GetClosestFinishCellIndex());
+                    Color, SpawnCell->GetCellIndex(), SpawnCell->GetClosestBoardCellIndex(), SpawnCell->GetClosestFinishCellIndex());
         }
     }
 }
@@ -258,7 +260,7 @@ void ACCGameModeBaseGame::FinishGame(FName PlayerTagName)
     {
         ACCControllerGame* GameController =
             Cast<ACCControllerGame>(UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), NetId)->GetOwningController());
-        
+
         if (GameController)
             GameController->Client_ShowWinWidget(FText::FromName(PlayerTagName));
     }
@@ -283,13 +285,14 @@ void ACCGameModeBaseGame::DisconnectPlayer(FUniqueNetIdRepl PlayerID)
     if (!PlayerController)
         return;
 
+    IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
     if (PlayerController->GetRemoteRole() != ROLE_AutonomousProxy)
     {
-        IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
-        if (SessionInterface.IsValid())
-        {
-            SessionInterface->DestroySession(FName("My session")); // Hardcoded untill session creation system will be implemented properly
-        }
+        if (!SessionInterface.IsValid())
+            return;
+
+        if (GameInstance)
+            SessionInterface->DestroySession(GameInstance->GetSessionName());
     }
 
     PlayerController->ClientTravel("/Game/Maps/MenuMap", ETravelType::TRAVEL_Absolute);

@@ -94,7 +94,7 @@ void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& C
 
     FPlayerInfo PlayerInfo;
     PlayerInfo.Tag = ColorTag;
-    PlayerInfo.bIsReady = true;
+    PlayerInfo.bIsReady = false;
 
     if (OwningPlayerController && OwningPlayerController->HasAuthority()) // Server don't have Ready button and it is ready by default
         PlayerInfo.bIsReady = true;

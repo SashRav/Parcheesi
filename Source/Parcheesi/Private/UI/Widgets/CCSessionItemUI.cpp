@@ -27,7 +27,7 @@ void UCCSessionItemUI::SetSessionWidgetData(FName ServerName, int Players, int M
 {
     ServerNameText->SetText(FText::FromName(ServerName));
     
-    FString PlayersData = FString::FromInt(Players) + " / " + FString::FromInt(MaxPlayers);
+    FString PlayersData = FString::FromInt(MaxPlayers); // For now display only max players
     PlayersText->SetText(FText::FromString(*PlayersData));
     PingText->SetText(FText::AsNumber(Ping));
 }

@@ -8,6 +8,7 @@
 #include "CCGameModeBaseGame.generated.h"
 
 class ACCGameStateGame;
+class UCCGameInstance;
 class APlayerController;
 class ACCPawn;
 
@@ -21,7 +22,7 @@ public:
     void StartNextTurn();
 
     void ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo);
-    
+
     void FinishGame(FName PlayerTagName);
 
     void SaveGameSettings(FGameSettings Settings);
@@ -49,4 +50,7 @@ protected:
 
     UPROPERTY()
     ACCGameStateGame* GameStateGame;
+
+    UPROPERTY()
+    UCCGameInstance* GameInstance;
 };
