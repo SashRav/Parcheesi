@@ -4,6 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "AI/CCPawnAIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ACCPawn::ACCPawn()
 {
@@ -11,6 +12,10 @@ ACCPawn::ACCPawn()
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
     AIControllerClass = ACCPawnAIController::StaticClass();
+
+    bUseControllerRotationYaw = false;
+    GetCharacterMovement()->bOrientRotationToMovement = true;
+    GetCharacterMovement()->bRequestedMoveUseAcceleration = false;
 }
 
 void ACCPawn::BeginPlay()
