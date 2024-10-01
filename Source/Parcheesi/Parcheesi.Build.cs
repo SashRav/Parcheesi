@@ -1,6 +1,7 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
 using UnrealBuildTool;
+using UnrealBuildTool.Rules;
 
 public class Parcheesi : ModuleRules
 {
@@ -17,7 +18,8 @@ public class Parcheesi : ModuleRules
             "UMG",
             "EnhancedInput" ,
             "OnlineSubsystem",
-            "OnlineSubsystemUtils"
+            "OnlineSubsystemUtils",
+            "AIModule"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

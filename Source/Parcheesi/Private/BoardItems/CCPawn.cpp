@@ -3,17 +3,14 @@
 #include "BoardItems/CCPawn.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/SplineComponent.h"
+#include "AI/CCPawnAIController.h"
 
 ACCPawn::ACCPawn()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
-    PawnSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
-    PawnSkeletalMeshComponent->SetupAttachment(RootComponent);
-
-    SplienComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineMesh"));
-    SplienComponent->SetupAttachment(RootComponent);
+    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+    AIControllerClass = ACCPawnAIController::StaticClass();
 }
 
 void ACCPawn::BeginPlay()
@@ -37,16 +34,16 @@ void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor, int3
     switch (PawnColor)
     {
     case ETurnColors::Red:
-        PawnSkeletalMeshComponent->SetMaterial(0, RedMaterial);
+        GetMesh()->SetMaterial(0, RedMaterial);
         break;
     case ETurnColors::Blue:
-        PawnSkeletalMeshComponent->SetMaterial(0, BlueMaterial);
+        GetMesh()->SetMaterial(0, BlueMaterial);
         break;
     case ETurnColors::Green:
-        PawnSkeletalMeshComponent->SetMaterial(0, GreenMaterial);
+        GetMesh()->SetMaterial(0, GreenMaterial);
         break;
     case ETurnColors::Yellow:
-        PawnSkeletalMeshComponent->SetMaterial(0, YellowMaterial);
+        GetMesh()->SetMaterial(0, YellowMaterial);
         break;
     }
 }

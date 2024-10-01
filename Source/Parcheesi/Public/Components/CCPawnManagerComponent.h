@@ -70,6 +70,9 @@ protected:
     UPROPERTY()
     ACCGameStateGame* GameState;
 
+    UFUNCTION()
+    void HandlePawnFinishedMovement(bool bResult);
+
     FTimerHandle PawnMovementTimerHandle;
     FTimerHandle MovementCheckerTimerHandle;
 

@@ -6,6 +6,7 @@
 #include "Framework/CCGameStateGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "CCCoreTypes.h"
+#include "AI/CCPawnAIController.h"
 
 UCCPawnManagerComponent::UCCPawnManagerComponent()
 {
@@ -134,39 +135,43 @@ void UCCPawnManagerComponent::ChangePositionChecker()
         PawnCurrentCellIndex = TargetCell;
         bIsMovementTimerActive = true;
 
-        GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
+        ChangePawnPosition();
     }
 }
 
 void UCCPawnManagerComponent::ChangePawnPosition()
 {
-    CurrentTime += 0.033f; // Value from 1/30 instead of using DeltaTime
-    float Alpha = FMath::Clamp(CurrentTime / MoveDuration, 0.0f, 1.0f);
-    FVector NewLocation = FMath::Lerp(StartLocation, TargetLocation, Alpha);
-
-    SelectedPawn->SetActorLocation(NewLocation);
-
-    if (CurrentTime >= MoveDuration)
+    ACCPawnAIController* AIController = Cast<ACCPawnAIController>(SelectedPawn->GetController());
+    if (AIController)
     {
-        GetWorld()->GetTimerManager().ClearTimer(PawnMovementTimerHandle);
-        bIsMovementTimerActive = false;
-        StepsAlredyMoved++;
-        CurrentTime = 0.0f;
-        TargetCell = -1;
-        StartLocation = FVector(0, 0, 0);
-        TargetLocation = FVector(0, 0, 0);
+        AIController->MoveToLocation(TargetLocation, 10.0f, false, false, true, false);
+        AIController->OnMovementFinished.AddDynamic(this, &UCCPawnManagerComponent::HandlePawnFinishedMovement);
+    }
+}
 
-        UE_LOG(LogTemp, Display, TEXT("StepsAlredyMoved: %d,  StepsToMove: %d"), StepsAlredyMoved, StepsToMove);
+void UCCPawnManagerComponent::HandlePawnFinishedMovement(bool bResult)
+{
+    UE_LOG(LogTemp, Display, TEXT("HandlePawnFinishedMovement"));
 
-        if (StepsAlredyMoved >= StepsToMove)
-        {
-            GetWorld()->GetTimerManager().ClearTimer(MovementCheckerTimerHandle);
+    ACCPawnAIController* AIController = Cast<ACCPawnAIController>(SelectedPawn->GetController());
+    if (AIController)
+        AIController->OnMovementFinished.RemoveAll(this);
 
-            if (bShouldMoveToFinish)
-                MovePawnToFinish();
-            else
-                FinishPawnMovement();
-        }
+    bIsMovementTimerActive = false;
+    StepsAlredyMoved++;
+    CurrentTime = 0.0f;
+    TargetCell = -1;
+    StartLocation = FVector(0, 0, 0);
+    TargetLocation = FVector(0, 0, 0);
+
+    if (StepsAlredyMoved >= StepsToMove)
+    {
+        GetWorld()->GetTimerManager().ClearTimer(MovementCheckerTimerHandle);
+
+        if (bShouldMoveToFinish)
+            MovePawnToFinish();
+        else
+            FinishPawnMovement();
     }
 }
 
@@ -322,10 +327,9 @@ void UCCPawnManagerComponent::MovePawnFromStart()
     SetupTargetPositions(SelectedPawn->GetStartCellIndex(), StartLocation);
     SetupTargetPositions(SelectedPawn->GetFirstBoardCellIndex(), TargetLocation);
 
-    // Run only ChangePawnPosition because we need to move Pawn only one time
     StepsToMove = 1;
     MoveDuration = 1.0f;
-    GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
+    ChangePawnPosition();
 }
 
 void UCCPawnManagerComponent::MovePawnOnBoard()
@@ -384,7 +388,7 @@ void UCCPawnManagerComponent::MovePawnToFinish()
     StepsAlredyMoved = 0;
     StepsToMove = 1;
     MoveDuration = 1.0f;
-    GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
+    ChangePawnPosition();
 }
 
 void UCCPawnManagerComponent::MovePawnOnFinish()
@@ -415,7 +419,7 @@ void UCCPawnManagerComponent::MovePawnToSpawn(ACCPawn* Pawn)
     StepsToMove = 1;
     MoveDuration = 1.0f;
 
-    GetWorld()->GetTimerManager().SetTimer(PawnMovementTimerHandle, this, &UCCPawnManagerComponent::ChangePawnPosition, 0.033f, true);
+    ChangePawnPosition();
 }
 
 void UCCPawnManagerComponent::SetNewPawnDataInGameState(int32 CellIndex, ACCPawn* FirstPawnToAdd, ACCPawn* SecondPawnToAdd)

@@ -3,16 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "GameFramework/Character.h"
 #include "CCCoreTypes.h"
 #include "CCPawn.generated.h"
 
 class UStaticMeshComponent;
-class USplineComponent;
 class USkeletalMeshComponent;
 
 UCLASS()
-class PARCHEESI_API ACCPawn : public AActor
+class PARCHEESI_API ACCPawn : public ACharacter
 {
     GENERATED_BODY()
 
@@ -33,12 +32,6 @@ public:
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_SetupPawnData(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell, int32 FirstFinishCell);
-
-    UPROPERTY(EditDefaultsOnly)
-    USkeletalMeshComponent* PawnSkeletalMeshComponent;
-
-    UPROPERTY(EditAnywhere)
-    USplineComponent* SplienComponent;
 
 protected:
     virtual void BeginPlay() override;
