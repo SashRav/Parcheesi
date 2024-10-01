@@ -40,7 +40,6 @@ protected:
     void MovePawnOnFinish();
 
     void ChangePawnPosition();
-    void ChangePositionChecker();
 
     void SetupTargetPositions(int32 TargetCellIndex, FVector& StartLocationRef);
     bool CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex);
@@ -70,11 +69,11 @@ protected:
     UPROPERTY()
     ACCGameStateGame* GameState;
 
+    UPROPERTY()
+    TArray<FVector> TargetPositions;
+
     UFUNCTION()
     void HandlePawnFinishedMovement(bool bResult);
-
-    FTimerHandle PawnMovementTimerHandle;
-    FTimerHandle MovementCheckerTimerHandle;
 
     float CurrentTime = 0.0f;
     float MoveDuration = 1.0f;

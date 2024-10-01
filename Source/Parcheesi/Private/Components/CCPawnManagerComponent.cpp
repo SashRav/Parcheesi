@@ -26,9 +26,7 @@ void UCCPawnManagerComponent::MoveSelectedPawn(ACCPawn* Pawn, int32 Steps)
     SelectedPawn = Pawn;
     StepsToMove = Steps;
     PawnCurrentCellIndex = Pawn->GetCurrentCellIndex();
-    MoveDuration = (1 + 0.4 * (Steps - 1)) / Steps; // Get time based on steps amount: 1 step = 1 second, 6 steps = 3 seconds
-
-    UE_LOG(LogTemp, Display, TEXT("MoveDuration: %f"), MoveDuration);
+    TargetPositions.Empty();
 
     EPawnPosition Position = Pawn->GetCurrentPawnPosition();
     switch (Position)
@@ -120,23 +118,8 @@ void UCCPawnManagerComponent::FinishPawnMovement()
     bIsMovementTimerActive = false;
     bShouldBuildGates = false;
     bShouldAttackEnemy = false;
+    TargetPositions.Empty();
     OnPawnMovementFinished.Broadcast();
-}
-
-void UCCPawnManagerComponent::ChangePositionChecker()
-{
-    if (!bIsMovementTimerActive)
-    {
-        TargetCell = GetTargetCellIndex(PawnCurrentCellIndex, 1, bIsMovingOnFinish);
-
-        SetupTargetPositions(PawnCurrentCellIndex, StartLocation);
-        SetupTargetPositions(TargetCell, TargetLocation);
-
-        PawnCurrentCellIndex = TargetCell;
-        bIsMovementTimerActive = true;
-
-        ChangePawnPosition();
-    }
 }
 
 void UCCPawnManagerComponent::ChangePawnPosition()
@@ -144,7 +127,7 @@ void UCCPawnManagerComponent::ChangePawnPosition()
     ACCPawnAIController* AIController = Cast<ACCPawnAIController>(SelectedPawn->GetController());
     if (AIController)
     {
-        AIController->MoveToLocation(TargetLocation, 10.0f, false, false, true, false);
+        AIController->MovePawnThroughCells(TargetPositions);
         AIController->OnMovementFinished.AddDynamic(this, &UCCPawnManagerComponent::HandlePawnFinishedMovement);
     }
 }
@@ -157,22 +140,10 @@ void UCCPawnManagerComponent::HandlePawnFinishedMovement(bool bResult)
     if (AIController)
         AIController->OnMovementFinished.RemoveAll(this);
 
-    bIsMovementTimerActive = false;
-    StepsAlredyMoved++;
-    CurrentTime = 0.0f;
-    TargetCell = -1;
-    StartLocation = FVector(0, 0, 0);
-    TargetLocation = FVector(0, 0, 0);
-
-    if (StepsAlredyMoved >= StepsToMove)
-    {
-        GetWorld()->GetTimerManager().ClearTimer(MovementCheckerTimerHandle);
-
-        if (bShouldMoveToFinish)
-            MovePawnToFinish();
-        else
-            FinishPawnMovement();
-    }
+    if (bShouldMoveToFinish)
+        MovePawnToFinish();
+    else
+        FinishPawnMovement();
 }
 
 bool UCCPawnManagerComponent::CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex)
@@ -210,22 +181,33 @@ bool UCCPawnManagerComponent::CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 Cell
 {
     FCellsData TargetCellData = GameState->GetCellData(CellIndex);
     if (TargetCellData.FirstPawnOnCell == nullptr)
+    {
+        TargetPositions.Add(TargetCellData.CellPosition);
         return true;
-
+    }
     if (TargetCellData.FirstPawnOnCell->Tags[0] != Pawn->Tags[0] && !TargetCellData.FirstPawnOnCell->GetIsInGates())
+    {
+        TargetPositions.Add(TargetCellData.CellPosition);
         return true;
-
+    }
     if (Pawn->GetCurrentPawnPosition() != EPawnPosition::OnBoard && !TargetCellData.FirstPawnOnCell->GetIsInGates())
+    {
+        TargetPositions.Add(TargetCellData.CellPosition);
         return true;
-
+    }
     if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnBoard && Pawn->GetFirstBoardCellIndex() != CellIndex)
         if (!TargetCellData.FirstPawnOnCell->GetIsInGates())
+        {
+            TargetPositions.Add(TargetCellData.CellPosition);
             return true;
+        }
 
     if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnBoard && Pawn->GetFirstBoardCellIndex() == CellIndex)
         if (!TargetCellData.FirstPawnOnCell->GetIsInGates() && CheckFirstFinishCellIsEmpty(Pawn))
+        {
+            TargetPositions.Add(TargetCellData.CellPosition);
             return true;
-
+        }
     return false;
 }
 
@@ -269,14 +251,17 @@ bool UCCPawnManagerComponent::CheckPawnPath(ACCPawn* Pawn, int32 Steps)
         // Check if finish cell on the path
         if (Pawn->GetFirstBoardCellIndex() == TargetCellIndex)
         {
+            TargetPositions.Empty();
             return false;
         }
         FCellsData TargetCellData = GameState->GetCellData(TargetCellIndex);
 
         if (TargetCellData.FirstPawnOnCell && TargetCellData.FirstPawnOnCell->GetIsInGates())
         {
+            TargetPositions.Empty();
             return false;
         }
+        TargetPositions.Add(TargetCellData.CellPosition);
     }
     return true;
 }
@@ -324,9 +309,6 @@ void UCCPawnManagerComponent::MovePawnFromStart()
     SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstBoardCellIndex());
     SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnBoard);
 
-    SetupTargetPositions(SelectedPawn->GetStartCellIndex(), StartLocation);
-    SetupTargetPositions(SelectedPawn->GetFirstBoardCellIndex(), TargetLocation);
-
     StepsToMove = 1;
     MoveDuration = 1.0f;
     ChangePawnPosition();
@@ -336,10 +318,10 @@ void UCCPawnManagerComponent::MovePawnOnBoard()
 {
     int32 Index = GetTargetCellIndex(PawnCurrentCellIndex, StepsToMove, false);
 
-    if (!CheckCanMoveToTargetCell(SelectedPawn, Index))
+    if (!CheckPawnPath(SelectedPawn, StepsToMove))
         return;
 
-    if (!CheckPawnPath(SelectedPawn, StepsToMove))
+    if (!CheckCanMoveToTargetCell(SelectedPawn, Index))
         return;
 
     bShouldMoveToFinish = CheckIsTargetCellLeadsToFinish(Index);
@@ -369,16 +351,16 @@ void UCCPawnManagerComponent::MovePawnOnBoard()
             return;
         }
     }
-
-    GetWorld()->GetTimerManager().SetTimer(MovementCheckerTimerHandle, this, &UCCPawnManagerComponent::ChangePositionChecker, 0.033f, true);
+    ChangePawnPosition();
 }
 
 void UCCPawnManagerComponent::MovePawnToFinish()
 {
     bShouldMoveToFinish = false;
 
-    SetupTargetPositions(PawnCurrentCellIndex, StartLocation);
     SetupTargetPositions(SelectedPawn->GetFirstFinishCellIndex(), TargetLocation);
+    TargetPositions.Empty();
+    TargetPositions.Add(TargetLocation);
 
     SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnFinish);
     SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstFinishCellIndex());
@@ -388,6 +370,7 @@ void UCCPawnManagerComponent::MovePawnToFinish()
     StepsAlredyMoved = 0;
     StepsToMove = 1;
     MoveDuration = 1.0f;
+    
     ChangePawnPosition();
 }
 
@@ -403,13 +386,17 @@ void UCCPawnManagerComponent::MovePawnOnFinish()
     bIsMovingOnFinish = true;
     SetNewPawnDataInGameState(Index, SelectedPawn, nullptr);
 
-    GetWorld()->GetTimerManager().SetTimer(MovementCheckerTimerHandle, this, &UCCPawnManagerComponent::ChangePositionChecker, 0.033f, true);
+    SetupTargetPositions(Index, TargetLocation);
+    TargetPositions.Add(TargetLocation);
+
+    ChangePawnPosition();
 }
 
 void UCCPawnManagerComponent::MovePawnToSpawn(ACCPawn* Pawn)
 {
-    SetupTargetPositions(Pawn->GetCurrentCellIndex(), StartLocation);
     SetupTargetPositions(Pawn->GetStartCellIndex(), TargetLocation);
+    TargetPositions.Empty();
+    TargetPositions.Add(TargetLocation);
 
     SelectedPawn = SecondaryPawn;
     SecondaryPawn = nullptr;

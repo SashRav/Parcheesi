@@ -14,8 +14,18 @@ class PARCHEESI_API ACCPawnAIController : public AAIController
     GENERATED_BODY()
 
 public:
-    virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
-
     UPROPERTY(BlueprintAssignable)
     FOnMovementFinished OnMovementFinished;
+
+    void MovePawnThroughCells(const TArray<FVector> Positions);
+
+protected:
+    virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
+    void MoveToNextPoint();
+
+    int32 CurrentPosition = 0;
+    int32 MaxPosition = 0;
+
+    UPROPERTY()
+    TArray<FVector> TargetPositions;
 };
