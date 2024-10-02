@@ -25,7 +25,7 @@ public:
     ACCPlayerPawnGame();
 
     void SetPlayerTagName(FName TagName) { PlayerTagName = TagName; };
-    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    
 
     UFUNCTION(Server, Reliable)
     void Server_UpdateSelectedColor(const FName& ColorTag);
@@ -71,7 +71,7 @@ public:
 
 protected:
     virtual void BeginPlay() override;
-
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void SetupPlayerInputComponent(UInputComponent* NewInputComponent) override;
 
     void ClickOnBoard();

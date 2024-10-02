@@ -39,7 +39,7 @@ protected:
     void MovePawnToFinish();
     void MovePawnOnFinish();
 
-    void ChangePawnPosition();
+    void ChangePawnPosition(ACCPawn* PawnToMove, TArray<FVector> Positions, bool bHandleMovement = true);
 
     void SetupTargetPositions(int32 TargetCellIndex, FVector& StartLocationRef);
     bool CheckIsTargetCellLeadsToFinish(int32 TargetCellIndex);

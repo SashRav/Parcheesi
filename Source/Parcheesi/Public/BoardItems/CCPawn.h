@@ -33,8 +33,15 @@ public:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_SetupPawnData(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell, int32 FirstFinishCell);
 
+    UPROPERTY(BlueprintReadOnly, Replicated)
+    bool bIsAttacking = false;
+
+    UPROPERTY(BlueprintReadOnly, Replicated)
+    bool bIsInGates = false;
+
 protected:
     virtual void BeginPlay() override;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
     UPROPERTY(EditDefaultsOnly)
     UMaterialInstance* RedMaterial;
@@ -60,8 +67,6 @@ protected:
     UPROPERTY()
     int32 CurrentCellIndex = -1;
 
-    UPROPERTY()
-    bool bIsInGates = false;
 
     UPROPERTY()
     EPawnPosition CurrentPawnPosition = EPawnPosition::OnStart;

@@ -5,6 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "AI/CCPawnAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 ACCPawn::ACCPawn()
 {
@@ -26,6 +27,14 @@ void ACCPawn::BeginPlay()
     check(GreenMaterial);
     check(YellowMaterial);
     check(BlueMaterial);
+}
+
+void ACCPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const 
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ACCPawn, bIsAttacking);
+    DOREPLIFETIME(ACCPawn, bIsInGates);
 }
 
 void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell, int32 FirstFinishCell)
