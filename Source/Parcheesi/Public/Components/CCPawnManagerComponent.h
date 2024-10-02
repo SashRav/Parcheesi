@@ -46,7 +46,8 @@ protected:
     bool CheckFirstFinishCellIsEmpty(ACCPawn* Pawn);
     bool CheckIfCanMoveOnFinishCells(int32 TargetCellIndex);
 
-    void MovePawnToSpawn(ACCPawn* Pawn);
+    void AttackPawnOnCell();
+    void FinishPawnAttack();
     void SetNewPawnDataInGameState(int32 CellIndex, ACCPawn* FirstPawnToAdd, ACCPawn* SecondPawnToAdd);
     void FinishPawnMovement();
 

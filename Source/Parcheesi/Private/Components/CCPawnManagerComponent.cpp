@@ -90,7 +90,7 @@ void UCCPawnManagerComponent::FinishPawnMovement()
     {
         if (bShouldAttackEnemy)
         {
-            MovePawnToSpawn(SecondaryPawn);
+            AttackPawnOnCell();
             return;
         }
         if (bShouldBuildGates)
@@ -124,6 +124,11 @@ void UCCPawnManagerComponent::FinishPawnMovement()
 
 void UCCPawnManagerComponent::ChangePawnPosition(ACCPawn* PawnToMove, TArray<FVector> Positions, bool bHandleMovement)
 {
+    if (!PawnToMove)
+        return;
+
+    UE_LOG(LogTemp, Display, TEXT("Cells to move: %d"), Positions.Num());
+
     ACCPawnAIController* AIController = Cast<ACCPawnAIController>(PawnToMove->GetController());
     if (AIController)
     {
@@ -137,9 +142,20 @@ void UCCPawnManagerComponent::HandlePawnFinishedMovement(bool bResult)
 {
     UE_LOG(LogTemp, Display, TEXT("HandlePawnFinishedMovement"));
 
-    ACCPawnAIController* AIController = Cast<ACCPawnAIController>(SelectedPawn->GetController());
-    if (AIController)
-        AIController->OnMovementFinished.RemoveAll(this);
+    ACCPawnAIController* AIController;
+    if (SelectedPawn)
+    {
+        AIController = Cast<ACCPawnAIController>(SelectedPawn->GetController());
+        if (AIController)
+            AIController->OnMovementFinished.RemoveAll(this);
+    }
+
+    if (SecondaryPawn)
+    {
+        AIController = Cast<ACCPawnAIController>(SecondaryPawn->GetController());
+        if (AIController)
+            AIController->OnMovementFinished.RemoveAll(this);
+    }
 
     if (bShouldMoveToFinish)
         MovePawnToFinish();
@@ -181,34 +197,56 @@ bool UCCPawnManagerComponent::CheckIfCanMoveOnFinishCells(int32 TargetCellIndex)
 bool UCCPawnManagerComponent::CheckCanMoveToTargetCell(ACCPawn* Pawn, int32 CellIndex)
 {
     FCellsData TargetCellData = GameState->GetCellData(CellIndex);
+
+    // If cell is empty just go to it
     if (TargetCellData.FirstPawnOnCell == nullptr)
     {
         TargetPositions.Add(TargetCellData.CellPosition);
         return true;
     }
+
+    // If cell has enemy and they are not in gates move to this cell
     if (TargetCellData.FirstPawnOnCell->Tags[0] != Pawn->Tags[0] && !TargetCellData.FirstPawnOnCell->GetIsInGates())
     {
-        TargetPositions.Add(TargetCellData.CellPosition);
+        FCellsData PreviusCellData;
+
+        if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnStart)
+            PreviusCellData = GameState->GetCellData(Pawn->GetStartCellIndex());
+        else
+            PreviusCellData = GameState->GetCellData(GetTargetCellIndex(CellIndex, -1, false));
+
+        FVector Direction = PreviusCellData.CellPosition - TargetCellData.CellPosition;
+        Direction.Normalize();
+
+        FVector TargetPoint = TargetCellData.CellPosition + Direction * 250.0f;
+        TargetPositions.Add(TargetPoint);
         return true;
     }
+
+    // If Pawn moves from start and target cell does not have gates
     if (Pawn->GetCurrentPawnPosition() != EPawnPosition::OnBoard && !TargetCellData.FirstPawnOnCell->GetIsInGates())
     {
         TargetPositions.Add(TargetCellData.CellPosition);
         return true;
     }
+
+    // If Pawn moves on board and target cell does not further then first board cell
     if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnBoard && Pawn->GetFirstBoardCellIndex() != CellIndex)
+        // If target cell does not contains gates
         if (!TargetCellData.FirstPawnOnCell->GetIsInGates())
         {
             TargetPositions.Add(TargetCellData.CellPosition);
             return true;
         }
 
+    // If Pawn moves on board and target cell is equals to fist board cell
     if (Pawn->GetCurrentPawnPosition() == EPawnPosition::OnBoard && Pawn->GetFirstBoardCellIndex() == CellIndex)
         if (!TargetCellData.FirstPawnOnCell->GetIsInGates() && CheckFirstFinishCellIsEmpty(Pawn))
         {
             TargetPositions.Add(TargetCellData.CellPosition);
             return true;
         }
+
     return false;
 }
 
@@ -310,8 +348,6 @@ void UCCPawnManagerComponent::MovePawnFromStart()
     SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetFirstBoardCellIndex());
     SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnBoard);
 
-    StepsToMove = 1;
-    MoveDuration = 1.0f;
     ChangePawnPosition(SelectedPawn, TargetPositions);
 }
 
@@ -393,21 +429,30 @@ void UCCPawnManagerComponent::MovePawnOnFinish()
     ChangePawnPosition(SelectedPawn, TargetPositions);
 }
 
-void UCCPawnManagerComponent::MovePawnToSpawn(ACCPawn* Pawn)
+void UCCPawnManagerComponent::AttackPawnOnCell()
 {
-    SetupTargetPositions(Pawn->GetStartCellIndex(), TargetLocation);
+    SelectedPawn->bIsAttacking = true;
+    FTimerHandle AttackTimerHaldle;
+
+    GetWorld()->GetTimerManager().SetTimer(AttackTimerHaldle, this, &UCCPawnManagerComponent::FinishPawnAttack, 1.0f, false);
+}
+
+void UCCPawnManagerComponent::FinishPawnAttack()
+{
+    SelectedPawn->bIsAttacking = false;
+    SetupTargetPositions(SecondaryPawn->GetStartCellIndex(), TargetLocation);
     TargetPositions.Empty();
     TargetPositions.Add(TargetLocation);
+    SecondaryPawn->SetCurrentPawnPosition(EPawnPosition::OnStart);
+    SecondaryPawn->SetCurrentCellIndex(SelectedPawn->GetStartCellIndex());
+    ChangePawnPosition(SecondaryPawn, TargetPositions);
 
-    SelectedPawn = SecondaryPawn;
-    SecondaryPawn = nullptr;
+    SetupTargetPositions(SelectedPawn->GetCurrentCellIndex(), TargetLocation);
+    TargetPositions.Empty();
+    TargetPositions.Add(TargetLocation);
+    ChangePawnPosition(SelectedPawn, TargetPositions, false);
 
-    SelectedPawn->SetCurrentPawnPosition(EPawnPosition::OnStart);
-    SelectedPawn->SetCurrentCellIndex(SelectedPawn->GetStartCellIndex());
-    StepsToMove = 1;
-    MoveDuration = 1.0f;
-
-    ChangePawnPosition(SelectedPawn, TargetPositions);
+    bShouldAttackEnemy = false;
 }
 
 void UCCPawnManagerComponent::SetNewPawnDataInGameState(int32 CellIndex, ACCPawn* FirstPawnToAdd, ACCPawn* SecondPawnToAdd)
