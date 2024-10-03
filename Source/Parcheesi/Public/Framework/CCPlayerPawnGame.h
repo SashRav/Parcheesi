@@ -15,6 +15,8 @@ class UCCSelectItem;
 class UCCPawnManagerComponent;
 class ACCPawn;
 class ACCDice;
+class USpringArmComponent;
+class UCameraComponent;
 
 UCLASS()
 class PARCHEESI_API ACCPlayerPawnGame : public APawn
@@ -25,7 +27,6 @@ public:
     ACCPlayerPawnGame();
 
     void SetPlayerTagName(FName TagName) { PlayerTagName = TagName; };
-    
 
     UFUNCTION(Server, Reliable)
     void Server_UpdateSelectedColor(const FName& ColorTag);
@@ -78,6 +79,10 @@ protected:
     void UpdateSelectedDiceOnUI();
     void InitLobby();
 
+    // Camera control
+    void ZoomCamera();
+    void RotateCamera();
+
     bool bIsPawnMoving = false;
     bool bIsAnyPawnCanMove = false;
     bool bDicesSpawned = false;
@@ -115,6 +120,10 @@ protected:
     UFUNCTION(Client, Reliable)
     void Client_UpdateLobbyPlayers(const TArray<FUniqueNetIdRepl>& AllPlayers);
 
+    // Camera Control
+    UFUNCTION(Client, Reliable)
+    void Client_ResetCameraToDefault();
+
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_HandlePawnMovementFinished();
 
@@ -150,6 +159,18 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* ClickOnBoardAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* ZoomCameraAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* RotateCameraAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UCameraComponent* CameraComponent;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    USpringArmComponent* SpringArmComponent;
 
     UPROPERTY()
     ACCDice* SelectedDiceActor;

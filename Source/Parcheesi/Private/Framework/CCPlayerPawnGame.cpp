@@ -15,16 +15,26 @@
 #include "Components/CCSelectItem.h"
 #include "Components/CCPawnManagerComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 ACCPlayerPawnGame::ACCPlayerPawnGame()
 {
     DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
     SelectItemDiceComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionDiceComponent"));
     SelectItemPawnComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionPawnComponent"));
+    
     PawnManagerComponent = CreateDefaultSubobject<UCCPawnManagerComponent>(TEXT("PawnManagerComponent"));
-
     PawnManagerComponent->OnPawnMovementFinished.AddDynamic(this, &ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished);
     PawnManagerComponent->OnGameFinished.AddDynamic(this, &ACCPlayerPawnGame::Server_HandleGameFinished);
+
+    SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
+    SpringArmComponent->SetupAttachment(RootComponent);
+    SpringArmComponent->TargetArmLength = 0.0f;
+    SpringArmComponent->bDoCollisionTest = false;
+
+    CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
+    CameraComponent->SetupAttachment(SpringArmComponent);
 
     PrimaryActorTick.bCanEverTick = false;
 }
@@ -41,6 +51,8 @@ void ACCPlayerPawnGame::BeginPlay()
     Super::BeginPlay();
 
     check(ClickOnBoardAction);
+    check(ZoomCameraAction);
+    check(RotateCameraAction);
 
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
@@ -78,6 +90,8 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
     {
         EnhancedInputComponent->BindAction(ClickOnBoardAction, ETriggerEvent::Started, this, &ACCPlayerPawnGame::ClickOnBoard);
+        EnhancedInputComponent->BindAction(ZoomCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::ZoomCamera);
+        EnhancedInputComponent->BindAction(RotateCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::RotateCamera);
     }
 }
 
@@ -141,7 +155,7 @@ void ACCPlayerPawnGame::Server_CleanAllDices_Implementation()
 
     SelectedDiceActor = nullptr;
     TArray<ACCDice*> DicesArray = ServerGameState->GetSpawnedDices();
-    
+
     if (DicesArray.Num() == 0)
         return;
 
@@ -257,7 +271,7 @@ void ACCPlayerPawnGame::ClickOnBoard()
 
     if (!OwningPlayerController)
         return;
- 
+
     FHitResult HitResult;
     if (OwningPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
     {
@@ -276,7 +290,7 @@ void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation()
 {
     if (!ServerGameState)
         return;
-    
+
     if (!SelectedDiceActor || !SelectedPawnActor || bIsPawnMoving)
         return;
 
@@ -288,7 +302,7 @@ void ACCPlayerPawnGame::Server_MoveSelectedPawn_Implementation()
     ServerGameState->RemoveDice(SelectedDiceActor); // Exists for debug purpose
     if (SelectedDiceActor->bDestryWhenUsed)
         SelectedDiceActor->Destroy();
-   
+
     if (ACCControllerGame* PlayerController = Cast<ACCControllerGame>(GetController()))
         PlayerController->Client_SetDiceSideOnUI(0);
 
@@ -342,7 +356,7 @@ void ACCPlayerPawnGame::Server_CheckIsAnyMoveAvailable_Implementation()
 void ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn_Implementation()
 {
     Server_CheckIsAnyMoveAvailable();
-    
+
     if (!bIsAnyPawnCanMove)
         Client_EnableTurnButton();
 }
@@ -419,3 +433,9 @@ void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl 
     if (ServerGameMode)
         ServerGameMode->DisconnectPlayer(PlayerID);
 }
+
+void ACCPlayerPawnGame::Client_ResetCameraToDefault_Implementation() {}
+
+void ACCPlayerPawnGame::ZoomCamera() {}
+
+void ACCPlayerPawnGame::RotateCamera() {}
