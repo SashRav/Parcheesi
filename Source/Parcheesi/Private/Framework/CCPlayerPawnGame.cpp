@@ -23,14 +23,13 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
     SelectItemDiceComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionDiceComponent"));
     SelectItemPawnComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionPawnComponent"));
-    
+
     PawnManagerComponent = CreateDefaultSubobject<UCCPawnManagerComponent>(TEXT("PawnManagerComponent"));
     PawnManagerComponent->OnPawnMovementFinished.AddDynamic(this, &ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished);
     PawnManagerComponent->OnGameFinished.AddDynamic(this, &ACCPlayerPawnGame::Server_HandleGameFinished);
 
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
     SpringArmComponent->SetupAttachment(RootComponent);
-    SpringArmComponent->TargetArmLength = 0.0f;
     SpringArmComponent->bDoCollisionTest = false;
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
@@ -57,6 +56,12 @@ void ACCPlayerPawnGame::BeginPlay()
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
     OwningPlayerController = Cast<ACCControllerGame>(GetController());
+
+    FRotator SpringArmRotation;
+    SpringArmRotation.Pitch = -70.0f;
+    SpringArmComponent->TargetArmLength = 5500.0f;
+    SpringArmComponent->SetRelativeRotation(SpringArmRotation);
+    SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, -700.0f);
 
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
 
@@ -436,6 +441,18 @@ void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl 
 
 void ACCPlayerPawnGame::Client_ResetCameraToDefault_Implementation() {}
 
-void ACCPlayerPawnGame::ZoomCamera() {}
+void ACCPlayerPawnGame::ZoomCamera(const FInputActionValue& Value)
+{
+    float ZoomCameraValue = Value.Get<float>();
 
-void ACCPlayerPawnGame::RotateCamera() {}
+    float NewArmLength = SpringArmComponent->TargetArmLength + ZoomCameraValue * -250;
+    if (NewArmLength > 6000.0f || NewArmLength < 2500.0f)
+        return;
+
+    SpringArmComponent->TargetArmLength = NewArmLength;
+}
+
+void ACCPlayerPawnGame::RotateCamera(const FInputActionValue& Value)
+{
+    float RotateCameraValue = Value.Get<float>();
+}

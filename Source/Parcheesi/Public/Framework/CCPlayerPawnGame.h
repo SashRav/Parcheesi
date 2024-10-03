@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "InputActionValue.h"
 #include "CCPlayerPawnGame.generated.h"
 
 class ACCGameModeBaseGame;
@@ -80,8 +81,8 @@ protected:
     void InitLobby();
 
     // Camera control
-    void ZoomCamera();
-    void RotateCamera();
+    void ZoomCamera(const FInputActionValue& Value);
+    void RotateCamera(const FInputActionValue& Value);
 
     bool bIsPawnMoving = false;
     bool bIsAnyPawnCanMove = false;
