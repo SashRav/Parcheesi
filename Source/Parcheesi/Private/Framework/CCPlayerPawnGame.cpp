@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "BoardItems/CCDice.h"
 #include "BoardItems/CCPawn.h"
 #include "EnhancedInputComponent.h"
@@ -14,9 +15,9 @@
 #include "Components/CCDiceComponent.h"
 #include "Components/CCSelectItem.h"
 #include "Components/CCPawnManagerComponent.h"
+#include "Components/TimelineComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 
 ACCPlayerPawnGame::ACCPlayerPawnGame()
 {
@@ -34,6 +35,11 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     CameraComponent->SetupAttachment(SpringArmComponent);
+
+    // Setup camera movement
+    TimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("TimelineComponent"));
+    ProgressTimelineFunction.BindUFunction(this, FName("MoveCameraToDefaultPosition"));
+    TimelineFinishedCallback.BindUFunction(this, FName("FinishCameraMovement"));
 
     PrimaryActorTick.bCanEverTick = false;
 }
@@ -58,15 +64,14 @@ void ACCPlayerPawnGame::BeginPlay()
     check(ClickOnBoardAction);
     check(ZoomCameraAction);
     check(RotateCameraAction);
+    check(CameraMovementTimelineCurve);
 
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
     OwningPlayerController = Cast<ACCControllerGame>(GetController());
 
-    FRotator SpringArmRotation;
-    SpringArmRotation.Pitch = -70.0f;
-    SpringArmComponent->SetRelativeRotation(SpringArmRotation);
-    SpringArmComponent->TargetArmLength = 5500.0f;
+    SpringArmComponent->SetRelativeRotation(DefaultSpringArmRotation);
+    SpringArmComponent->TargetArmLength = DefaultSpringArmLenght;
     SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, -700.0f);
 
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
@@ -330,6 +335,7 @@ void ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished_Implementation()
 {
     bIsPawnMoving = false;
     Server_CheckIfCanEnableEndTurn();
+    Client_ResetCameraToDefault();
 }
 
 void ACCPlayerPawnGame::Server_CheckIsAnyMoveAvailable_Implementation()
@@ -445,7 +451,42 @@ void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl 
         ServerGameMode->DisconnectPlayer(PlayerID);
 }
 
-void ACCPlayerPawnGame::Client_ResetCameraToDefault_Implementation() {}
+void ACCPlayerPawnGame::Client_ResetCameraToDefault_Implementation()
+{
+
+    if (!SpringArmComponent || bIsCameraInDefaultState)
+        return;
+
+    // Create Timeline to move camera back to default position
+    // Curve is set from 0 to 1
+    if (CameraMovementTimelineCurve)
+    {
+        bIsCameraMoving = true;
+        InitialArmLength = SpringArmComponent->TargetArmLength;
+        InitialActorRotation = GetActorRotation();
+
+        TimelineComponent->AddInterpFloat(CameraMovementTimelineCurve, ProgressTimelineFunction, FName("Alpha"));
+        TimelineComponent->SetTimelineFinishedFunc(TimelineFinishedCallback);
+        TimelineComponent->SetLooping(false);
+        TimelineComponent->PlayFromStart();
+    }
+}
+
+// Runs each Tick while timeline is active
+void ACCPlayerPawnGame::MoveCameraToDefaultPosition(float Value)
+{
+    const float NewArmLength = FMath::Lerp(InitialArmLength, DefaultSpringArmLenght, Value);
+    FRotator NewRotation = FMath::Lerp(InitialActorRotation, DefaultActorRotation, Value);
+
+    SpringArmComponent->TargetArmLength = NewArmLength;
+    SetActorRotation(NewRotation);
+}
+
+void ACCPlayerPawnGame::FinishCameraMovement()
+{
+    bIsCameraMoving = false;
+    bIsCameraInDefaultState = true;
+}
 
 void ACCPlayerPawnGame::Client_SetCameraInitPosition_Implementation(const FName Tag)
 {
@@ -459,46 +500,62 @@ void ACCPlayerPawnGame::Client_SetCameraInitPosition_Implementation(const FName 
     else if (UEnum::GetValueAsName(ETurnColors::Blue) == Tag)
         NewRotation.Yaw = 0.0f;
 
-    SetActorRotation(NewRotation);
+    DefaultActorRotation = NewRotation;
+    SetActorRotation(DefaultActorRotation);
 }
 
 void ACCPlayerPawnGame::ZoomCamera(const FInputActionValue& Value)
 {
+    if (bIsCameraMoving)
+        return;
+
     const float ZoomCameraValue = Value.Get<float>();
     // Hardcoded untill it will be needed to setup in blueprints
     const float MinZoomDistance = 2500.0f;
-    const float MaxZoomDistance = 6000.0f;
     const float CurrentZoomDistance = SpringArmComponent->TargetArmLength;
     const float SmallMultiplier = 0.5f;
     const float LargeMultiplier = 2.0f;
     const float MinPitchAngle = -30.0f;
     const float MaxPitchAngle = -70.0f;
 
-    float NormalizedDistance = (CurrentZoomDistance - MinZoomDistance) / (MaxZoomDistance - MinZoomDistance);
+    float NormalizedDistance = (CurrentZoomDistance - MinZoomDistance) / (DefaultSpringArmLenght - MinZoomDistance);
     float ZoomStepMultiplay = FMath::Lerp(SmallMultiplier, LargeMultiplier, NormalizedDistance);
-    float Step = -250.0f * ZoomStepMultiplay;
+    float Step = -200.0f * ZoomStepMultiplay;
 
     float NewArmLength = CurrentZoomDistance + ZoomCameraValue * Step;
 
-    if (NewArmLength > 6000.0f || NewArmLength < 2500.0f)
-        return;
-
-    SpringArmComponent->TargetArmLength = NewArmLength;
-
     // Setup camera rotation
+    float NewNormalizedDistance = (NewArmLength - MinZoomDistance) / (DefaultSpringArmLenght - MinZoomDistance);
     FRotator CurrentRotation = SpringArmComponent->GetRelativeRotation();
-    float NewPitchAngle = FMath::Lerp(MinPitchAngle, MaxPitchAngle, NormalizedDistance);
+    float NewPitchAngle = FMath::Lerp(MinPitchAngle, MaxPitchAngle, NewNormalizedDistance);
     CurrentRotation.Pitch = NewPitchAngle;
 
+    if (NewArmLength > DefaultSpringArmLenght)
+    {
+        CurrentRotation.Pitch = MaxPitchAngle;
+        NewArmLength = DefaultSpringArmLenght;
+    }
+    else if (NewArmLength < MinZoomDistance)
+    {
+        CurrentRotation.Pitch = MinPitchAngle;
+        NewArmLength = MinZoomDistance;
+    }
+
+    bIsCameraInDefaultState = false;
+    SpringArmComponent->TargetArmLength = NewArmLength;
     SpringArmComponent->SetRelativeRotation(CurrentRotation);
 }
 
 void ACCPlayerPawnGame::RotateCamera(const FInputActionValue& Value)
 {
+    if (bIsCameraMoving)
+        return;
+
     float RotateCameraValue = Value.Get<float>();
 
     FRotator NewRotation = GetActorRotation();
     NewRotation.Yaw += RotateCameraValue * 2;
 
+    bIsCameraInDefaultState = false;
     SetActorRotation(NewRotation);
 }

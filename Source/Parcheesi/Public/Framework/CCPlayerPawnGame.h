@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "InputActionValue.h"
+#include "Components/TimelineComponent.h"
 #include "CCPlayerPawnGame.generated.h"
 
 class ACCGameModeBaseGame;
@@ -18,6 +19,7 @@ class ACCPawn;
 class ACCDice;
 class USpringArmComponent;
 class UCameraComponent;
+class UTimelineComponent;
 
 UCLASS()
 class PARCHEESI_API ACCPlayerPawnGame : public APawn
@@ -83,6 +85,28 @@ protected:
     // Camera control
     void ZoomCamera(const FInputActionValue& Value);
     void RotateCamera(const FInputActionValue& Value);
+
+    UFUNCTION()
+    void MoveCameraToDefaultPosition(float Value);
+
+    UFUNCTION()
+    void FinishCameraMovement();
+
+   // FTimerHandle CameraMovingHandler;
+    FTimeline CameraMovementTimeline;
+    FOnTimelineFloat ProgressTimelineFunction;
+    FOnTimelineEvent TimelineFinishedCallback;
+
+    const float DefaultSpringArmLenght = 5700.0f;
+    float CameraMoveDuration = 0.5f;
+    float CameraMoveTimeElapsed = 0.0f;
+    float InitialArmLength;
+    float CurrentDeltaTime;
+    FRotator InitialActorRotation;
+    FRotator DefaultActorRotation = FRotator(0.0f, 0.0f, 0.0f);
+    FRotator DefaultSpringArmRotation = FRotator(-70.0f, 0.0f, 0.0f);
+    bool bIsCameraMoving = false;
+    bool bIsCameraInDefaultState = true;
 
     bool bIsPawnMoving = false;
     bool bIsAnyPawnCanMove = false;
@@ -170,6 +194,9 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* RotateCameraAction;
 
+    UPROPERTY(EditAnywhere)
+    UCurveFloat* CameraMovementTimelineCurve;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UCameraComponent* CameraComponent;
 
@@ -181,4 +208,7 @@ protected:
 
     UPROPERTY()
     ACCPawn* SelectedPawnActor;
+
+    UPROPERTY()
+    UTimelineComponent* TimelineComponent;
 };
