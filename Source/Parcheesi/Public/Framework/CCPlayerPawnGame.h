@@ -27,7 +27,7 @@ class PARCHEESI_API ACCPlayerPawnGame : public APawn
 public:
     ACCPlayerPawnGame();
 
-    void SetPlayerTagName(FName TagName) { PlayerTagName = TagName; };
+    void SetPlayerTagName(FName TagName);
 
     UFUNCTION(Server, Reliable)
     void Server_UpdateSelectedColor(const FName& ColorTag);
@@ -124,6 +124,9 @@ protected:
     // Camera Control
     UFUNCTION(Client, Reliable)
     void Client_ResetCameraToDefault();
+
+    UFUNCTION(Client, Reliable)
+    void Client_SetCameraInitPosition(const FName Tag);
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_HandlePawnMovementFinished();

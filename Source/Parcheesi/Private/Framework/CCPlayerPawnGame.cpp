@@ -38,6 +38,12 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     PrimaryActorTick.bCanEverTick = false;
 }
 
+void ACCPlayerPawnGame::SetPlayerTagName(FName TagName)
+{
+    PlayerTagName = TagName;
+    Client_SetCameraInitPosition(TagName);
+}
+
 void ACCPlayerPawnGame::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -59,8 +65,8 @@ void ACCPlayerPawnGame::BeginPlay()
 
     FRotator SpringArmRotation;
     SpringArmRotation.Pitch = -70.0f;
-    SpringArmComponent->TargetArmLength = 5500.0f;
     SpringArmComponent->SetRelativeRotation(SpringArmRotation);
+    SpringArmComponent->TargetArmLength = 5500.0f;
     SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, -700.0f);
 
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
@@ -441,18 +447,58 @@ void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl 
 
 void ACCPlayerPawnGame::Client_ResetCameraToDefault_Implementation() {}
 
+void ACCPlayerPawnGame::Client_SetCameraInitPosition_Implementation(const FName Tag)
+{
+    FRotator NewRotation = GetActorRotation();
+    if (UEnum::GetValueAsName(ETurnColors::Red) == Tag)
+        NewRotation.Yaw = 90.0f;
+    else if (UEnum::GetValueAsName(ETurnColors::Green) == Tag)
+        NewRotation.Yaw = 180.0f;
+    else if (UEnum::GetValueAsName(ETurnColors::Yellow) == Tag)
+        NewRotation.Yaw = 270.0f;
+    else if (UEnum::GetValueAsName(ETurnColors::Blue) == Tag)
+        NewRotation.Yaw = 0.0f;
+
+    SetActorRotation(NewRotation);
+}
+
 void ACCPlayerPawnGame::ZoomCamera(const FInputActionValue& Value)
 {
-    float ZoomCameraValue = Value.Get<float>();
+    const float ZoomCameraValue = Value.Get<float>();
+    // Hardcoded untill it will be needed to setup in blueprints
+    const float MinZoomDistance = 2500.0f;
+    const float MaxZoomDistance = 6000.0f;
+    const float CurrentZoomDistance = SpringArmComponent->TargetArmLength;
+    const float SmallMultiplier = 0.5f;
+    const float LargeMultiplier = 2.0f;
+    const float MinPitchAngle = -30.0f;
+    const float MaxPitchAngle = -70.0f;
 
-    float NewArmLength = SpringArmComponent->TargetArmLength + ZoomCameraValue * -250;
+    float NormalizedDistance = (CurrentZoomDistance - MinZoomDistance) / (MaxZoomDistance - MinZoomDistance);
+    float ZoomStepMultiplay = FMath::Lerp(SmallMultiplier, LargeMultiplier, NormalizedDistance);
+    float Step = -250.0f * ZoomStepMultiplay;
+
+    float NewArmLength = CurrentZoomDistance + ZoomCameraValue * Step;
+
     if (NewArmLength > 6000.0f || NewArmLength < 2500.0f)
         return;
 
     SpringArmComponent->TargetArmLength = NewArmLength;
+
+    // Setup camera rotation
+    FRotator CurrentRotation = SpringArmComponent->GetRelativeRotation();
+    float NewPitchAngle = FMath::Lerp(MinPitchAngle, MaxPitchAngle, NormalizedDistance);
+    CurrentRotation.Pitch = NewPitchAngle;
+
+    SpringArmComponent->SetRelativeRotation(CurrentRotation);
 }
 
 void ACCPlayerPawnGame::RotateCamera(const FInputActionValue& Value)
 {
     float RotateCameraValue = Value.Get<float>();
+
+    FRotator NewRotation = GetActorRotation();
+    NewRotation.Yaw += RotateCameraValue * 2;
+
+    SetActorRotation(NewRotation);
 }
