@@ -92,18 +92,6 @@ protected:
     void RotateCamera(const FInputActionValue& Value);
     void ResetCameraByClick();
 
-    /* UFUNCTION()
-     void MoveCameraToDefaultPosition(float Value);
-
-     UFUNCTION()
-     void FinishCameraMovementToDefaultPosistion();
-
-     UFUNCTION()
-     void MoveActorToSelectedPosition(float Value);
-
-     UFUNCTION()
-     void FinishActorMovementToSelectedPosistion();*/
-
     // FTimeline CameraMovementTimeline;
     FOnTimelineFloat ProgressTimelineFunction;
     FOnTimelineEvent TimelineFinishedCallback;

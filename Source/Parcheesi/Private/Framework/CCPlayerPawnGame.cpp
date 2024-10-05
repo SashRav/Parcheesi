@@ -513,5 +513,5 @@ void ACCPlayerPawnGame::RotateCamera(const FInputActionValue& Value)
 
 void ACCPlayerPawnGame::Client_MoveActorToPosition_Implementation()
 {
-    CameraControlComponent->MoveActorToNewPosition(PositionFromMove, PositionToMove);
+    CameraControlComponent->MoveCameraToPawn(PositionToMove);
 }

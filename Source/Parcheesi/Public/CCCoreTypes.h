@@ -21,7 +21,6 @@ struct FPlayersTurnData : public FTableRowBase
     bool TurnSatus;
 };
 
-
 USTRUCT(BlueprintType)
 struct FCellsData : public FTableRowBase
 {
@@ -36,7 +35,6 @@ struct FCellsData : public FTableRowBase
     UPROPERTY()
     ACCPawn* SecondPawnOnCell;
 };
-
 
 USTRUCT(BlueprintType)
 struct FAllPlayersData : public FTableRowBase
@@ -75,6 +73,27 @@ struct FGameSettings : public FTableRowBase
 
     UPROPERTY()
     int32 DicesToRool;
+};
+
+USTRUCT(BlueprintType)
+struct FCameraMovemntData : public FTableRowBase
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    float SpringArmLength;
+    
+    UPROPERTY()
+    FRotator SpringArmRotation;
+    
+    UPROPERTY()
+    FRotator CameraRotation;
+    
+    UPROPERTY()
+    FRotator ActorRotation;
+    
+    UPROPERTY()
+    FVector ActorLocation;
 };
 
 UENUM(BlueprintType)

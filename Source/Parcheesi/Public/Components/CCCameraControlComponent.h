@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "InputActionValue.h"
 #include "Components/TimelineComponent.h"
+#include "CCCoreTypes.h"
 #include "CCCameraControlComponent.generated.h"
 
 class USpringArmComponent;
@@ -21,23 +22,17 @@ class PARCHEESI_API UCCCameraControlComponent : public UActorComponent
 public:
     UCCCameraControlComponent();
 
+    UFUNCTION()
+    void MoveCameraToTargetPosition(float Value);
+
+    UFUNCTION()
+    void FinishCameraMovementToTargetPosistion();
+
     void ZoomCamera(const FInputActionValue& Value);
     void RotateCamera(const FInputActionValue& Value);
     void SetCameraInitPosition(const FName Tag);
     void ResetCameraToDefault();
-    void MoveActorToNewPosition(FVector NewPositionFromMove, FVector NewPositionToMove);
-
-    UFUNCTION()
-    void MoveCameraToDefaultPosition(float Value);
-
-    UFUNCTION()
-    void FinishCameraMovementToDefaultPosistion();
-
-    UFUNCTION()
-    void MoveActorToSelectedPosition(float Value);
-
-    UFUNCTION()
-    void FinishActorMovementToSelectedPosistion();
+    void MoveCameraToPawn(FVector TargetLocation);
 
     UPROPERTY(EditAnywhere)
     UCurveFloat* CameraMovementToDefaultCurve;
@@ -58,26 +53,21 @@ protected:
     virtual void BeginPlay() override;
 
     void ZoomCameraFromPawn(float ZoomCameraValue);
+    void StartMoveCameraToTargetPositon(UCurveFloat* CurveToUse, FCameraMovemntData TargetData);
 
     bool bIsCameraMoving = false;
     bool bIsCameraFolowPawn = false;
-    bool bIsCameraInDefaultState = true;
-    float DefaultSpringArmLenght = 5700.0f;
-    float PawnSelectedSpringArmLenght = 3000.0f;
-    float InitialArmLength;
-    float PawnSpringArmRotationPitch = -60.0f;
-    FRotator InitialArmRotation;
-    FRotator InitialActorRotation;
-    FRotator InitalCameraRotation;
-    FRotator DefaultActorRotation = FRotator(0.0f, 0.0f, 0.0f);
-    FRotator DefaultSpringArmRotation = FRotator(-70.0f, 0.0f, 0.0f);
-    FRotator PawnSpringArmRotationTarget;
-    FRotator PawnCameraRotation = FRotator(20.0f, 0.0f, 0.0f);
-    FVector DefaultActorLocation;
-    FVector PositionFromMove;
-    FVector PositionToMove;
+
     FOnTimelineFloat ProgressTimelineFunction;
     FOnTimelineEvent TimelineFinishedCallback;
+
+    FCameraMovemntData InitalMovingData;
+    FCameraMovemntData TargetMovingData;
+    FCameraMovemntData DefaultMovingData;
+    FCameraMovemntData PawnMovingData;
+
+    bool bShouldActorBeAttach = false;
+    bool bIsCameraInDefaultState = true;
 
     UPROPERTY()
     ACCPlayerPawnGame* OwningActor;
