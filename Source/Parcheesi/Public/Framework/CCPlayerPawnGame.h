@@ -15,6 +15,7 @@ class UInputAction;
 class UCCDiceComponent;
 class UCCSelectItem;
 class UCCPawnManagerComponent;
+class UCCCameraControlComponent;
 class ACCPawn;
 class ACCDice;
 class USpringArmComponent;
@@ -30,6 +31,8 @@ public:
     ACCPlayerPawnGame();
 
     void SetPlayerTagName(FName TagName);
+
+    USceneComponent* GetSelectedPawnSceneComponent();
 
     UFUNCTION(Server, Reliable)
     void Server_UpdateSelectedColor(const FName& ColorTag);
@@ -87,22 +90,21 @@ protected:
     // Camera control
     void ZoomCamera(const FInputActionValue& Value);
     void RotateCamera(const FInputActionValue& Value);
-    void ZoomCameraFromPawn(float ZoomCameraValue);
     void ResetCameraByClick();
 
-    UFUNCTION()
-    void MoveCameraToDefaultPosition(float Value);
+    /* UFUNCTION()
+     void MoveCameraToDefaultPosition(float Value);
 
-    UFUNCTION()
-    void FinishCameraMovementToDefaultPosistion();
+     UFUNCTION()
+     void FinishCameraMovementToDefaultPosistion();
 
-    UFUNCTION()
-    void MoveActorToSelectedPosition(float Value);
+     UFUNCTION()
+     void MoveActorToSelectedPosition(float Value);
 
-    UFUNCTION()
-    void FinishActorMovementToSelectedPosistion();
+     UFUNCTION()
+     void FinishActorMovementToSelectedPosistion();*/
 
-    FTimeline CameraMovementTimeline;
+    // FTimeline CameraMovementTimeline;
     FOnTimelineFloat ProgressTimelineFunction;
     FOnTimelineEvent TimelineFinishedCallback;
 
@@ -174,7 +176,7 @@ protected:
     void Client_ResetCameraToDefault();
 
     UFUNCTION(Client, Reliable)
-    void Client_MoveActorToPosition(UCurveFloat* CurveToUse);
+    void Client_MoveActorToPosition();
 
     UFUNCTION(Client, Reliable)
     void Client_SetCameraInitPosition(const FName Tag);
@@ -212,6 +214,9 @@ protected:
     UPROPERTY(EditAnywhere)
     UCCSelectItem* SelectItemPawnComponent;
 
+    UPROPERTY(EditAnywhere)
+    UCCCameraControlComponent* CameraControlComponent;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* ClickOnBoardAction;
 
@@ -227,12 +232,6 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* ResetCameraAction;
 
-    UPROPERTY(EditAnywhere)
-    UCurveFloat* CameraMovementToDefaultCurve;
-
-    UPROPERTY(EditAnywhere)
-    UCurveFloat* CameraMovementToPawnCurve;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UCameraComponent* CameraComponent;
 
@@ -242,9 +241,9 @@ protected:
     UPROPERTY()
     ACCDice* SelectedDiceActor;
 
-    UPROPERTY(Replicated)
-    ACCPawn* SelectedPawnActor;
-
     UPROPERTY()
     UTimelineComponent* TimelineComponent;
+
+    UPROPERTY(Replicated)
+    ACCPawn* SelectedPawnActor;
 };
