@@ -64,6 +64,7 @@ void ACCPlayerPawnGame::BeginPlay()
     check(ZoomCameraAction);
     check(RotateCameraAction);
     check(DoubleClickOnBoardAction);
+    check(ResetCameraAction);
     check(CameraMovementToDefaultCurve);
     check(CameraMovementToPawnCurve);
 
@@ -109,6 +110,7 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
     {
         EnhancedInputComponent->BindAction(ClickOnBoardAction, ETriggerEvent::Started, this, &ACCPlayerPawnGame::ClickOnBoard);
+        EnhancedInputComponent->BindAction(ResetCameraAction, ETriggerEvent::Started, this, &ACCPlayerPawnGame::ResetCameraByClick);
         EnhancedInputComponent->BindAction(ZoomCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::ZoomCamera);
         EnhancedInputComponent->BindAction(RotateCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::RotateCamera);
         EnhancedInputComponent->BindAction(
@@ -161,6 +163,7 @@ void ACCPlayerPawnGame::Server_EndPlayerTurn_Implementation()
     Server_CleanAllDices();
     ServerGameMode->StartNextTurn();
     bDicesSpawned = false;
+    Client_ResetCameraToDefault();
 }
 
 void ACCPlayerPawnGame::Server_DebugEndPlayerTurn_Implementation()
@@ -482,11 +485,13 @@ void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl 
 
 void ACCPlayerPawnGame::Client_ResetCameraToDefault_Implementation()
 {
-    if (!SpringArmComponent || !CameraComponent || bIsCameraInDefaultState || !CameraMovementToDefaultCurve)
+    if (!SpringArmComponent || !CameraComponent || !CameraMovementToDefaultCurve || bIsCameraInDefaultState)
         return;
 
     // Create Timeline to move camera back to default position
     // Curve is set from 0 to 1
+    DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
     bIsCameraMoving = true;
     InitialArmLength = SpringArmComponent->TargetArmLength;
     InitialArmRotation = SpringArmComponent->GetRelativeRotation();
@@ -642,6 +647,11 @@ void ACCPlayerPawnGame::ZoomCameraFromPawn(float ZoomCameraValue)
     CameraComponent->SetRelativeRotation(CurrentCameraRotation);
 }
 
+void ACCPlayerPawnGame::ResetCameraByClick() 
+{
+    Client_ResetCameraToDefault();
+}
+
 void ACCPlayerPawnGame::RotateCamera(const FInputActionValue& Value)
 {
     if (bIsCameraMoving)
@@ -681,7 +691,7 @@ void ACCPlayerPawnGame::MoveActorToSelectedPosition(float Value)
 {
     const FVector NewLocation = FMath::Lerp(PositionFromMove, PositionToMove, Value);
     SetActorLocation(NewLocation);
-    
+
     if (bIsCameraFolowPawn)
         return;
 
@@ -692,7 +702,6 @@ void ACCPlayerPawnGame::MoveActorToSelectedPosition(float Value)
     SpringArmComponent->TargetArmLength = NewArmLength;
     CameraComponent->SetRelativeRotation(NewCameraRotation);
     SpringArmComponent->SetRelativeRotation(NewArmRotation);
-    
 }
 
 void ACCPlayerPawnGame::FinishActorMovementToSelectedPosistion()
@@ -701,4 +710,6 @@ void ACCPlayerPawnGame::FinishActorMovementToSelectedPosistion()
     bIsCameraMoving = false;
     PositionToMove = FVector();
     PositionFromMove = FVector();
+
+    AttachToComponent(SelectedPawnActor->PawnPositonComponent, FAttachmentTransformRules::KeepWorldTransform);
 }

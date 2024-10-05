@@ -1,8 +1,6 @@
 // Copyright Cats and Cubes. All Rights Reserved.
 
 #include "BoardItems/CCPawn.h"
-#include "Components/StaticMeshComponent.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "AI/CCPawnAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -17,6 +15,10 @@ ACCPawn::ACCPawn()
     bUseControllerRotationYaw = false;
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->bRequestedMoveUseAcceleration = false;
+
+    PawnPositonComponent = CreateDefaultSubobject<USceneComponent>(TEXT("PawnPositonComponent"));
+    PawnPositonComponent->SetupAttachment(RootComponent);
+    PawnPositonComponent->SetUsingAbsoluteRotation(true);
 }
 
 void ACCPawn::BeginPlay()
@@ -29,7 +31,7 @@ void ACCPawn::BeginPlay()
     check(BlueMaterial);
 }
 
-void ACCPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const 
+void ACCPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 

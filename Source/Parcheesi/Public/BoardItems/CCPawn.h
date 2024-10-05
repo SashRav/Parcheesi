@@ -7,8 +7,7 @@
 #include "CCCoreTypes.h"
 #include "CCPawn.generated.h"
 
-class UStaticMeshComponent;
-class USkeletalMeshComponent;
+class USceneComponent;
 
 UCLASS()
 class PARCHEESI_API ACCPawn : public ACharacter
@@ -38,6 +37,9 @@ public:
 
     UPROPERTY(BlueprintReadOnly, Replicated)
     bool bIsInGates = false;
+
+    UPROPERTY()
+    USceneComponent* PawnPositonComponent;
 
 protected:
     virtual void BeginPlay() override;

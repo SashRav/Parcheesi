@@ -88,6 +88,7 @@ protected:
     void ZoomCamera(const FInputActionValue& Value);
     void RotateCamera(const FInputActionValue& Value);
     void ZoomCameraFromPawn(float ZoomCameraValue);
+    void ResetCameraByClick();
 
     UFUNCTION()
     void MoveCameraToDefaultPosition(float Value);
@@ -222,6 +223,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* RotateCameraAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* ResetCameraAction;
 
     UPROPERTY(EditAnywhere)
     UCurveFloat* CameraMovementToDefaultCurve;
