@@ -116,6 +116,11 @@ void UCCCameraControlComponent::RotateCamera(const FInputActionValue& Value)
     OwningActor->SetActorRotation(NewRotation);
 }
 
+void UCCCameraControlComponent::MoveCameraOnLevel(const FInputActionValue& Value) 
+{
+    UE_LOG(LogTemp, Display, TEXT("Camera Is Moving: %s"), *Value.ToString());
+}
+
 void UCCCameraControlComponent::ZoomCameraFromPawn(float ZoomCameraValue)
 {
     if (!CameraComponent)
@@ -176,6 +181,14 @@ void UCCCameraControlComponent::ResetCameraToDefault()
     bShouldActorBeAttach = false;
     bIsCameraInDefaultState = true;
     StartMoveCameraToTargetPositon(CameraMovementToDefaultCurve, DefaultMovingData);
+}
+
+void UCCCameraControlComponent::TryToResetCameraAfterPawnMove() 
+{
+    if (!bIsCameraFolowPawn)
+        return;
+
+    ResetCameraToDefault();
 }
 
 void UCCCameraControlComponent::MoveCameraToPawn(FVector TargetLocation)

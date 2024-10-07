@@ -50,6 +50,9 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
 
 void ACCPlayerPawnGame::SetPlayerTagName(FName TagName)
 {
+    if (!PlayerTagName.IsNone())
+        return;
+
     PlayerTagName = TagName;
     Client_SetCameraInitPosition(TagName);
 }
@@ -76,6 +79,7 @@ void ACCPlayerPawnGame::BeginPlay()
     check(RotateCameraAction);
     check(DoubleClickOnBoardAction);
     check(ResetCameraAction);
+    check(MoveCameraAction);
 
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
@@ -116,6 +120,7 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
         EnhancedInputComponent->BindAction(ResetCameraAction, ETriggerEvent::Started, this, &ACCPlayerPawnGame::ResetCameraByClick);
         EnhancedInputComponent->BindAction(ZoomCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::ZoomCamera);
         EnhancedInputComponent->BindAction(RotateCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::RotateCamera);
+        EnhancedInputComponent->BindAction(MoveCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::MoveCameraOnLevel);
         EnhancedInputComponent->BindAction(
             DoubleClickOnBoardAction, ETriggerEvent::Completed, this, &ACCPlayerPawnGame::DoubleClickOnBoard);
     }
@@ -166,7 +171,6 @@ void ACCPlayerPawnGame::Server_EndPlayerTurn_Implementation()
     Server_CleanAllDices();
     ServerGameMode->StartNextTurn();
     bDicesSpawned = false;
-    Client_ResetCameraToDefault();
 }
 
 void ACCPlayerPawnGame::Server_DebugEndPlayerTurn_Implementation()
@@ -212,6 +216,8 @@ void ACCPlayerPawnGame::Server_CleanSelectionData_Implementation()
 void ACCPlayerPawnGame::Multicast_SetCurrentTurn_Implementation(bool Turn)
 {
     bCurrentTurn = Turn;
+    if (Turn)
+        Client_ResetCameraToDefault();
 }
 
 void ACCPlayerPawnGame::Client_EnableTurnButton_Implementation()
@@ -325,7 +331,6 @@ void ACCPlayerPawnGame::DoubleClickOnBoard()
     {
         UE_LOG(LogTemp, Display, TEXT("Double on pawn"));
         PawnClickedTimes = 0;
-        PositionFromMove = GetActorLocation();
         PositionToMove = SelectedPawnActor->GetActorLocation();
 
         Client_MoveActorToPosition();
@@ -370,7 +375,7 @@ void ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished_Implementation()
 {
     bIsPawnMoving = false;
     Server_CheckIfCanEnableEndTurn();
-    Client_ResetCameraToDefault();
+    Client_TryToResetCameraAfterPawnMove();
 }
 
 void ACCPlayerPawnGame::Server_CheckIsAnyMoveAvailable_Implementation()
@@ -506,6 +511,11 @@ void ACCPlayerPawnGame::ResetCameraByClick()
     CameraControlComponent->ResetCameraToDefault();
 }
 
+void ACCPlayerPawnGame::MoveCameraOnLevel(const FInputActionValue& Value)
+{
+    CameraControlComponent->MoveCameraOnLevel(Value);
+}
+
 void ACCPlayerPawnGame::RotateCamera(const FInputActionValue& Value)
 {
     CameraControlComponent->RotateCamera(Value);
@@ -514,4 +524,9 @@ void ACCPlayerPawnGame::RotateCamera(const FInputActionValue& Value)
 void ACCPlayerPawnGame::Client_MoveActorToPosition_Implementation()
 {
     CameraControlComponent->MoveCameraToPawn(PositionToMove);
+}
+
+void ACCPlayerPawnGame::Client_TryToResetCameraAfterPawnMove_Implementation()
+{
+    CameraControlComponent->TryToResetCameraAfterPawnMove();
 }

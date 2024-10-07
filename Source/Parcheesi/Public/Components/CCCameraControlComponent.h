@@ -30,8 +30,10 @@ public:
 
     void ZoomCamera(const FInputActionValue& Value);
     void RotateCamera(const FInputActionValue& Value);
+    void MoveCameraOnLevel(const FInputActionValue& Value);
     void SetCameraInitPosition(const FName Tag);
     void ResetCameraToDefault();
+    void TryToResetCameraAfterPawnMove();
     void MoveCameraToPawn(FVector TargetLocation);
 
     UPROPERTY(EditAnywhere)

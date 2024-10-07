@@ -90,40 +90,15 @@ protected:
     // Camera control
     void ZoomCamera(const FInputActionValue& Value);
     void RotateCamera(const FInputActionValue& Value);
+    void MoveCameraOnLevel(const FInputActionValue& Value);
     void ResetCameraByClick();
-
-    // FTimeline CameraMovementTimeline;
-    FOnTimelineFloat ProgressTimelineFunction;
-    FOnTimelineEvent TimelineFinishedCallback;
-
-    const float DefaultSpringArmLenght = 5700.0f;
-    const float PawnSelectedSpringArmLenght = 3000.0f;
-    float CameraMoveDuration = 0.5f;
-    float CameraMoveTimeElapsed = 0.0f;
-    float InitialArmLength;
-    float CurrentDeltaTime;
-
-    FVector DefaultActorLocation;
-    FRotator InitialActorRotation;
-    FRotator InitialArmRotation;
-    FRotator InitalCameraRotation;
-    FRotator DefaultActorRotation = FRotator(0.0f, 0.0f, 0.0f);
-    FRotator DefaultSpringArmRotation = FRotator(-70.0f, 0.0f, 0.0f);
-    FRotator PawnCameraRotation = FRotator(20.0f, 0.0f, 0.0f);
-    FRotator PawnSpringArmRotationTarget;
-    float PawnSpringArmRotationPitch = -60.0f;
-
-    bool bIsCameraMoving = false;
-    bool bIsCameraInDefaultState = true;
-    bool bIsCameraFolowPawn = false;
-
+  
     bool bIsPawnMoving = false;
     bool bIsAnyPawnCanMove = false;
     bool bDicesSpawned = false;
 
     int32 PawnClickedTimes = 0;
     FTimerHandle ResetDoubleClickPawnHandle;
-    FVector PositionFromMove;
     FVector PositionToMove;
 
     UFUNCTION(Server, Reliable)
@@ -162,6 +137,9 @@ protected:
     // Camera Control
     UFUNCTION(Client, Reliable)
     void Client_ResetCameraToDefault();
+
+    UFUNCTION(Client, Reliable)
+    void Client_TryToResetCameraAfterPawnMove();
 
     UFUNCTION(Client, Reliable)
     void Client_MoveActorToPosition();
@@ -219,6 +197,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* ResetCameraAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* MoveCameraAction;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UCameraComponent* CameraComponent;
