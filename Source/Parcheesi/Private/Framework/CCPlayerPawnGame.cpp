@@ -120,6 +120,7 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
         EnhancedInputComponent->BindAction(ResetCameraAction, ETriggerEvent::Started, this, &ACCPlayerPawnGame::ResetCameraByClick);
         EnhancedInputComponent->BindAction(ZoomCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::ZoomCamera);
         EnhancedInputComponent->BindAction(RotateCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::RotateCamera);
+        EnhancedInputComponent->BindAction(RotateCameraAction, ETriggerEvent::Canceled, this, &ACCPlayerPawnGame::ResetCameraLag);
         EnhancedInputComponent->BindAction(MoveCameraAction, ETriggerEvent::Triggered, this, &ACCPlayerPawnGame::MoveCameraOnLevel);
         EnhancedInputComponent->BindAction(
             DoubleClickOnBoardAction, ETriggerEvent::Completed, this, &ACCPlayerPawnGame::DoubleClickOnBoard);
@@ -511,12 +512,17 @@ void ACCPlayerPawnGame::ResetCameraByClick()
     CameraControlComponent->ResetCameraToDefault();
 }
 
+void ACCPlayerPawnGame::ResetCameraLag(const FInputActionValue& Value)
+{
+    CameraControlComponent->ResetCameraLag();
+}
+
 void ACCPlayerPawnGame::MoveCameraOnLevel(const FInputActionValue& Value)
 {
     CameraControlComponent->MoveCameraOnLevel(Value);
 }
 
-void ACCPlayerPawnGame::RotateCamera(const FInputActionValue& Value)
+void ACCPlayerPawnGame::RotateCamera(const FInputActionInstance& Value)
 {
     CameraControlComponent->RotateCamera(Value);
 }

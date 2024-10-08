@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
 #include "Components/TimelineComponent.h"
 #include "CCCoreTypes.h"
 #include "CCCameraControlComponent.generated.h"
@@ -29,18 +30,25 @@ public:
     void FinishCameraMovementToTargetPosistion();
 
     void ZoomCamera(const FInputActionValue& Value);
-    void RotateCamera(const FInputActionValue& Value);
+    void RotateCamera(const FInputActionInstance& Value);
     void MoveCameraOnLevel(const FInputActionValue& Value);
     void SetCameraInitPosition(const FName Tag);
     void ResetCameraToDefault();
     void TryToResetCameraAfterPawnMove();
     void MoveCameraToPawn(FVector TargetLocation);
+    void ResetCameraLag();
 
     UPROPERTY(EditAnywhere)
     UCurveFloat* CameraMovementToDefaultCurve;
 
     UPROPERTY(EditAnywhere)
     UCurveFloat* CameraMovementToPawnCurve;
+
+    UPROPERTY(EditAnywhere)
+    UCurveFloat* DefaultCameraMovementCurve;
+
+    UPROPERTY(EditAnywhere)
+    UCurveFloat* EndCameraMovementCurve;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UCameraComponent* CameraComponent;
@@ -70,6 +78,8 @@ protected:
 
     bool bShouldActorBeAttach = false;
     bool bIsCameraInDefaultState = true;
+
+    const float DefaultRotationLagSpeed = 10.0f;
 
     UPROPERTY()
     ACCPlayerPawnGame* OwningActor;

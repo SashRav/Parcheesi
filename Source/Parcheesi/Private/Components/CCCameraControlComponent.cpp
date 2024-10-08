@@ -7,6 +7,7 @@
 #include "Framework/CCPlayerPawnGame.h"
 #include "InputActionValue.h"
 #include "CCCoreTypes.h"
+#include "EnhancedInputComponent.h"
 
 UCCCameraControlComponent::UCCCameraControlComponent()
 {
@@ -19,6 +20,8 @@ void UCCCameraControlComponent::BeginPlay()
 
     check(CameraMovementToDefaultCurve);
     check(CameraMovementToPawnCurve);
+    check(DefaultCameraMovementCurve);
+    check(EndCameraMovementCurve);
 
     OwningActor = Cast<ACCPlayerPawnGame>(GetOwner());
 
@@ -34,6 +37,8 @@ void UCCCameraControlComponent::BeginPlay()
     SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, -700.0f);
     SpringArmComponent->SetRelativeRotation(DefaultMovingData.SpringArmRotation);
     SpringArmComponent->TargetArmLength = DefaultMovingData.SpringArmLength;
+    SpringArmComponent->bEnableCameraRotationLag = true;
+    SpringArmComponent->CameraRotationLagSpeed = DefaultRotationLagSpeed;
 }
 
 void UCCCameraControlComponent::SetCameraInitPosition(const FName Tag)
@@ -102,21 +107,7 @@ void UCCCameraControlComponent::ZoomCamera(const FInputActionValue& Value)
     SpringArmComponent->SetRelativeRotation(CurrentRotation);
 }
 
-void UCCCameraControlComponent::RotateCamera(const FInputActionValue& Value)
-{
-    if (bIsCameraMoving)
-        return;
-
-    float RotateCameraValue = Value.Get<float>();
-
-    FRotator NewRotation = OwningActor->GetActorRotation();
-    NewRotation.Yaw += RotateCameraValue * 2;
-
-    bIsCameraInDefaultState = false;
-    OwningActor->SetActorRotation(NewRotation);
-}
-
-void UCCCameraControlComponent::MoveCameraOnLevel(const FInputActionValue& Value) 
+void UCCCameraControlComponent::MoveCameraOnLevel(const FInputActionValue& Value)
 {
     UE_LOG(LogTemp, Display, TEXT("Camera Is Moving: %s"), *Value.ToString());
 }
@@ -173,6 +164,25 @@ void UCCCameraControlComponent::ZoomCameraFromPawn(float ZoomCameraValue)
     CameraComponent->SetRelativeRotation(CurrentCameraRotation);
 }
 
+void UCCCameraControlComponent::RotateCamera(const FInputActionInstance& Value)
+{
+    const float StartTime = 0.0f;
+    const float EndTime = 1.0f;
+    const float StartMultiplier = 1.0f;
+    const float EndMultiplier = 0.3f;
+
+    FRotator NewRotation = SpringArmComponent->GetRelativeRotation();
+    const float RotateCameraValue = Value.GetValue().Get<float>();
+    NewRotation.Yaw += RotateCameraValue * 2.0f;
+
+    float CurrentRunTime = FMath::Clamp(Value.GetElapsedTime(), StartTime, EndTime);
+    float LagMultiplier = StartMultiplier - ((StartMultiplier - EndMultiplier) / (EndTime - StartTime)) * (CurrentRunTime - StartTime);
+    SpringArmComponent->CameraRotationLagSpeed = 10.0f * LagMultiplier;
+
+    bIsCameraInDefaultState = false;
+    SpringArmComponent->SetRelativeRotation(NewRotation);
+}
+
 void UCCCameraControlComponent::ResetCameraToDefault()
 {
     if (bIsCameraInDefaultState)
@@ -183,7 +193,7 @@ void UCCCameraControlComponent::ResetCameraToDefault()
     StartMoveCameraToTargetPositon(CameraMovementToDefaultCurve, DefaultMovingData);
 }
 
-void UCCCameraControlComponent::TryToResetCameraAfterPawnMove() 
+void UCCCameraControlComponent::TryToResetCameraAfterPawnMove()
 {
     if (!bIsCameraFolowPawn)
         return;
@@ -198,6 +208,11 @@ void UCCCameraControlComponent::MoveCameraToPawn(FVector TargetLocation)
     bShouldActorBeAttach = true;
     bIsCameraInDefaultState = false;
     StartMoveCameraToTargetPositon(CameraMovementToPawnCurve, PawnMovingData);
+}
+
+void UCCCameraControlComponent::ResetCameraLag()
+{
+    SpringArmComponent->CameraRotationLagSpeed = DefaultRotationLagSpeed;
 }
 
 void UCCCameraControlComponent::StartMoveCameraToTargetPositon(UCurveFloat* CurveToUse, FCameraMovemntData TargetData)

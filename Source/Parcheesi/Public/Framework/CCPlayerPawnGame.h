@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
 #include "Components/TimelineComponent.h"
 #include "CCPlayerPawnGame.generated.h"
 
@@ -89,10 +90,11 @@ protected:
 
     // Camera control
     void ZoomCamera(const FInputActionValue& Value);
-    void RotateCamera(const FInputActionValue& Value);
+    void RotateCamera(const FInputActionInstance& Value);
     void MoveCameraOnLevel(const FInputActionValue& Value);
+    void ResetCameraLag(const FInputActionValue& Value);
     void ResetCameraByClick();
-  
+
     bool bIsPawnMoving = false;
     bool bIsAnyPawnCanMove = false;
     bool bDicesSpawned = false;
