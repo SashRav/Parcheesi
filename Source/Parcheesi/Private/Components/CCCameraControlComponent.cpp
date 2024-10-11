@@ -34,7 +34,6 @@ void UCCCameraControlComponent::BeginPlay()
     DefaultMovingData.SpringArmRotation = FRotator(-70.0f, 0.0f, 0.0f);
     DefaultMovingData.SpringArmLength = 5700.0f;
 
-    SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, -700.0f);
     SpringArmComponent->SetRelativeRotation(DefaultMovingData.SpringArmRotation);
     SpringArmComponent->TargetArmLength = DefaultMovingData.SpringArmLength;
     SpringArmComponent->bEnableCameraRotationLag = true;
@@ -56,112 +55,58 @@ void UCCCameraControlComponent::SetCameraInitPosition(const FName Tag)
     OwningActor->SetActorRotation(NewRotation);
 
     DefaultMovingData.ActorRotation = NewRotation;
+    StartArmLenght = SpringArmComponent->TargetArmLength;
 }
 
 void UCCCameraControlComponent::ZoomCamera(const FInputActionValue& Value)
 {
-    if (bIsCameraMoving)
-        return;
-
     const float ZoomCameraValue = Value.Get<float>();
+    const float CurrentZoomDistance = StartArmLenght;
+
+    float SpringArmMaxLength = DefaultMovingData.SpringArmLength;
+    float MinZoomDistance = 2500.0f;
+    float LargeMultiplier = 0.5f;
+    float SmallMultiplier = 2.0f;
+    float MinArmPitchAngle = -30.0f;
+    float MaxArmPitchAngle = -70.0f;
+    float MinCameraPitchAngle = 0.0f;
+    float MaxCameraPitchAngle = 0.0f;
+    float StepValue = 300.0f;
 
     if (bIsCameraFolowPawn)
     {
-        ZoomCameraFromPawn(ZoomCameraValue);
-        return;
+        MinZoomDistance = 1500.0f;
+        StepValue = 200.0f;
+        SmallMultiplier = 0.6f;
+        LargeMultiplier = 1.8f;
+        MinArmPitchAngle = -70.0f;
+        MaxArmPitchAngle = -60.0f;
+        MinCameraPitchAngle = 32.0f;
+        MaxCameraPitchAngle = 20.0f;
+        SpringArmMaxLength = PawnMovingData.SpringArmLength;
     }
 
-    // Hardcoded untill it will be needed to setup in blueprints
-    const float MinZoomDistance = 2500.0f;
-    const float CurrentZoomDistance = SpringArmComponent->TargetArmLength;
-    const float SmallMultiplier = 0.5f;
-    const float LargeMultiplier = 2.0f;
-    const float MinPitchAngle = -30.0f;
-    const float MaxPitchAngle = -70.0f;
-
-    const float NormalizedDistance = (CurrentZoomDistance - MinZoomDistance) / (DefaultMovingData.SpringArmLength - MinZoomDistance);
+    const float NormalizedDistance = (CurrentZoomDistance - MinZoomDistance) / (SpringArmMaxLength - MinZoomDistance);
     const float ZoomStepMultiplay = FMath::Lerp(SmallMultiplier, LargeMultiplier, NormalizedDistance);
-    const float Step = -200.0f * ZoomStepMultiplay;
+    const float Step = -StepValue * ZoomStepMultiplay;
 
     float NewArmLength = CurrentZoomDistance + ZoomCameraValue * Step;
 
-    // Setup camera rotation
-    float NewNormalizedDistance = (NewArmLength - MinZoomDistance) / (DefaultMovingData.SpringArmLength - MinZoomDistance);
-    FRotator CurrentRotation = SpringArmComponent->GetRelativeRotation();
-    float NewPitchAngle = FMath::Lerp(MinPitchAngle, MaxPitchAngle, NewNormalizedDistance);
-    CurrentRotation.Pitch = NewPitchAngle;
-
-    if (NewArmLength > DefaultMovingData.SpringArmLength)
-    {
-        CurrentRotation.Pitch = MaxPitchAngle;
-        NewArmLength = DefaultMovingData.SpringArmLength;
-    }
-    else if (NewArmLength < MinZoomDistance)
-    {
-        CurrentRotation.Pitch = MinPitchAngle;
-        NewArmLength = MinZoomDistance;
-    }
-
+    NewArmLength = FMath::Clamp(NewArmLength, MinZoomDistance, SpringArmMaxLength);
     bIsCameraInDefaultState = false;
-    SpringArmComponent->TargetArmLength = NewArmLength;
-    SpringArmComponent->SetRelativeRotation(CurrentRotation);
+
+    StartArmLenght = NewArmLength;
+
+    FCameraMovemntData ZoomData;
+    ZoomData.SpringArmLength = NewArmLength;
+
+    bShouldMoveOnlyArm = true;
+    StartMoveCameraToTargetPositon(DefaultCameraMovementCurve, ZoomData);
 }
 
 void UCCCameraControlComponent::MoveCameraOnLevel(const FInputActionValue& Value)
 {
     UE_LOG(LogTemp, Display, TEXT("Camera Is Moving: %s"), *Value.ToString());
-}
-
-void UCCCameraControlComponent::ZoomCameraFromPawn(float ZoomCameraValue)
-{
-    if (!CameraComponent)
-        return;
-
-    // Hardcoded untill it will be needed to setup in blueprints
-    const float MinZoomDistance = 1500.0f;
-    const float CurrentZoomDistance = SpringArmComponent->TargetArmLength;
-    const float SmallMultiplier = 0.6f;
-    const float LargeMultiplier = 1.8f;
-    const float MinArmPitchAngle = -70.0f;
-    const float MaxArmPitchAngle = -60.0f;
-    const float MinCameraPitchAngle = 32.0f;
-    const float MaxCameraPitchAngle = 20.0f;
-
-    const float NormalizedDistance = (CurrentZoomDistance - MinZoomDistance) / (PawnMovingData.SpringArmLength - MinZoomDistance);
-    const float ZoomStepMultiplay = FMath::Lerp(SmallMultiplier, LargeMultiplier, NormalizedDistance);
-    const float Step = -125.0f * ZoomStepMultiplay;
-
-    float NewArmLength = CurrentZoomDistance + ZoomCameraValue * Step;
-
-    // Setup camera rotation
-    const float NewNormalizedDistance = (NewArmLength - MinZoomDistance) / (PawnMovingData.SpringArmLength - MinZoomDistance);
-    FRotator CurrentArmRotation = SpringArmComponent->GetRelativeRotation();
-    FRotator CurrentCameraRotation = CameraComponent->GetRelativeRotation();
-    const float NewArmPitchAngle = FMath::Lerp(MinArmPitchAngle, MaxArmPitchAngle, NewNormalizedDistance);
-    const float NewCameraPitchAngle = FMath::Lerp(MinCameraPitchAngle, MaxCameraPitchAngle, NewNormalizedDistance);
-    CurrentArmRotation.Pitch = NewArmPitchAngle;
-    CurrentCameraRotation.Pitch = NewCameraPitchAngle;
-
-    if (NewArmLength > PawnMovingData.SpringArmLength)
-    {
-        CurrentCameraRotation.Pitch = MaxCameraPitchAngle;
-        CurrentArmRotation.Pitch = MaxArmPitchAngle;
-        NewArmLength = PawnMovingData.SpringArmLength;
-    }
-    else if (NewArmLength < MinZoomDistance)
-    {
-        CurrentCameraRotation.Pitch = MinCameraPitchAngle;
-        CurrentArmRotation.Pitch = MinArmPitchAngle;
-        NewArmLength = MinZoomDistance;
-    }
-
-    UE_LOG(LogTemp, Display, TEXT("Camera Rotation:%s, Arm Rotation:%s, Arm:%f"), *CurrentCameraRotation.ToString(),
-        *CurrentArmRotation.ToString(), NewArmLength);
-    bIsCameraInDefaultState = false;
-
-    SpringArmComponent->TargetArmLength = NewArmLength;
-    SpringArmComponent->SetRelativeRotation(CurrentArmRotation);
-    CameraComponent->SetRelativeRotation(CurrentCameraRotation);
 }
 
 void UCCCameraControlComponent::RotateCamera(const FInputActionInstance& Value)
@@ -190,6 +135,9 @@ void UCCCameraControlComponent::ResetCameraToDefault()
 
     bShouldActorBeAttach = false;
     bIsCameraInDefaultState = true;
+    TargetSocketOffset = FVector(0.0f, 0.0f, 0.0f);
+
+    bShouldMoveOnlyArm = false;
     StartMoveCameraToTargetPositon(CameraMovementToDefaultCurve, DefaultMovingData);
 }
 
@@ -207,6 +155,8 @@ void UCCCameraControlComponent::MoveCameraToPawn(FVector TargetLocation)
     PawnMovingData.ActorRotation = OwningActor->GetActorRotation();
     bShouldActorBeAttach = true;
     bIsCameraInDefaultState = false;
+    TargetSocketOffset = PawnSocketOffset;
+    bShouldMoveOnlyArm = false;
     StartMoveCameraToTargetPositon(CameraMovementToPawnCurve, PawnMovingData);
 }
 
@@ -225,10 +175,14 @@ void UCCCameraControlComponent::StartMoveCameraToTargetPositon(UCurveFloat* Curv
     bIsCameraMoving = true;
 
     InitalMovingData.SpringArmLength = SpringArmComponent->TargetArmLength;
-    InitalMovingData.SpringArmRotation = SpringArmComponent->GetRelativeRotation();
-    InitalMovingData.CameraRotation = CameraComponent->GetRelativeRotation();
-    InitalMovingData.ActorRotation = OwningActor->GetActorRotation();
-    InitalMovingData.ActorLocation = OwningActor->GetActorLocation();
+    if (!bShouldMoveOnlyArm)
+    {
+        InitalMovingData.SpringArmRotation = SpringArmComponent->GetRelativeRotation();
+        InitalMovingData.CameraRotation = CameraComponent->GetRelativeRotation();
+        InitalMovingData.ActorRotation = OwningActor->GetActorRotation();
+        InitalMovingData.ActorLocation = OwningActor->GetActorLocation();
+        InitalSocketOffset = SpringArmComponent->SocketOffset;
+    }
 
     ProgressTimelineFunction.BindUFunction(this, FName("MoveCameraToTargetPosition"));
     TimelineFinishedCallback.BindUFunction(this, FName("FinishCameraMovementToTargetPosistion"));
@@ -240,14 +194,21 @@ void UCCCameraControlComponent::StartMoveCameraToTargetPositon(UCurveFloat* Curv
 
 void UCCCameraControlComponent::MoveCameraToTargetPosition(float Value)
 {
-    const FVector NewActorLocation = FMath::Lerp(InitalMovingData.ActorLocation, TargetMovingData.ActorLocation, Value);
     const float NewArmLength = FMath::Lerp(InitalMovingData.SpringArmLength, TargetMovingData.SpringArmLength, Value);
+    SpringArmComponent->TargetArmLength = NewArmLength;
+
+    if (bShouldMoveOnlyArm)
+        return;
+
+    const FVector NewSocketOffset = FMath::Lerp(InitalSocketOffset, TargetSocketOffset, Value);
+    const FVector NewActorLocation = FMath::Lerp(InitalMovingData.ActorLocation, TargetMovingData.ActorLocation, Value);
     const FRotator NewCameraRotation = FMath::Lerp(InitalMovingData.CameraRotation, TargetMovingData.CameraRotation, Value);
     const FRotator NewArmRotation = FMath::Lerp(InitalMovingData.SpringArmRotation, TargetMovingData.SpringArmRotation, Value);
     const FRotator NewActorRotation = FMath::Lerp(InitalMovingData.ActorRotation, TargetMovingData.ActorRotation, Value);
 
-    SpringArmComponent->TargetArmLength = NewArmLength;
     SpringArmComponent->SetRelativeRotation(NewArmRotation);
+    SpringArmComponent->SocketOffset = NewSocketOffset;
+
     CameraComponent->SetRelativeRotation(NewCameraRotation);
     OwningActor->SetActorRotation(NewActorRotation);
     OwningActor->SetActorLocation(NewActorLocation);
@@ -256,6 +217,7 @@ void UCCCameraControlComponent::MoveCameraToTargetPosition(float Value)
 void UCCCameraControlComponent::FinishCameraMovementToTargetPosistion()
 {
     bIsCameraMoving = false;
+    bShouldMoveOnlyArm = false;
 
     if (bIsCameraFolowPawn)
     {
@@ -267,5 +229,6 @@ void UCCCameraControlComponent::FinishCameraMovementToTargetPosistion()
     {
         OwningActor->AttachToComponent(OwningActor->GetSelectedPawnSceneComponent(), FAttachmentTransformRules::KeepWorldTransform);
         bIsCameraFolowPawn = true;
+        StartArmLenght = PawnMovingData.SpringArmLength;
     }
 }

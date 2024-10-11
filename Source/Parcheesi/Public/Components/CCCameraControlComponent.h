@@ -62,7 +62,6 @@ public:
 protected:
     virtual void BeginPlay() override;
 
-    void ZoomCameraFromPawn(float ZoomCameraValue);
     void StartMoveCameraToTargetPositon(UCurveFloat* CurveToUse, FCameraMovemntData TargetData);
 
     bool bIsCameraMoving = false;
@@ -78,8 +77,14 @@ protected:
 
     bool bShouldActorBeAttach = false;
     bool bIsCameraInDefaultState = true;
+    bool bShouldMoveOnlyArm = false;
 
     const float DefaultRotationLagSpeed = 10.0f;
+    const FVector PawnSocketOffset = FVector(0.0f, 0.0f, -400.0f);
+    FVector TargetSocketOffset;
+    FVector InitalSocketOffset;
+
+    float StartArmLenght;
 
     UPROPERTY()
     ACCPlayerPawnGame* OwningActor;
