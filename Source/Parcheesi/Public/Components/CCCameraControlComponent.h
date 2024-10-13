@@ -66,6 +66,7 @@ protected:
 
     bool bIsCameraMoving = false;
     bool bIsCameraFolowPawn = false;
+    bool bIsCameraMovingToDefault = false;
 
     FOnTimelineFloat ProgressTimelineFunction;
     FOnTimelineEvent TimelineFinishedCallback;
@@ -80,6 +81,7 @@ protected:
     bool bShouldMoveOnlyArm = false;
 
     const float DefaultRotationLagSpeed = 10.0f;
+    const float DefaultLagSpeed = 6.5f;
     const FVector PawnSocketOffset = FVector(0.0f, 0.0f, -400.0f);
     FVector TargetSocketOffset;
     FVector InitalSocketOffset;

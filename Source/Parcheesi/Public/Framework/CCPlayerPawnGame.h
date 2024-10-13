@@ -17,11 +17,13 @@ class UCCDiceComponent;
 class UCCSelectItem;
 class UCCPawnManagerComponent;
 class UCCCameraControlComponent;
+class USphereComponent;
 class ACCPawn;
 class ACCDice;
 class USpringArmComponent;
 class UCameraComponent;
 class UTimelineComponent;
+class UFloatingPawnMovement;
 
 UCLASS()
 class PARCHEESI_API ACCPlayerPawnGame : public APawn
@@ -98,6 +100,7 @@ protected:
     bool bIsPawnMoving = false;
     bool bIsAnyPawnCanMove = false;
     bool bDicesSpawned = false;
+    bool bIsLastSelectedPawnIsValid = false;
 
     int32 PawnClickedTimes = 0;
     FTimerHandle ResetDoubleClickPawnHandle;
@@ -210,10 +213,16 @@ protected:
     USpringArmComponent* SpringArmComponent;
 
     UPROPERTY()
-    ACCDice* SelectedDiceActor;
+    UTimelineComponent* TimelineComponent;
+
+    UPROPERTY(EditAnywhere)
+    UFloatingPawnMovement* MovementComponent;
+
+    UPROPERTY(EditAnywhere)
+    USphereComponent* SphereCollisionComponent;
 
     UPROPERTY()
-    UTimelineComponent* TimelineComponent;
+    ACCDice* SelectedDiceActor;
 
     UPROPERTY(Replicated)
     ACCPawn* SelectedPawnActor;

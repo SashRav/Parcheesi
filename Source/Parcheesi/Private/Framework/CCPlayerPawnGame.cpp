@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 #include "BoardItems/CCDice.h"
 #include "BoardItems/CCPawn.h"
 #include "EnhancedInputComponent.h"
@@ -17,6 +18,7 @@
 #include "Components/CCPawnManagerComponent.h"
 #include "Components/CCCameraControlComponent.h"
 #include "Components/TimelineComponent.h"
+#include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Camera/CameraComponent.h"
 
@@ -29,6 +31,11 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     PawnManagerComponent = CreateDefaultSubobject<UCCPawnManagerComponent>(TEXT("PawnManagerComponent"));
     PawnManagerComponent->OnPawnMovementFinished.AddDynamic(this, &ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished);
     PawnManagerComponent->OnGameFinished.AddDynamic(this, &ACCPlayerPawnGame::Server_HandleGameFinished);
+
+    // Collision setup in blueprint
+    SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionComponent"));
+    SphereCollisionComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+    RootComponent = SphereCollisionComponent;
 
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
     SpringArmComponent->SetupAttachment(RootComponent);
@@ -44,6 +51,9 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     CameraControlComponent->TimelineComponent = TimelineComponent;
     CameraControlComponent->CameraComponent = CameraComponent;
     CameraControlComponent->SpringArmComponent = SpringArmComponent;
+
+    MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovementComnponent"));
+    MovementComponent->UpdatedComponent = RootComponent;
 
     PrimaryActorTick.bCanEverTick = false;
 }
@@ -289,13 +299,17 @@ void ACCPlayerPawnGame::Server_SelectDiceActor_Implementation(ACCDice* HitDice)
 void ACCPlayerPawnGame::Server_SelectPawnActor_Implementation(ACCPawn* HitPawn)
 {
     if (HitPawn->Tags[0] != PlayerTagName)
+    {
+        bIsLastSelectedPawnIsValid = false;
         return;
+    }
 
     if (SelectedPawnActor)
         Client_VisualDeselectActor(SelectItemPawnComponent, SelectedPawnActor->GetMesh());
 
     SelectedPawnActor = HitPawn;
     Client_VisualSelectActor(SelectItemPawnComponent, SelectedPawnActor->GetMesh());
+    bIsLastSelectedPawnIsValid = true;
 }
 
 void ACCPlayerPawnGame::ClickOnBoard()
@@ -328,7 +342,7 @@ void ACCPlayerPawnGame::ClickOnBoard()
 void ACCPlayerPawnGame::DoubleClickOnBoard()
 {
     UE_LOG(LogTemp, Display, TEXT("Double "));
-    if (PawnClickedTimes >= 2 && SelectedPawnActor)
+    if (PawnClickedTimes >= 2 && bIsLastSelectedPawnIsValid && SelectedPawnActor)
     {
         UE_LOG(LogTemp, Display, TEXT("Double on pawn"));
         PawnClickedTimes = 0;

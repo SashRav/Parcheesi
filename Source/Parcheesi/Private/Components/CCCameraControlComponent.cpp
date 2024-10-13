@@ -37,7 +37,9 @@ void UCCCameraControlComponent::BeginPlay()
     SpringArmComponent->SetRelativeRotation(DefaultMovingData.SpringArmRotation);
     SpringArmComponent->TargetArmLength = DefaultMovingData.SpringArmLength;
     SpringArmComponent->bEnableCameraRotationLag = true;
+    SpringArmComponent->bEnableCameraLag = true;
     SpringArmComponent->CameraRotationLagSpeed = DefaultRotationLagSpeed;
+    SpringArmComponent->CameraLagSpeed = DefaultLagSpeed;
 }
 
 void UCCCameraControlComponent::SetCameraInitPosition(const FName Tag)
@@ -106,7 +108,34 @@ void UCCCameraControlComponent::ZoomCamera(const FInputActionValue& Value)
 
 void UCCCameraControlComponent::MoveCameraOnLevel(const FInputActionValue& Value)
 {
-    UE_LOG(LogTemp, Display, TEXT("Camera Is Moving: %s"), *Value.ToString());
+    // Movement Limited by SphereCollision in OwningActor and Blocking volumes on the level
+
+    if (bIsCameraMovingToDefault)
+        return;
+
+    if (bIsCameraFolowPawn) 
+    {
+        ResetCameraToDefault(); // Should be tested and discussed
+        return;
+    }
+
+    const FVector2D MovementVector = Value.Get<FVector2D>();
+
+    const FRotator Rotation = SpringArmComponent->GetComponentRotation();
+    const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+    const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+    const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+    const float CurrentZoomDistance = StartArmLenght;
+    
+    const float NormalizedDistance = (StartArmLenght - 2500.0f) / (5700.0f - 2500.0f); // Hardcoded max zoom values
+    const float MovementMultiplier = FMath::Lerp(0.8, 1.0f, NormalizedDistance); 
+
+    OwningActor->AddMovementInput(ForwardDirection, MovementVector.Y * MovementMultiplier);
+    OwningActor->AddMovementInput(RightDirection, MovementVector.X * MovementMultiplier);
+
+    bIsCameraInDefaultState = false;
 }
 
 void UCCCameraControlComponent::RotateCamera(const FInputActionInstance& Value)
@@ -135,6 +164,7 @@ void UCCCameraControlComponent::ResetCameraToDefault()
 
     bShouldActorBeAttach = false;
     bIsCameraInDefaultState = true;
+    bIsCameraMovingToDefault = true;
     TargetSocketOffset = FVector(0.0f, 0.0f, 0.0f);
 
     bShouldMoveOnlyArm = false;
@@ -218,6 +248,7 @@ void UCCCameraControlComponent::FinishCameraMovementToTargetPosistion()
 {
     bIsCameraMoving = false;
     bShouldMoveOnlyArm = false;
+    bIsCameraMovingToDefault = false;
 
     if (bIsCameraFolowPawn)
     {
