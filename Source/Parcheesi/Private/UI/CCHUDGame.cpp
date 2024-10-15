@@ -115,7 +115,7 @@ void ACCHUDGame::DebugEndPlayerTurn()
 
 void ACCHUDGame::RollDice()
 {
-    OwningPlayerPawn->Server_RollDices();
+    OwningPlayerPawn->RollDice();
 }
 
 void ACCHUDGame::MovePawn()

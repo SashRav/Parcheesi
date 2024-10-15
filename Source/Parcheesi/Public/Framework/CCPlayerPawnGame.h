@@ -34,6 +34,7 @@ public:
     ACCPlayerPawnGame();
 
     void SetPlayerTagName(FName TagName);
+    void RollDice();
 
     USceneComponent* GetSelectedPawnSceneComponent();
 
@@ -56,7 +57,7 @@ public:
     void Server_MoveSelectedPawn();
 
     UFUNCTION(Server, Reliable)
-    void Server_RollDices();
+    void Server_RollDices(FVector SpawnDirection);
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_SetCurrentTurn(bool Turn);

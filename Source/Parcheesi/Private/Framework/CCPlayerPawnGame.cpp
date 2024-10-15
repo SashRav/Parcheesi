@@ -24,7 +24,7 @@
 
 ACCPlayerPawnGame::ACCPlayerPawnGame()
 {
-    DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
+
     SelectItemDiceComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionDiceComponent"));
     SelectItemPawnComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionPawnComponent"));
 
@@ -32,7 +32,7 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     PawnManagerComponent->OnPawnMovementFinished.AddDynamic(this, &ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished);
     PawnManagerComponent->OnGameFinished.AddDynamic(this, &ACCPlayerPawnGame::Server_HandleGameFinished);
 
-    // Collision setup in blueprint
+    // Setting up collisions in a blueprint
     SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionComponent"));
     SphereCollisionComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
     RootComponent = SphereCollisionComponent;
@@ -43,6 +43,9 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     CameraComponent->SetupAttachment(SpringArmComponent);
+
+    DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
+    DiceComponent->PlayerSpringArm = SpringArmComponent;
 
     // Setup camera movement
     TimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("TimelineComponent"));
@@ -78,6 +81,11 @@ void ACCPlayerPawnGame::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
     DOREPLIFETIME(ACCPlayerPawnGame, PlayerTagName);
     DOREPLIFETIME(ACCPlayerPawnGame, SelectedPawnActor);
+}
+
+void ACCPlayerPawnGame::RollDice()
+{
+    Server_RollDices(SpringArmComponent->GetComponentRotation().Vector());
 }
 
 void ACCPlayerPawnGame::BeginPlay()
@@ -137,10 +145,10 @@ void ACCPlayerPawnGame::SetupPlayerInputComponent(UInputComponent* NewInputCompo
     }
 }
 
-void ACCPlayerPawnGame::Server_RollDices_Implementation()
+void ACCPlayerPawnGame::Server_RollDices_Implementation(FVector SpawnDirection)
 {
     bDicesSpawned = true;
-    DiceComponent->RollDices();
+    DiceComponent->RollDices(SpawnDirection);
 }
 
 void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& ColorTag)

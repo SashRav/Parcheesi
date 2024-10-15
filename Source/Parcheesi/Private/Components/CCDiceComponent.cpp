@@ -3,6 +3,7 @@
 #include "Components/CCDiceComponent.h"
 #include "BoardItems/CCDice.h"
 #include "Framework/CCGameStateGame.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 void UCCDiceComponent::BeginPlay()
@@ -34,15 +35,17 @@ void UCCDiceComponent::BeginPlay()
     }
 }
 
-void UCCDiceComponent::RollDices() 
+void UCCDiceComponent::RollDices(FVector ForwardVector)
 {
-    if (!ServerGameState)
+    if (!ServerGameState || !PlayerSpringArm)
         return;
+
+    ForwardVectorToSpawn = ForwardVector;
 
     FTimerHandle TimerHandle;
     FTimerDelegate TimerDelegate;
 
-    FRotator Rotation;
+    FRotator Rotation = PlayerSpringArm->GetComponentRotation();
     FVector SpawnLocation(500.0f, -100.0f, 600.0f);
     int32 DicesToSpawn = ServerGameState->GetGameSettings().DicesToRool;
 
@@ -51,9 +54,6 @@ void UCCDiceComponent::RollDices()
 
     for (int32 DiceNumber = 1; DiceNumber <= DicesToSpawn; DiceNumber++)
     {
-        Rotation.Pitch = FMath::RandRange(-180.0, 180.0);
-        Rotation.Yaw = FMath::RandRange(-180.0, 180.0);
-        Rotation.Roll = FMath::RandRange(-180.0, 180.0);
         SpawnLocation.Y = FMath::RandRange(-100.0, 100.0) * DiceNumber;
         SpawnLocation.X = FMath::RandRange(-100.0, 100.0) * DiceNumber;
 
@@ -67,7 +67,7 @@ void UCCDiceComponent::RollDices()
     GetWorld()->GetTimerManager().SetTimer(DoubleTimerHandle, this, &UCCDiceComponent::TryDoubleDices, DiceMoveDelay + 1.0f, false);
 }
 
-void UCCDiceComponent::SpawnDice(FVector SpawnLocation, FRotator Rotation, bool UseVelocity, bool SimulatePhysics) 
+void UCCDiceComponent::SpawnDice(FVector SpawnLocation, FRotator Rotation, bool UseVelocity, bool SimulatePhysics)
 {
     if (!ServerGameState)
         return;
@@ -82,20 +82,23 @@ void UCCDiceComponent::SpawnDice(FVector SpawnLocation, FRotator Rotation, bool 
     }
 }
 
-void UCCDiceComponent::SetDiceVelocity(ACCDice* Dice) 
+void UCCDiceComponent::SetDiceVelocity(ACCDice* Dice)
 {
-    if (!Dice)
+    if (!Dice || !PlayerSpringArm)
         return;
 
-    FVector DiceVelocity(0.0f, 0.0f, 0.0f);
-    // Hardcoded for now
-    DiceVelocity.X = FMath::RandRange(-1750.0, -1250.0);
-    DiceVelocity.Y = FMath::RandRange(-200.0, 200.0);
+    FVector DiceVelocity = ForwardVectorToSpawn;
+    UE_LOG(LogTemp, Display, TEXT("Init Vector: %s"), *DiceVelocity.ToString());
+
+    DiceVelocity.X = DiceVelocity.X * 6000;
+    DiceVelocity.Y = DiceVelocity.Y * 6000;
     DiceVelocity.Z = FMath::RandRange(-1200.0, -500.0);
+    UE_LOG(LogTemp, Display, TEXT("New Vector: %s"), *DiceVelocity.ToString());
+    
     Dice->GetStaticMeshComponent()->SetPhysicsLinearVelocity(DiceVelocity);
 }
 
-void UCCDiceComponent::TryDoubleDices() 
+void UCCDiceComponent::TryDoubleDices()
 {
     TArray<ACCDice*> SpawnedDices = ServerGameState->GetSpawnedDices();
     UE_LOG(LogTemp, Log, TEXT("Trying to double dices. Dices number: %d"), SpawnedDices.Num());
@@ -125,7 +128,7 @@ void UCCDiceComponent::TryDoubleDices()
     OnDiceRollingEnd.Broadcast();
 }
 
-void UCCDiceComponent::MoveDicesToBoard(TArray<FVector> TargetLocations) 
+void UCCDiceComponent::MoveDicesToBoard(TArray<FVector> TargetLocations)
 {
     if (!ServerGameState)
         return;

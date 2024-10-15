@@ -8,6 +8,7 @@
 
 class ACCDice;
 class ACCGameStateGame;
+class USpringArmComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDiceRollingEnd);
 
@@ -18,16 +19,21 @@ class PARCHEESI_API UCCDiceComponent : public UActorComponent
 
 public:
     void SpawnDice(FVector SpawnLocation, FRotator Rotation, bool UseVelocity, bool SimulatePhysics);
-    void RollDices();
+    void RollDices(FVector ForwardVector);
 
     UPROPERTY(BlueprintAssignable)
     FOnDiceRollingEnd OnDiceRollingEnd;
+
+    UPROPERTY()
+    USpringArmComponent* PlayerSpringArm;
 
 protected:
     virtual void BeginPlay() override;
 
     void SetDiceVelocity(ACCDice* Dice);
     void TryDoubleDices();
+
+    FVector ForwardVectorToSpawn; 
 
     UFUNCTION()
     void MoveDicesToBoard(TArray<FVector> TargetLocations);
