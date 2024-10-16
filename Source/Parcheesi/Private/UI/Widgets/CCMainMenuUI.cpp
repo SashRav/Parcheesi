@@ -20,7 +20,7 @@ void UCCMainMenuUI::NativeConstruct()
 
 void UCCMainMenuUI::SingleplayerButtonClicked()
 {
-    // MainMenuHUD->ShowSingleplayerWidget(); // Will be enabled when single player widget will be ready
+    MainMenuHUD->ShowSingleplayerWidget(); 
 }
 
 void UCCMainMenuUI::MultiplayerButtonClicked()
