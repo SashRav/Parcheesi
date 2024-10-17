@@ -29,6 +29,9 @@ public:
     void SetCurrentCellIndex(int32 Index) { CurrentCellIndex = Index; }
     void SetIsInGates(bool State) { bIsInGates = State; }
 
+     UFUNCTION(NetMulticast, Reliable)
+    void SetMovementTick(bool State);
+
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_SetupPawnData(ETurnColors PawnColor, int32 StartCell, int32 FirstBoardCell, int32 FirstFinishCell);
 

@@ -29,6 +29,8 @@ void ACCPawn::BeginPlay()
     check(GreenMaterial);
     check(YellowMaterial);
     check(BlueMaterial);
+
+    GetMovementComponent()->SetComponentTickEnabled(false);
 }
 
 void ACCPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -62,4 +64,10 @@ void ACCPawn::Multicast_SetupPawnData_Implementation(ETurnColors PawnColor, int3
         GetMesh()->SetMaterial(0, YellowMaterial);
         break;
     }
+}
+
+void ACCPawn::SetMovementTick_Implementation(bool State)
+{
+    GetMesh()->bComponentUseFixedSkelBounds = State;
+    GetMovementComponent()->SetComponentTickEnabled(State);
 }

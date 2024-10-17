@@ -129,6 +129,8 @@ void UCCPawnManagerComponent::ChangePawnPosition(ACCPawn* PawnToMove, TArray<FVe
 
     UE_LOG(LogTemp, Display, TEXT("Cells to move: %d"), Positions.Num());
 
+    PawnToMove->SetMovementTick(true);
+
     ACCPawnAIController* AIController = Cast<ACCPawnAIController>(PawnToMove->GetController());
     if (AIController)
     {
@@ -145,6 +147,7 @@ void UCCPawnManagerComponent::HandlePawnFinishedMovement(bool bResult)
     ACCPawnAIController* AIController;
     if (SelectedPawn)
     {
+        SelectedPawn->SetMovementTick(false);
         AIController = Cast<ACCPawnAIController>(SelectedPawn->GetController());
         if (AIController)
             AIController->OnMovementFinished.RemoveAll(this);
@@ -152,6 +155,7 @@ void UCCPawnManagerComponent::HandlePawnFinishedMovement(bool bResult)
 
     if (SecondaryPawn)
     {
+        SecondaryPawn->SetMovementTick(false);
         AIController = Cast<ACCPawnAIController>(SecondaryPawn->GetController());
         if (AIController)
             AIController->OnMovementFinished.RemoveAll(this);
