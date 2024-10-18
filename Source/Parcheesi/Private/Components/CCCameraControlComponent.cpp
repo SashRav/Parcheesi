@@ -27,12 +27,12 @@ void UCCCameraControlComponent::BeginPlay()
 
     PawnMovingData.CameraRotation = FRotator(20.0f, 0.0f, 0.0f);
     PawnMovingData.SpringArmRotation = FRotator(-60.0f, 0.0f, 0.0f);
-    PawnMovingData.SpringArmLength = 3000.0f;
+    PawnMovingData.SpringArmLength = 1650.0f;
 
     DefaultMovingData.ActorLocation = OwningActor->GetActorLocation();
     DefaultMovingData.CameraRotation = FRotator(0.0f, 0.0f, 0.0f);
     DefaultMovingData.SpringArmRotation = FRotator(-70.0f, 0.0f, 0.0f);
-    DefaultMovingData.SpringArmLength = 5700.0f;
+    DefaultMovingData.SpringArmLength = 3200.0f;
 
     SpringArmComponent->SetRelativeRotation(DefaultMovingData.SpringArmRotation);
     SpringArmComponent->TargetArmLength = DefaultMovingData.SpringArmLength;
@@ -40,6 +40,7 @@ void UCCCameraControlComponent::BeginPlay()
     SpringArmComponent->bEnableCameraLag = true;
     SpringArmComponent->CameraRotationLagSpeed = DefaultRotationLagSpeed;
     SpringArmComponent->CameraLagSpeed = DefaultLagSpeed;
+    SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, -300.0f);
 }
 
 void UCCCameraControlComponent::SetCameraInitPosition(const FName Tag)
@@ -66,19 +67,19 @@ void UCCCameraControlComponent::ZoomCamera(const FInputActionValue& Value)
     const float CurrentZoomDistance = StartArmLenght;
 
     float SpringArmMaxLength = DefaultMovingData.SpringArmLength;
-    float MinZoomDistance = 2500.0f;
+    float MinZoomDistance = 1700.0f;
     float LargeMultiplier = 0.5f;
     float SmallMultiplier = 2.0f;
     float MinArmPitchAngle = -30.0f;
     float MaxArmPitchAngle = -70.0f;
     float MinCameraPitchAngle = 0.0f;
     float MaxCameraPitchAngle = 0.0f;
-    float StepValue = 300.0f;
+    float StepValue = 200.0f;
 
     if (bIsCameraFolowPawn)
     {
-        MinZoomDistance = 1500.0f;
-        StepValue = 200.0f;
+        MinZoomDistance = 1200.0f;
+        StepValue = 125.0f;
         SmallMultiplier = 0.6f;
         LargeMultiplier = 1.8f;
         MinArmPitchAngle = -70.0f;
@@ -113,7 +114,7 @@ void UCCCameraControlComponent::MoveCameraOnLevel(const FInputActionValue& Value
     if (bIsCameraMovingToDefault)
         return;
 
-    if (bIsCameraFolowPawn) 
+    if (bIsCameraFolowPawn)
     {
         ResetCameraToDefault(); // Should be tested and discussed
         return;
@@ -128,9 +129,9 @@ void UCCCameraControlComponent::MoveCameraOnLevel(const FInputActionValue& Value
     const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
     const float CurrentZoomDistance = StartArmLenght;
-    
+
     const float NormalizedDistance = (StartArmLenght - 2500.0f) / (5700.0f - 2500.0f); // Hardcoded max zoom values
-    const float MovementMultiplier = FMath::Lerp(0.8, 1.0f, NormalizedDistance); 
+    const float MovementMultiplier = FMath::Lerp(0.8, 1.0f, NormalizedDistance);
 
     OwningActor->AddMovementInput(ForwardDirection, MovementVector.Y * MovementMultiplier);
     OwningActor->AddMovementInput(RightDirection, MovementVector.X * MovementMultiplier);
@@ -165,7 +166,7 @@ void UCCCameraControlComponent::ResetCameraToDefault()
     bShouldActorBeAttach = false;
     bIsCameraInDefaultState = true;
     bIsCameraMovingToDefault = true;
-    TargetSocketOffset = FVector(0.0f, 0.0f, 0.0f);
+    TargetSocketOffset = FVector(0.0f, 0.0f, -300.0f);
 
     bShouldMoveOnlyArm = false;
     StartMoveCameraToTargetPositon(CameraMovementToDefaultCurve, DefaultMovingData);
