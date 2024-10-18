@@ -4,6 +4,7 @@
 #include "Framework/CCGameModeBaseGame.h"
 #include "Framework/CCGameStateGame.h"
 #include "Framework/CCControllerGame.h"
+#include "Framework/CCGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/PlayerController.h"
@@ -88,6 +89,7 @@ void ACCPlayerPawnGame::RollDice()
     Server_RollDices(SpringArmComponent->GetComponentRotation().Vector());
 }
 
+
 void ACCPlayerPawnGame::BeginPlay()
 {
     Super::BeginPlay();
@@ -102,11 +104,15 @@ void ACCPlayerPawnGame::BeginPlay()
     ServerGameMode = Cast<ACCGameModeBaseGame>(UGameplayStatics::GetGameMode(GetWorld()));
     ServerGameState = Cast<ACCGameStateGame>(UGameplayStatics::GetGameState(GetWorld()));
     OwningPlayerController = Cast<ACCControllerGame>(GetController());
+    ServerGameInstance = Cast<UCCGameInstance>(GetGameInstance());
 
     DiceComponent->OnDiceRollingEnd.AddDynamic(this, &ACCPlayerPawnGame::Server_CheckIfCanEnableEndTurn);
 
-    FTimerHandle LobbyInitTimer;
-    GetWorld()->GetTimerManager().SetTimer(LobbyInitTimer, this, &ACCPlayerPawnGame::InitLobby, 0.1f, false);
+    if (ServerGameInstance && !ServerGameInstance->GetIsSinglePlayer())
+    {
+        FTimerHandle LobbyInitTimer;
+        GetWorld()->GetTimerManager().SetTimer(LobbyInitTimer, this, &ACCPlayerPawnGame::InitLobby, 0.1f, false);
+    }
 }
 
 void ACCPlayerPawnGame::InitLobby()

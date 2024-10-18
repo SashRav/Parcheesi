@@ -42,6 +42,9 @@ protected:
 
     void SpawnPawnsOnBoard();
 
+    // Single player setup
+    void StartSingleplayer();
+
     UPROPERTY()
     TArray<FPlayersTurnData> PlayersTurnData;
 

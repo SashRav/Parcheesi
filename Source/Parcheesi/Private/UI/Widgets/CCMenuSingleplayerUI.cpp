@@ -4,6 +4,7 @@
 #include "UI/Widgets/CCMenuButtonUI.h"
 #include "UI/CCHUDMainMenu.h"
 #include "Kismet/GameplayStatics.h"
+#include "Framework/CCGameInstance.h"
 
 void UCCMenuSingleplayerUI::NativeConstruct()
 {
@@ -27,5 +28,11 @@ void UCCMenuSingleplayerUI::BackToMenuButtonlicked()
 
 void UCCMenuSingleplayerUI::StartGame() 
 {
+    UCCGameInstance* GameInstance = Cast<UCCGameInstance>(GetGameInstance());
+    if (GameInstance)
+    {
+        GameInstance->SetIsSinglePlayer(true);
+        GameInstance->SetPlayerColor(ETurnColors::Red);
+    }
     UGameplayStatics::OpenLevel(this, "/Game/_Main/Maps/GameMap");
 }

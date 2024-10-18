@@ -22,11 +22,17 @@ void ACCGameModeBaseGame::BeginPlay()
 
     GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameInstance = Cast<UCCGameInstance>(GetGameInstance());
+
+    if (GameInstance->GetIsSinglePlayer())
+        StartSingleplayer();
 }
 
 void ACCGameModeBaseGame::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
+
+    if (GameInstance && GameInstance->GetIsSinglePlayer()) // exit if in singleplayer mode
+        return;
 
     GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
 
@@ -292,8 +298,19 @@ void ACCGameModeBaseGame::DisconnectPlayer(FUniqueNetIdRepl PlayerID)
             return;
 
         if (GameInstance)
+        {
             SessionInterface->DestroySession(GameInstance->GetSessionName());
+            GameInstance->SetIsSinglePlayer(false);
+            GameInstance->SetPlayerColor(ETurnColors::None);
+        }
     }
 
     PlayerController->ClientTravel("/Game/Maps/MenuMap", ETravelType::TRAVEL_Absolute);
+}
+
+void ACCGameModeBaseGame::StartSingleplayer() 
+{
+    ACCControllerGame* GameController = Cast<ACCControllerGame>(GetWorld()->GetFirstPlayerController());
+    if (GameController)
+        GameController->Client_StartGameFromController();
 }

@@ -24,6 +24,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UTimelineComponent;
 class UFloatingPawnMovement;
+class UCCGameInstance;
 
 UCLASS()
 class PARCHEESI_API ACCPlayerPawnGame : public APawn
@@ -174,6 +175,9 @@ protected:
     UPROPERTY()
     ACCControllerGame* OwningPlayerController;
 
+    UPROPERTY()
+    UCCGameInstance* ServerGameInstance;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UCCDiceComponent* DiceComponent;
 
@@ -227,4 +231,5 @@ protected:
 
     UPROPERTY(Replicated)
     ACCPawn* SelectedPawnActor;
+
 };
