@@ -30,7 +30,7 @@ void ACCGameStateGame::AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName Playe
         UE_LOG(LogTemp, Display, TEXT("New Player Added. Player Id: %s, Player Tag: %s"), *UserIdSerialized, *PlayerTag.ToString());
     }
     else
-        UE_LOG(LogTemp, Display, TEXT("Trying to add player with Not valide Net ID"));
+        UE_LOG(LogTemp, Error, TEXT("Trying to add player with Not valide Net ID"));
 
     // Update Players List in lobby
     OnPlayersCountChanged.Broadcast();
@@ -71,7 +71,7 @@ void ACCGameStateGame::RemovePlayerFromPlayersData(FUniqueNetIdRepl PlayerID)
 {
     AllPlayersData.Remove(PlayerID);
     OnPlayersCountChanged.Broadcast();
-    OnSelectingColorInLobby.Broadcast(); // Reset Ready players 
+    OnSelectingColorInLobby.Broadcast(); // Reset Ready players
 }
 
 void ACCGameStateGame::SetupPlayersTurnData()
@@ -144,4 +144,32 @@ TArray<ACCPawn*> ACCGameStateGame::GetAllPawns()
     }
 
     return FoundPawns;
+}
+
+void ACCGameStateGame::AddNewPlayerToList(AController* Controller, FName PlayerTag)
+{
+    if (Controller)
+    {
+        FPlayerInfo PlayerData;
+        PlayerData.Tag = PlayerTag;
+        PlayerData.bIsReady = false;
+
+        AllPlayersDataNew.Add(Controller, PlayerData);
+        UE_LOG(LogTemp, Display, TEXT("New Player Added. Player: %s, Player Tag: %s"), *Controller->GetName(), *PlayerTag.ToString());
+    }
+    else
+        UE_LOG(LogTemp, Error, TEXT("Trying to add player with Not valide controller "));
+}
+
+void ACCGameStateGame::SetupNewPlayersTurnData()
+{
+    if (AllPlayersDataNew.Num() > 0)
+        for (TPair<AController*, FPlayerInfo>& Elem : AllPlayersDataNew)
+        {
+            FPlayerInfo PlayerData = Elem.Value;
+            const ETurnColors ColorEnum = GetEnumColorFromTag(PlayerData.Tag.ToString());
+            AController* Controller = Elem.Key;
+            PlayersNewTurnData.Add(ColorEnum, Controller);
+        }
+    UE_LOG(LogTemp, Display, TEXT("Total players with colors: %d"), PlayersNewTurnData.Num());
 }

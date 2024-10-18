@@ -24,6 +24,7 @@ public:
     void ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo);
     void ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn);
     void SetupPlayersTurnData();
+    void SetupNewPlayersTurnData();
     FCellsData GetCellData(int32 Index) { return *CellsData.Find(Index); };
     TMap<int32, FCellsData> GetAllCellsData() { return CellsData; }
     bool CheckCellIsValidOnIndex(int32 CellIndex);
@@ -47,6 +48,11 @@ public:
 
     bool IsGameStarted() { return bIsGameStarted; }
     void SetIsGameStarted(bool Status) { bIsGameStarted = Status; }
+    TMap<ETurnColors, AController*> GetNewPlayersTurnData() { return PlayersNewTurnData; }
+
+    // Singleplayer logic
+    void AddNewPlayerToList(AController* Controller, FName PlayerTag);
+    TMap<AController*, FPlayerInfo> GetAllNewPlayersData() { return AllPlayersDataNew; };
 
     UPROPERTY(BlueprintAssignable)
     FOnSelectingColorInLobby OnSelectingColorInLobby;
@@ -68,7 +74,13 @@ protected:
     TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersData;
 
     UPROPERTY()
+    TMap<AController*, FPlayerInfo> AllPlayersDataNew;
+
+    UPROPERTY()
     TMap<ETurnColors, FUniqueNetIdRepl> PlayersTurnData;
+
+    UPROPERTY()
+    TMap<ETurnColors, AController*> PlayersNewTurnData;
 
     UPROPERTY()
     TMap<int32, FCellsData> CellsData;

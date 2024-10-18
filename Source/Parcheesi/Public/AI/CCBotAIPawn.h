@@ -9,11 +9,17 @@
 UCLASS()
 class PARCHEESI_API ACCBotAIPawn : public APawn
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	ACCBotAIPawn();
+    ACCBotAIPawn();
+
+    void SetBotTagName(FName TagName) { BotTagName = TagName; };
+    FName GetBotTagName() { return BotTagName; }
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
+
+    UPROPERTY()
+    FName BotTagName;
 };

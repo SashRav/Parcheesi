@@ -13,12 +13,14 @@
 #include "CCCoreTypes.h"
 #include "OnlineSubsystemUtils.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "AI/CCBotAIPawn.h"
 
 void ACCGameModeBaseGame::BeginPlay()
 {
     Super::BeginPlay();
 
     check(PawnClass);
+    check(BotAIPawnClass);
 
     GameStateGame = Cast<ACCGameStateGame>(GetWorld()->GetGameState());
     GameInstance = Cast<UCCGameInstance>(GetGameInstance());
@@ -232,7 +234,11 @@ void ACCGameModeBaseGame::SpawnPawnsOnBoard()
         return;
 
     TArray<ETurnColors> PlayersColors;
-    GameStateGame->GetPlayersTurnData().GetKeys(PlayersColors);
+
+    if (GameInstance->GetIsSinglePlayer())
+        GameStateGame->GetNewPlayersTurnData().GetKeys(PlayersColors);
+    else
+        GameStateGame->GetPlayersTurnData().GetKeys(PlayersColors);
 
     for (ETurnColors Color : PlayersColors)
     {
@@ -308,9 +314,37 @@ void ACCGameModeBaseGame::DisconnectPlayer(FUniqueNetIdRepl PlayerID)
     PlayerController->ClientTravel("/Game/Maps/MenuMap", ETravelType::TRAVEL_Absolute);
 }
 
-void ACCGameModeBaseGame::StartSingleplayer() 
+void ACCGameModeBaseGame::StartSingleplayer()
 {
-    ACCControllerGame* GameController = Cast<ACCControllerGame>(GetWorld()->GetFirstPlayerController());
-    if (GameController)
-        GameController->Client_StartGameFromController();
+    if (!GameStateGame)
+        return;
+
+    // Bot colors are hardcoded untill player will be able select color in Main menu
+    if (ACCBotAIPawn* SpawnedBotPawn = GetWorld()->SpawnActor<ACCBotAIPawn>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
+    {
+        SpawnedBotPawn->SetBotTagName(UEnum::GetValueAsName(ETurnColors::Green));
+        GameStateGame->AddNewPlayerToList(SpawnedBotPawn->GetController(), "Green" );
+    }
+    if (ACCBotAIPawn* SpawnedBotPawn = GetWorld()->SpawnActor<ACCBotAIPawn>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
+    {
+        SpawnedBotPawn->SetBotTagName(UEnum::GetValueAsName(ETurnColors::Blue));
+        GameStateGame->AddNewPlayerToList(SpawnedBotPawn->GetController(), "Blue");
+    }
+    if (ACCBotAIPawn* SpawnedBotPawn = GetWorld()->SpawnActor<ACCBotAIPawn>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
+    {
+        SpawnedBotPawn->SetBotTagName(UEnum::GetValueAsName(ETurnColors::Yellow));
+        GameStateGame->AddNewPlayerToList(SpawnedBotPawn->GetController(), "Yellow");
+    }
+
+    ACCControllerGame* PlayerController = Cast<ACCControllerGame>(GetWorld()->GetFirstPlayerController());
+    if (!PlayerController)
+        return;
+
+    GameStateGame->AddNewPlayerToList(PlayerController, "Red");
+    GameStateGame->SetupNewPlayersTurnData();
+    SpawnPawnsOnBoard();
+
+    GameStateGame->SetIsGameStarted(true);
+    PlayerController->Client_StartGameFromController();
+    PlayerController->Client_ShowTurnButtonsWidget();
 }

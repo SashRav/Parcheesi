@@ -11,6 +11,7 @@ class ACCGameStateGame;
 class UCCGameInstance;
 class APlayerController;
 class ACCPawn;
+class ACCBotAIPawn;
 
 UCLASS()
 class PARCHEESI_API ACCGameModeBaseGame : public AGameModeBase
@@ -50,6 +51,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACCPawn> PawnClass;
+
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<ACCBotAIPawn> BotAIPawnClass;
 
     UPROPERTY()
     ACCGameStateGame* GameStateGame;
