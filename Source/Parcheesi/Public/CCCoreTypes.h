@@ -81,7 +81,7 @@ struct FCameraMovemntData : public FTableRowBase
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY()
-    float SpringArmLength;
+    float FocalLength;
     
     UPROPERTY()
     FRotator SpringArmRotation;
