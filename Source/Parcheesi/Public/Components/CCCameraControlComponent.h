@@ -12,7 +12,7 @@
 
 class USpringArmComponent;
 class UTimelineComponent;
-class UCameraComponent;
+class UCineCameraComponent;
 class ACCPlayerPawnGame;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -51,7 +51,7 @@ public:
     UCurveFloat* EndCameraMovementCurve;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UCameraComponent* CameraComponent;
+    UCineCameraComponent* CineCameraComponent;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     USpringArmComponent* SpringArmComponent;
@@ -80,13 +80,58 @@ protected:
     bool bIsCameraInDefaultState = true;
     bool bShouldMoveOnlyArm = false;
 
-    const float DefaultRotationLagSpeed = 10.0f;
-    const float DefaultLagSpeed = 6.5f;
-    const FVector PawnSocketOffset = FVector(0.0f, 0.0f, -400.0f);
     FVector TargetSocketOffset;
     FVector InitalSocketOffset;
-
     float StartArmLenght;
+
+    float InitialFocalLength;
+    float TargetFocalLength;
+    float StartFocalLength;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Camera Lag")
+    float DefaultRotationLagSpeed = 10.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Camera Lag")
+    float DefaultLagSpeed = 6.5f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Default")
+    FVector DefaultSocketOffset = FVector(0.0f, 0.0f, -300.0f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Default")
+    float MinFocalLength = 12.5f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Default")
+    float MaxFocalLength = 35.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Default")
+    float MaxSpringArmLength = 3200.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Default")
+    float MinSpringArmLength = 1700.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Default")
+    FRotator DefaultSpringArmRotation = FRotator(-70.0f, 0.0f, 0.0f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Default")
+    FRotator DefaultCameraRotation = FRotator(0.0f, 0.0f, 0.0f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Pawn")
+    FVector PawnSocketOffset = FVector(0.0f, 0.0f, 1000.0f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Pawn")
+    float MaxPawnSpringArmLength = 1650.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Pawn")
+    float MinPawnSpringArmLength = 1200.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Pawn")
+    FRotator DefaultPawnSpringArmRotation = FRotator(-60.0f, 0.0f, 0.0f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Pawn")
+    FRotator DefaultPawnCameraRotation = FRotator(-20.0f, 0.0f, 0.0f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zoom | Pawn")
+    float MinPawnFocalLength = 20.0f;
 
     UPROPERTY()
     ACCPlayerPawnGame* OwningActor;

@@ -21,7 +21,7 @@ class USphereComponent;
 class ACCPawn;
 class ACCDice;
 class USpringArmComponent;
-class UCameraComponent;
+class UCineCameraComponent;
 class UTimelineComponent;
 class UFloatingPawnMovement;
 class UCCGameInstance;
@@ -212,7 +212,7 @@ protected:
     UInputAction* MoveCameraAction;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UCameraComponent* CameraComponent;
+    UCineCameraComponent* CineCameraComponent;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     USpringArmComponent* SpringArmComponent;

@@ -19,7 +19,8 @@ public class Parcheesi : ModuleRules
             "EnhancedInput" ,
             "OnlineSubsystem",
             "OnlineSubsystemUtils",
-            "AIModule"
+            "AIModule",
+            "CinematicCamera"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

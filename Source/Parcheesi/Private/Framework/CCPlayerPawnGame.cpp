@@ -21,11 +21,10 @@
 #include "Components/TimelineComponent.h"
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Camera/CameraComponent.h"
+#include "CineCameraComponent.h"
 
 ACCPlayerPawnGame::ACCPlayerPawnGame()
 {
-
     SelectItemDiceComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionDiceComponent"));
     SelectItemPawnComponent = CreateDefaultSubobject<UCCSelectItem>(TEXT("SelectionPawnComponent"));
 
@@ -42,8 +41,8 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     SpringArmComponent->SetupAttachment(RootComponent);
     SpringArmComponent->bDoCollisionTest = false;
 
-    CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-    CameraComponent->SetupAttachment(SpringArmComponent);
+    CineCameraComponent = CreateDefaultSubobject<UCineCameraComponent>(TEXT("CineCameraComponent"));
+    CineCameraComponent->SetupAttachment(SpringArmComponent);
 
     DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
     DiceComponent->PlayerSpringArm = SpringArmComponent;
@@ -53,7 +52,7 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
 
     CameraControlComponent = CreateDefaultSubobject<UCCCameraControlComponent>(TEXT("CameraControlComponent"));
     CameraControlComponent->TimelineComponent = TimelineComponent;
-    CameraControlComponent->CameraComponent = CameraComponent;
+    CameraControlComponent->CineCameraComponent = CineCameraComponent;
     CameraControlComponent->SpringArmComponent = SpringArmComponent;
 
     MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovementComnponent"));
