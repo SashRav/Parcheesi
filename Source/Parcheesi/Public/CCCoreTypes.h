@@ -100,8 +100,8 @@ UENUM(BlueprintType)
 enum class ETurnColors : uint8
 {
     Red,
-    Yellow,
     Green,
+    Yellow,
     Blue,
     None
 };

@@ -48,11 +48,11 @@ public:
 
     bool IsGameStarted() { return bIsGameStarted; }
     void SetIsGameStarted(bool Status) { bIsGameStarted = Status; }
-    TMap<ETurnColors, AController*> GetNewPlayersTurnData() { return PlayersNewTurnData; }
-
-    // Singleplayer logic
+    
+    // Singleplayer logic    
     void AddNewPlayerToList(AController* Controller, FName PlayerTag);
     TMap<AController*, FPlayerInfo> GetAllNewPlayersData() { return AllPlayersDataNew; };
+    TMap<ETurnColors, AController*> GetNewPlayersTurnData() { return PlayersNewTurnData; }
 
     UPROPERTY(BlueprintAssignable)
     FOnSelectingColorInLobby OnSelectingColorInLobby;

@@ -34,5 +34,5 @@ void UCCMenuSingleplayerUI::StartGame()
         GameInstance->SetIsSinglePlayer(true);
         GameInstance->SetPlayerColor(ETurnColors::Red);
     }
-    UGameplayStatics::OpenLevel(this, "/Game/_Main/Maps/GameMap_LvlDesign");
+    UGameplayStatics::OpenLevel(this, "/Game/_Main/Maps/GameMap");
 }

@@ -11,7 +11,7 @@ class ACCGameStateGame;
 class UCCGameInstance;
 class APlayerController;
 class ACCPawn;
-class ACCBotAIPawn;
+class ACCPlayerPawnGame;
 
 UCLASS()
 class PARCHEESI_API ACCGameModeBaseGame : public AGameModeBase
@@ -45,6 +45,10 @@ protected:
 
     // Single player setup
     void StartSingleplayer();
+    void SetNextSingleTurnColor();
+    void UpdateSinglePlayerWidget();
+    void UpdateSinglePlayersTurnData();
+    void StartSingleNextTurnForPlayer(AController* Controller);
 
     UPROPERTY()
     TArray<FPlayersTurnData> PlayersTurnData;
@@ -53,7 +57,7 @@ protected:
     TSubclassOf<ACCPawn> PawnClass;
 
     UPROPERTY(EditDefaultsOnly)
-    TSubclassOf<ACCBotAIPawn> BotAIPawnClass;
+    TSubclassOf<ACCPlayerPawnGame> BotAIPawnClass;
 
     UPROPERTY()
     ACCGameStateGame* GameStateGame;

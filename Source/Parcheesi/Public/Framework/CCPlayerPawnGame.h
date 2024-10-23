@@ -232,4 +232,7 @@ protected:
     UPROPERTY(Replicated)
     ACCPawn* SelectedPawnActor;
 
+    // Check if pawn is bot
+    UPROPERTY(EditDefaultsOnly)
+    bool bIsPawnForBot = false;
 };

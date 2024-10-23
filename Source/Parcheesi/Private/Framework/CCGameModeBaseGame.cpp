@@ -13,7 +13,6 @@
 #include "CCCoreTypes.h"
 #include "OnlineSubsystemUtils.h"
 #include "Interfaces/OnlineSessionInterface.h"
-#include "AI/CCBotAIPawn.h"
 
 void ACCGameModeBaseGame::BeginPlay()
 {
@@ -26,7 +25,10 @@ void ACCGameModeBaseGame::BeginPlay()
     GameInstance = Cast<UCCGameInstance>(GetGameInstance());
 
     if (GameInstance->GetIsSinglePlayer())
-        StartSingleplayer();
+    {
+        FTimerHandle StartSinglePlayerHandle;
+        GetWorld()->GetTimerManager().SetTimer(StartSinglePlayerHandle, this, &ACCGameModeBaseGame::StartSingleplayer, 0.5f, false);
+    }
 }
 
 void ACCGameModeBaseGame::PostLogin(APlayerController* NewPlayer)
@@ -320,19 +322,16 @@ void ACCGameModeBaseGame::StartSingleplayer()
         return;
 
     // Bot colors are hardcoded untill player will be able select color in Main menu
-    if (ACCBotAIPawn* SpawnedBotPawn = GetWorld()->SpawnActor<ACCBotAIPawn>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
+    if (ACCPlayerPawnGame* SpawnedBotPawn = GetWorld()->SpawnActor<ACCPlayerPawnGame>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
     {
-        SpawnedBotPawn->SetBotTagName(UEnum::GetValueAsName(ETurnColors::Green));
-        GameStateGame->AddNewPlayerToList(SpawnedBotPawn->GetController(), "Green" );
+        GameStateGame->AddNewPlayerToList(SpawnedBotPawn->GetController(), "Green");
     }
-    if (ACCBotAIPawn* SpawnedBotPawn = GetWorld()->SpawnActor<ACCBotAIPawn>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
+    if (ACCPlayerPawnGame* SpawnedBotPawn = GetWorld()->SpawnActor<ACCPlayerPawnGame>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
     {
-        SpawnedBotPawn->SetBotTagName(UEnum::GetValueAsName(ETurnColors::Blue));
         GameStateGame->AddNewPlayerToList(SpawnedBotPawn->GetController(), "Blue");
     }
-    if (ACCBotAIPawn* SpawnedBotPawn = GetWorld()->SpawnActor<ACCBotAIPawn>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
+    if (ACCPlayerPawnGame* SpawnedBotPawn = GetWorld()->SpawnActor<ACCPlayerPawnGame>(BotAIPawnClass, FVector(0, 0, 0), FRotator(0, 0, 0)))
     {
-        SpawnedBotPawn->SetBotTagName(UEnum::GetValueAsName(ETurnColors::Yellow));
         GameStateGame->AddNewPlayerToList(SpawnedBotPawn->GetController(), "Yellow");
     }
 
@@ -340,11 +339,143 @@ void ACCGameModeBaseGame::StartSingleplayer()
     if (!PlayerController)
         return;
 
+    PlayerController->Client_StartGameFromController();
+
     GameStateGame->AddNewPlayerToList(PlayerController, "Red");
+
     GameStateGame->SetupNewPlayersTurnData();
     SpawnPawnsOnBoard();
 
-    GameStateGame->SetIsGameStarted(true);
-    PlayerController->Client_StartGameFromController();
-    PlayerController->Client_ShowTurnButtonsWidget();
+    SetNextSingleTurnColor();
+    UpdateSinglePlayersTurnData();
+    UpdateSinglePlayerWidget();
+}
+
+void ACCGameModeBaseGame::SetNextSingleTurnColor()
+{
+    if (!GameStateGame)
+        return;
+
+    // Set the same color if only one player
+    if (GameStateGame->GetAllNewPlayersData().Num() == 1)
+    {
+        TArray<ETurnColors> PlayersColors;
+        GameStateGame->GetNewPlayersTurnData().GetKeys(PlayersColors);
+        GameStateGame->SetCurrentTurnColor(PlayersColors[0]);
+        return;
+    }
+
+    ETurnColors CurrentTurnColor = GameStateGame->GetCurrentTurnColor();
+
+    uint8 TurnNumber = static_cast<uint8>(CurrentTurnColor);
+    UE_LOG(LogTemp, Display, TEXT("Current color number: %d"), TurnNumber);
+
+    UEnum* EnumPtr = StaticEnum<ETurnColors>();
+    if (EnumPtr)
+    {
+        int64 MaxEnumValue = EnumPtr->GetMaxEnumValue() - 1; // Returns +1 then existing
+        bool NextColorNotFound = true;
+        int32 TryIterator = 0;
+        do
+        {
+            if (TurnNumber >= MaxEnumValue)
+                TurnNumber = 0;
+            else
+                TurnNumber++;
+
+            CurrentTurnColor = static_cast<ETurnColors>(TurnNumber);
+            if (GameStateGame->GetNewPlayersTurnData().Contains(CurrentTurnColor))
+                NextColorNotFound = false;
+            if (TryIterator + 1 > MaxEnumValue)
+            {
+                NextColorNotFound = false;
+                UE_LOG(LogTemp, Warning, TEXT("Error in setting Next Turn Color. Do While ended with no result"));
+            }
+
+            TryIterator++;
+
+        } while (NextColorNotFound);
+
+        GameStateGame->SetCurrentTurnColor(CurrentTurnColor);
+        UE_LOG(LogTemp, Display, TEXT("Next turn For player color number: %s"), *UEnum::GetValueAsString(CurrentTurnColor));
+    }
+}
+
+void ACCGameModeBaseGame::UpdateSinglePlayersTurnData()
+{
+    if (!GameStateGame)
+        return;
+
+    PlayersTurnData.Empty();
+    TArray<ETurnColors> PlayersColors;
+
+    TMap<ETurnColors, AController*> AllPlayersDataNew = GameStateGame->GetNewPlayersTurnData();
+    ETurnColors CurrentTurnColor = GameStateGame->GetCurrentTurnColor();
+    AllPlayersDataNew.GetKeys(PlayersColors);
+
+    for (ETurnColors Color : PlayersColors)
+    {
+        FPlayersTurnData PlayerData;
+
+        // Set Player name
+        AController* PlayerController = *AllPlayersDataNew.Find(Color);
+        PlayerData.PlayerName = PlayerController->GetName();
+
+        // Set Local player tag
+        ACCPlayerPawnGame* PlayerPawn = Cast<ACCPlayerPawnGame>(PlayerController->GetPawn());
+
+        if (PlayerPawn)
+            PlayerPawn->SetPlayerTagName(UEnum::GetValueAsName(Color));
+
+        // Set player turn status
+        if (CurrentTurnColor == Color)
+        {
+            StartSingleNextTurnForPlayer(PlayerController); // Start New turn for the player
+            PlayerData.TurnSatus = true;
+        }
+        else
+            PlayerData.TurnSatus = false;
+
+        // Set player color
+        switch (Color)
+        {
+        case ETurnColors::Red:
+            PlayerData.PlayerColor = FColor::Red;
+            break;
+        case ETurnColors::Yellow:
+            PlayerData.PlayerColor = FColor::Yellow;
+            break;
+        case ETurnColors::Green:
+            PlayerData.PlayerColor = FColor::Green;
+            break;
+        case ETurnColors::Blue:
+            PlayerData.PlayerColor = FColor::Blue;
+            break;
+        }
+
+        PlayersTurnData.Add(PlayerData);
+    }
+}
+
+void ACCGameModeBaseGame::StartSingleNextTurnForPlayer(AController* Controller)
+{
+    ACCControllerGame* PlayerController = Cast<ACCControllerGame>(Controller);
+
+    if (PlayerController)
+        PlayerController->Client_ShowTurnButtonsWidget();
+}
+
+void ACCGameModeBaseGame::UpdateSinglePlayerWidget()
+{
+    if (!GameStateGame || PlayersTurnData.Num() == 0)
+        return;
+
+    TArray<AController*> PlayersControllers;
+    GameStateGame->GetAllNewPlayersData().GetKeys(PlayersControllers);
+
+    for (AController* Controller : PlayersControllers)
+    {
+        if (ACCControllerGame* PlayerController = Cast<ACCControllerGame>(Controller))
+            PlayerController->Client_UpdateTurnWidgets(PlayersTurnData);
+    }
 }

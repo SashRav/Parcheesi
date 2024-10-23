@@ -32,6 +32,14 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     PawnManagerComponent->OnPawnMovementFinished.AddDynamic(this, &ACCPlayerPawnGame::Multicast_HandlePawnMovementFinished);
     PawnManagerComponent->OnGameFinished.AddDynamic(this, &ACCPlayerPawnGame::Server_HandleGameFinished);
 
+    DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
+    DiceComponent->PlayerSpringArm = SpringArmComponent;
+
+    PrimaryActorTick.bCanEverTick = false;
+
+    if (bIsPawnForBot)
+        return;
+
     // Setting up collisions in a blueprint
     SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionComponent"));
     SphereCollisionComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
@@ -44,9 +52,6 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
     CineCameraComponent = CreateDefaultSubobject<UCineCameraComponent>(TEXT("CineCameraComponent"));
     CineCameraComponent->SetupAttachment(SpringArmComponent);
 
-    DiceComponent = CreateDefaultSubobject<UCCDiceComponent>(TEXT("DiceComponent"));
-    DiceComponent->PlayerSpringArm = SpringArmComponent;
-
     // Setup camera movement
     TimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("TimelineComponent"));
 
@@ -57,8 +62,6 @@ ACCPlayerPawnGame::ACCPlayerPawnGame()
 
     MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovementComnponent"));
     MovementComponent->UpdatedComponent = RootComponent;
-
-    PrimaryActorTick.bCanEverTick = false;
 }
 
 void ACCPlayerPawnGame::SetPlayerTagName(FName TagName)
@@ -67,6 +70,10 @@ void ACCPlayerPawnGame::SetPlayerTagName(FName TagName)
         return;
 
     PlayerTagName = TagName;
+
+    if (bIsPawnForBot)
+        return;
+
     Client_SetCameraInitPosition(TagName);
 }
 
@@ -87,7 +94,6 @@ void ACCPlayerPawnGame::RollDice()
 {
     Server_RollDices(SpringArmComponent->GetComponentRotation().Vector());
 }
-
 
 void ACCPlayerPawnGame::BeginPlay()
 {
