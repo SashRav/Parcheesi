@@ -20,19 +20,14 @@ class PARCHEESI_API ACCGameStateGame : public AGameStateBase
     GENERATED_BODY()
 
 public:
-    void AddPlayerToList(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
-    void ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo);
+    void ChangePlayerInfo(AController* Controller, FPlayerInfo PlayerInfo);
     void ChangeCellsDataItem(int32 Index, ACCPawn* FirstPawn, ACCPawn* SecondPawn);
-    void SetupPlayersTurnData();
-    void SetupNewPlayersTurnData();
+
     FCellsData GetCellData(int32 Index) { return *CellsData.Find(Index); };
     TMap<int32, FCellsData> GetAllCellsData() { return CellsData; }
     bool CheckCellIsValidOnIndex(int32 CellIndex);
 
-    TMap<FUniqueNetIdRepl, FPlayerInfo> GetAllPlayersData() { return AllPlayersData; };
-    void RemovePlayerFromPlayersData(FUniqueNetIdRepl PlayerID);
-    TMap<ETurnColors, FUniqueNetIdRepl> GetPlayersTurnData() { return PlayersTurnData; }
-
+    
     void SetCurrentTurnColor(ETurnColors Color) { CurrentTurnColor = Color; };
     ETurnColors GetCurrentTurnColor() { return CurrentTurnColor; }
 
@@ -48,11 +43,12 @@ public:
 
     bool IsGameStarted() { return bIsGameStarted; }
     void SetIsGameStarted(bool Status) { bIsGameStarted = Status; }
-    
-    // Singleplayer logic    
+
+    void SetupPlayersTurnData();
     void AddNewPlayerToList(AController* Controller, FName PlayerTag);
-    TMap<AController*, FPlayerInfo> GetAllNewPlayersData() { return AllPlayersDataNew; };
-    TMap<ETurnColors, AController*> GetNewPlayersTurnData() { return PlayersNewTurnData; }
+    void RemovePlayerFromPlayersData(AController* Controller);
+    TMap<AController*, FPlayerInfo> GetAllPlayersData() { return AllPlayersData; };
+    TMap<ETurnColors, AController*> GetPlayersTurnData() { return PlayersTurnData; }
 
     UPROPERTY(BlueprintAssignable)
     FOnSelectingColorInLobby OnSelectingColorInLobby;
@@ -71,16 +67,10 @@ protected:
     void SetCellsData();
 
     UPROPERTY()
-    TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersData;
+    TMap<AController*, FPlayerInfo> AllPlayersData;
 
     UPROPERTY()
-    TMap<AController*, FPlayerInfo> AllPlayersDataNew;
-
-    UPROPERTY()
-    TMap<ETurnColors, FUniqueNetIdRepl> PlayersTurnData;
-
-    UPROPERTY()
-    TMap<ETurnColors, AController*> PlayersNewTurnData;
+    TMap<ETurnColors, AController*> PlayersTurnData;
 
     UPROPERTY()
     TMap<int32, FCellsData> CellsData;

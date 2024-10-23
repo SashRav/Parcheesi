@@ -17,7 +17,7 @@ class PARCHEESI_API UCCLobbyPlayerItem : public UUserWidget
     GENERATED_BODY()
 
 public:
-    void SetPlayerData(FText Name, FUniqueNetIdRepl PlayerID, bool bEnableButton);
+    void SetPlayerData(FText Name, bool bEnableButton);
 
     UPROPERTY(BlueprintAssignable)
     FOnKickPlayerButtonPressed OnKickPlayerButtonPressed;

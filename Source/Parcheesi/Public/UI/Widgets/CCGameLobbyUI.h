@@ -46,7 +46,7 @@ public:
 
     void UpdateSelectionStatus(const TArray<FAllPlayersData>& AllPlayersData);
     void UpdateSettings(FGameSettings GameSettings);
-    void UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers);
+    void UpdatePlayersList(const TArray<FText>& AllPlayers);
 
 protected:
     virtual void NativeConstruct() override;

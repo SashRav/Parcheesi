@@ -277,7 +277,7 @@ void UCCGameLobbyUI::UpdateSettings(FGameSettings GameSettings)
     C_MoveFromStart->SetIsChecked(GameSettings.bMoveWithSix);
 }
 
-void UCCGameLobbyUI::UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers)
+void UCCGameLobbyUI::UpdatePlayersList(const TArray<FText>& AllPlayers)
 {
     for (int32 i = 0; i < SB_PlayersList->GetChildrenCount(); i++)
     {
@@ -293,19 +293,19 @@ void UCCGameLobbyUI::UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayer
     if (AllPlayers.Num() == 0)
         return;
 
-    for (FUniqueNetIdRepl Item : AllPlayers)
+    for (FText Item : AllPlayers)
     {
         UCCLobbyPlayerItem* PlayerInfo = CreateWidget<UCCLobbyPlayerItem>(GetWorld(), LobbyPlayerItemClass);
         bool bShowButton = GetOwningPlayer()->HasAuthority();
 
-        if (bShowButton && GetOwningPlayerPawn()->GetPlayerState()->GetUniqueId() == Item)
-            bShowButton = false;
+        /*if (bShowButton && GetOwningPlayerPawn()->GetPlayerState()->GetUniqueId() == Item)
+            bShowButton = false;*/
 
-        PlayerInfo->SetPlayerData(FText::FromString(Item->ToString().Left(20)), Item, bShowButton); // Hardcoded untill using Players names
+        PlayerInfo->SetPlayerData(Item, bShowButton); // Hardcoded untill using Players names
 
-        if (bShowButton)
-            PlayerInfo->OnKickPlayerButtonPressed.AddDynamic(this,
-                &UCCGameLobbyUI::DisconnectPlayerByID); // Potential memory leak. Will need to check does GC removes widgets with binidng
+        //if (bShowButton)
+        //    PlayerInfo->OnKickPlayerButtonPressed.AddDynamic(this,
+        //        &UCCGameLobbyUI::DisconnectPlayerByID); // Potential memory leak. Will need to check does GC removes widgets with binidng
 
         SB_PlayersList->AddChild(PlayerInfo);
     }

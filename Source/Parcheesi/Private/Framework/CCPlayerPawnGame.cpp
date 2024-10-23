@@ -174,7 +174,7 @@ void ACCPlayerPawnGame::Server_UpdateSelectedColor_Implementation(const FName& C
     if (OwningPlayerController && OwningPlayerController->HasAuthority()) // Server don't have Ready button and it is ready by default
         PlayerInfo.bIsReady = true;
 
-    ServerGameMode->ChangePlayerInfo(GetPlayerState()->GetUniqueId(), PlayerInfo);
+    ServerGameMode->ChangePlayerInfo(GetController(), PlayerInfo);
 }
 
 void ACCPlayerPawnGame::Server_PlayerIsReady_Implementation(bool bIsReady)
@@ -182,13 +182,12 @@ void ACCPlayerPawnGame::Server_PlayerIsReady_Implementation(bool bIsReady)
     if (!ServerGameState)
         return;
 
-    TMap<FUniqueNetIdRepl, FPlayerInfo> PlayersData = ServerGameState->GetAllPlayersData();
+    TMap<AController*, FPlayerInfo> PlayersData = ServerGameState->GetAllPlayersData();
 
-    FUniqueNetIdRepl LocalID = GetPlayerState()->GetUniqueId();
-    FPlayerInfo PlayerInfo = *PlayersData.Find(LocalID);
+    FPlayerInfo PlayerInfo = *PlayersData.Find(GetController());
     PlayerInfo.bIsReady = bIsReady;
 
-    ServerGameMode->ChangePlayerInfo(GetPlayerState()->GetUniqueId(), PlayerInfo);
+    ServerGameMode->ChangePlayerInfo(GetController(), PlayerInfo);
 }
 
 void ACCPlayerPawnGame::Server_EndPlayerTurn_Implementation()
@@ -464,14 +463,14 @@ void ACCPlayerPawnGame::Server_UpdateLobbySelection_Implementation()
         return;
 
     TArray<FAllPlayersData> AllPlayersData;
-    TMap<FUniqueNetIdRepl, FPlayerInfo> AllPlayersDataMap = ServerGameState->GetAllPlayersData();
+    TMap<AController*, FPlayerInfo> AllPlayersDataMap = ServerGameState->GetAllPlayersData();
 
     if (AllPlayersDataMap.Num() > 0)
-        for (TPair<FUniqueNetIdRepl, FPlayerInfo>& Player : AllPlayersDataMap)
+        for (TPair<AController*, FPlayerInfo>& Player : AllPlayersDataMap)
         {
             FAllPlayersData NewPlayerData;
             FPlayerInfo DataValue = Player.Value;
-            NewPlayerData.PlayerName = FText::FromString(Player.Key.GetUniqueNetId()->ToString().Right(5));
+            NewPlayerData.PlayerName = FText::FromString(Player.Key->GetName().Right(5));
             NewPlayerData.Tag = DataValue.Tag;
             NewPlayerData.bIsReady = DataValue.bIsReady;
 
@@ -507,13 +506,19 @@ void ACCPlayerPawnGame::Server_UpdateLobbyPlayers_Implementation()
     if (!ServerGameState)
         return;
 
-    TArray<FUniqueNetIdRepl> PlayersArray;
+    TArray<AController*> PlayersArray;
     ServerGameState->GetAllPlayersData().GetKeys(PlayersArray);
 
-    Client_UpdateLobbyPlayers(PlayersArray);
+    TArray<FText> PlayersNames;
+    for (AController* PlayerController : PlayersArray)
+    {
+        PlayersNames.Add(FText::FromString(PlayerController->GetName()));
+    }
+
+    Client_UpdateLobbyPlayers(PlayersNames);
 }
 
-void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FUniqueNetIdRepl>& AllPlayers)
+void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FText>& AllPlayers)
 {
     if (OwningPlayerController)
         OwningPlayerController->Client_UpdatePlayersList(AllPlayers);
@@ -521,8 +526,9 @@ void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FU
 
 void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl PlayerID)
 {
-    if (ServerGameMode)
-        ServerGameMode->DisconnectPlayer(PlayerID);
+    // Disabled until Kick functionality will be enabled again
+    /*if (ServerGameMode)
+        ServerGameMode->DisconnectPlayer(PlayerID);*/
 }
 
 void ACCPlayerPawnGame::Client_ResetCameraToDefault_Implementation()

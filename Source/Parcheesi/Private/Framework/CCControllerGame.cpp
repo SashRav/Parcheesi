@@ -123,7 +123,7 @@ void ACCControllerGame::Client_UpdateLobbySettings_Implementation(const FGameSet
         OwningHUD->UpdateLobbySettings(GameSettings);
 }
 
-void ACCControllerGame::Client_UpdatePlayersList_Implementation(const TArray<FUniqueNetIdRepl>& AllPlayers)
+void ACCControllerGame::Client_UpdatePlayersList_Implementation(const TArray<FText>& AllPlayers)
 {
     if (OwningHUD)
         OwningHUD->UpdatePlayersList(AllPlayers);

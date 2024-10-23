@@ -175,7 +175,7 @@ void ACCHUDGame::UpdateLobbySettings(FGameSettings GameSettings)
     LobbyWidget->UpdateSettings(GameSettings);
 }
 
-void ACCHUDGame::UpdatePlayersList(const TArray<FUniqueNetIdRepl>& AllPlayers)
+void ACCHUDGame::UpdatePlayersList(const TArray<FText>& AllPlayers)
 {
     LobbyWidget->UpdatePlayersList(AllPlayers);
 }

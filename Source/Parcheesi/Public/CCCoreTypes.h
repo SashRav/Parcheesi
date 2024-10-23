@@ -18,7 +18,7 @@ struct FPlayersTurnData : public FTableRowBase
     FLinearColor PlayerColor;
 
     UPROPERTY()
-    bool TurnSatus;
+    bool TurnSatus = false;
 };
 
 USTRUCT(BlueprintType)

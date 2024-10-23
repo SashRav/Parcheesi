@@ -14,14 +14,13 @@ void UCCLobbyPlayerItem::KickPlayer()
     OnKickPlayerButtonPressed.Broadcast(PlayerNetID);
 }
 
-void UCCLobbyPlayerItem::SetPlayerData(FText Name, FUniqueNetIdRepl PlayerID, bool bEnableButton)
+void UCCLobbyPlayerItem::SetPlayerData(FText Name, bool bEnableButton)
 {
     if (!bEnableButton)
     {
         B_KickPlayer->SetIsEnabled(false);
         B_KickPlayer->SetVisibility(ESlateVisibility::Hidden);
     }
-    PlayerNetID = PlayerID;
     T_PlayerName->SetText(Name);
 }
 

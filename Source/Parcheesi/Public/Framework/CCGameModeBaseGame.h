@@ -19,36 +19,33 @@ class PARCHEESI_API ACCGameModeBaseGame : public AGameModeBase
     GENERATED_BODY()
 
 public:
-    void StartNewGame();
-    void StartNextTurn();
+   void StartNewGame();
+   void StartNextTurn();
 
-    void ChangePlayerInfo(FUniqueNetIdRepl PlayerNetId, FPlayerInfo PlayerInfo);
+    void ChangePlayerInfo(AController* Controller, FPlayerInfo PlayerInfo);
 
     void FinishGame(FName PlayerTagName);
 
     void SaveGameSettings(FGameSettings Settings);
-    void DisconnectPlayer(FUniqueNetIdRepl PlayerID);
+    void DisconnectPlayer(AController* Controller);
+
+    void SetNextTurnColor();
 
 protected:
     virtual void PostLogin(APlayerController* NewPlayer) override;
     virtual void BeginPlay() override;
 
-    void AddPlayerToAllPlayersData(FUniqueNetIdRepl PlayerNetId, FName PlayerTag);
-
-    void UpdatePlayersTurnData();
-    void UpdatePlayersTurnWidgets();
-
-    void StartNextTurnForPlayer(FUniqueNetIdRepl PlayerNetId);
-    void SetNextTurnColor();
-
+    void AddPlayerToAllPlayersData(AController* Controller, FName PlayerTag);
     void SpawnPawnsOnBoard();
 
-    // Single player setup
+
+    void UpdatePlayerWidget();
+    void UpdatePlayersTurnData();
+    void StartNextTurnForPlayer(AController* Controller);
+
+        // Single player setup
     void StartSingleplayer();
-    void SetNextSingleTurnColor();
-    void UpdateSinglePlayerWidget();
-    void UpdateSinglePlayersTurnData();
-    void StartSingleNextTurnForPlayer(AController* Controller);
+
 
     UPROPERTY()
     TArray<FPlayersTurnData> PlayersTurnData;
