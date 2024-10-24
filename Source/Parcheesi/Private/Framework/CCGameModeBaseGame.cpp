@@ -67,6 +67,7 @@ void ACCGameModeBaseGame::StartNewGame()
     SetNextTurnColor();
     UpdatePlayersTurnData();
     SpawnPawnsOnBoard();
+    UpdatePlayerWidget();
 }
 
 void ACCGameModeBaseGame::ChangePlayerInfo(AController* Controller, FPlayerInfo PlayerInfo)
@@ -85,6 +86,7 @@ void ACCGameModeBaseGame::StartNextTurn()
 {
     SetNextTurnColor();
     UpdatePlayersTurnData();
+    UpdatePlayerWidget();
 }
 
 void ACCGameModeBaseGame::SpawnPawnsOnBoard()
