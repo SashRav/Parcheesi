@@ -96,6 +96,18 @@ struct FCameraMovemntData : public FTableRowBase
     FVector ActorLocation;
 };
 
+USTRUCT(BlueprintType)
+struct FLobbyPlayersData : public FTableRowBase
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    FText PlayerName;
+
+    UPROPERTY()
+    FUniqueNetIdRepl NetId;
+};
+
 UENUM(BlueprintType)
 enum class ETurnColors : uint8
 {

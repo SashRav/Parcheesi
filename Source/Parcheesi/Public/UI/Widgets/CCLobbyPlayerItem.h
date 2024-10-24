@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "CCCoreTypes.h"
 #include "CCLobbyPlayerItem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKickPlayerButtonPressed, FUniqueNetIdRepl, PlayerID);
@@ -17,7 +18,7 @@ class PARCHEESI_API UCCLobbyPlayerItem : public UUserWidget
     GENERATED_BODY()
 
 public:
-    void SetPlayerData(FText Name, bool bEnableButton);
+    void SetPlayerData(FLobbyPlayersData PlayersData, bool bEnableButton);
 
     UPROPERTY(BlueprintAssignable)
     FOnKickPlayerButtonPressed OnKickPlayerButtonPressed;

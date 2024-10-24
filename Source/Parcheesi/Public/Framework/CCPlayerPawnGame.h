@@ -139,7 +139,7 @@ protected:
     void Client_UpdateLobbySettings(FGameSettings GameSettings);
 
     UFUNCTION(Client, Reliable)
-    void Client_UpdateLobbyPlayers(const TArray<FText>& AllPlayers);
+    void Client_UpdateLobbyPlayers(const TArray<FLobbyPlayersData>& AllPlayers);
 
     // Camera Control
     UFUNCTION(Client, Reliable)

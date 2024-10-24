@@ -175,7 +175,7 @@ void ACCHUDGame::UpdateLobbySettings(FGameSettings GameSettings)
     LobbyWidget->UpdateSettings(GameSettings);
 }
 
-void ACCHUDGame::UpdatePlayersList(const TArray<FText>& AllPlayers)
+void ACCHUDGame::UpdatePlayersList(const TArray<FLobbyPlayersData>& AllPlayers)
 {
     LobbyWidget->UpdatePlayersList(AllPlayers);
 }

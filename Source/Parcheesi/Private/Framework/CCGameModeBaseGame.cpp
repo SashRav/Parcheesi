@@ -169,6 +169,12 @@ void ACCGameModeBaseGame::DisconnectPlayer(AController* Controller)
     PlayerController->ClientTravel("/Game/Maps/MenuMap", ETravelType::TRAVEL_Absolute);
 }
 
+void ACCGameModeBaseGame::DisconnectPlayerByNetID(FUniqueNetIdRepl PlayerID)
+{
+    AController* PlayerController = UGameplayStatics::GetPlayerStateFromUniqueNetId(GetWorld(), PlayerID)->GetOwningController();
+    DisconnectPlayer(PlayerController);
+}
+
 void ACCGameModeBaseGame::StartSingleplayer()
 {
     if (!GameStateGame)

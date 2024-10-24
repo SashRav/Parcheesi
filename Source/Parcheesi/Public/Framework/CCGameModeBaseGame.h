@@ -28,6 +28,7 @@ public:
 
     void SaveGameSettings(FGameSettings Settings);
     void DisconnectPlayer(AController* Controller);
+    void DisconnectPlayerByNetID(FUniqueNetIdRepl PlayerID);
 
     void SetNextTurnColor();
 

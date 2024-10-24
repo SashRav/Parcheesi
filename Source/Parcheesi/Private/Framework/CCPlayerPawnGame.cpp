@@ -509,16 +509,19 @@ void ACCPlayerPawnGame::Server_UpdateLobbyPlayers_Implementation()
     TArray<AController*> PlayersArray;
     ServerGameState->GetAllPlayersData().GetKeys(PlayersArray);
 
-    TArray<FText> PlayersNames;
+    TArray<FLobbyPlayersData> PlayersData;
     for (AController* PlayerController : PlayersArray)
     {
-        PlayersNames.Add(FText::FromString(PlayerController->GetName()));
+        FLobbyPlayersData LocalPlayer;
+        LocalPlayer.PlayerName = FText::FromString(PlayerController->GetName());
+        LocalPlayer.NetId = PlayerController->PlayerState->GetUniqueId();
+        PlayersData.Add(LocalPlayer);
     }
 
-    Client_UpdateLobbyPlayers(PlayersNames);
+    Client_UpdateLobbyPlayers(PlayersData);
 }
 
-void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FText>& AllPlayers)
+void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FLobbyPlayersData>& AllPlayers)
 {
     if (OwningPlayerController)
         OwningPlayerController->Client_UpdatePlayersList(AllPlayers);
@@ -526,9 +529,8 @@ void ACCPlayerPawnGame::Client_UpdateLobbyPlayers_Implementation(const TArray<FT
 
 void ACCPlayerPawnGame::Server_DisconnectPlayer_Implementation(FUniqueNetIdRepl PlayerID)
 {
-    // Disabled until Kick functionality will be enabled again
-    /*if (ServerGameMode)
-        ServerGameMode->DisconnectPlayer(PlayerID);*/
+    if (ServerGameMode)
+        ServerGameMode->DisconnectPlayerByNetID(PlayerID);
 }
 
 void ACCPlayerPawnGame::Client_ResetCameraToDefault_Implementation()

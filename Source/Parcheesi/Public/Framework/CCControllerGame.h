@@ -52,7 +52,7 @@ public:
     void Client_UpdateLobbySettings(const FGameSettings GameSettings);
 
     UFUNCTION(Client, Reliable)
-    void Client_UpdatePlayersList(const TArray<FText>& AllPlayers);
+    void Client_UpdatePlayersList(const TArray<FLobbyPlayersData>& AllPlayers);
 
     UFUNCTION(Client, Reliable)
     void Client_CreateLobbyWidget();

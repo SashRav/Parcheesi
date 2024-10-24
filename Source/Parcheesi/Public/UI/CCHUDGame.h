@@ -90,7 +90,7 @@ public:
 
     void UpdateLobbySelection(const TArray<FAllPlayersData>& AllPlayersData);
     void UpdateLobbySettings(FGameSettings GameSettings);
-    void UpdatePlayersList(const TArray<FText>& AllPlayers);
+    void UpdatePlayersList(const TArray<FLobbyPlayersData>& AllPlayers);
 
     void CreateLobbyWidget();
 
